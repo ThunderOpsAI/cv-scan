@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { sendPaymentReceiptEmail } from "@/lib/email/resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
@@ -70,6 +71,24 @@ export async function POST(req: NextRequest) {
             .from("users")
             .update as any)({ stripe_customer_id: session.customer })
             .eq("id", userId);
+        }
+
+        // Send payment receipt email (non-blocking)
+        if (process.env.RESEND_API_KEY && session.customer_email) {
+          const { data: user } = await (supabase
+            .from("users")
+            .select as any)("name")
+            .eq("id", userId)
+            .single();
+
+          if (user) {
+            sendPaymentReceiptEmail(
+              session.customer_email,
+              user.name || "there",
+              credits,
+              session.amount_total || 0
+            ).catch(console.error);
+          }
         }
 
         break;

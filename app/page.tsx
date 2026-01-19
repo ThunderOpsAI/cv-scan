@@ -42,7 +42,7 @@ export default function Home() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/generate"
+            href="/auth/signin"
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-blue-500/25"
           >
             Try Free - 3 Credits
@@ -125,12 +125,11 @@ export default function Home() {
         <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
           Pay only for what you use. No subscriptions, no hidden fees.
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { name: "Free Trial", credits: 3, price: "$0", desc: "Try it out" },
-            { name: "Starter", credits: 10, price: "$9", desc: "One resume" },
-            { name: "Pro", credits: 30, price: "$19", desc: "Multiple jobs", popular: true },
-            { name: "Unlimited", credits: 100, price: "$49", desc: "Power users" },
+            { name: "Starter Pack", credits: 10, price: "$4.99", desc: "Perfect for trying out" },
+            { name: "Popular Pack", credits: 25, price: "$9.99", desc: "Best value - 20% off", popular: true },
+            { name: "Pro Pack", credits: 50, price: "$17.99", desc: "Power users - 28% off" },
           ].map((plan) => (
             <div
               key={plan.name}
@@ -152,10 +151,10 @@ export default function Home() {
         </div>
         <div className="text-center mt-8">
           <Link
-            href="/pricing"
+            href="/buy-credits"
             className="text-blue-400 hover:text-blue-300 transition-colors"
           >
-            View full pricing details →
+            View all packages →
           </Link>
         </div>
       </section>
@@ -170,7 +169,7 @@ export default function Home() {
             Join thousands of job seekers who have landed interviews with BulletPro-powered resumes.
           </p>
           <Link
-            href="/generate"
+            href="/auth/signin"
             className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-all"
           >
             Get Started Free
@@ -182,15 +181,18 @@ export default function Home() {
       <footer className="container mx-auto px-4 py-8 border-t border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-400">
-            © 2024 BulletPro. All rights reserved.
+            © 2026 BulletPro. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-              Privacy
+            <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+              Dashboard
             </Link>
-            <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-              Terms
+            <Link href="/buy-credits" className="text-gray-400 hover:text-white transition-colors">
+              Pricing
             </Link>
+            <a href="mailto:support@bulletpro.com" className="text-gray-400 hover:text-white transition-colors">
+              Support
+            </a>
           </div>
         </div>
       </footer>

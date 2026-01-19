@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
+import { sendWelcomeEmail } from "@/lib/email/resend";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -37,6 +38,11 @@ export const authOptions: NextAuthOptions = {
           image: user.image,
         };
         await (supabase.from("users").insert as any)(newUser);
+
+        // Send welcome email (non-blocking, won't fail signup if email fails)
+        if (process.env.RESEND_API_KEY) {
+          sendWelcomeEmail(user.email, user.name || "there").catch(console.error);
+        }
       } else {
         // Update existing user info
         await (supabase
