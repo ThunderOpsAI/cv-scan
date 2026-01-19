@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+
+# Env
+.env.local
+
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Personal / local
+Important Info DO NOT COMMIT for my eyes only/
+
