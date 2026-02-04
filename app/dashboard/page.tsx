@@ -77,6 +77,27 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Profile Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Your Profile</h2>
+            <Link
+              href="/dashboard/profile"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 border border-blue-500/50 hover:border-blue-400 transition-all block group"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
+                    Build Your Professional Profile
+                  </h3>
+                  <p className="text-blue-100 mb-3">
+                    Create your profile with experiences, education, and skills for better job matching
+                  </p>
+                </div>
+                <div className="text-4xl">👤</div>
+              </div>
+            </Link>
+          </div>
+
           {/* Action Cards */}
           <div className="grid md:grid-cols-2 gap-6">
             <Link
