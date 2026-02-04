@@ -101,7 +101,7 @@ export default function Dashboard() {
           {/* Job Applications */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Job Applications</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <Link
                 href="/dashboard/scanner"
                 className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"
@@ -130,6 +130,21 @@ export default function Dashboard() {
                   Complete application package: tailored resume, cover letter, ATS analysis
                 </p>
                 <div className="text-purple-400 text-sm">5 credits per pack</div>
+              </Link>
+
+              <Link
+                href="/dashboard/applications"
+                className="bg-gradient-to-r from-orange-600/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-6 border border-orange-500/30 hover:border-orange-400/50 transition-all group"
+                data-testid="application-tracker-link"
+              >
+                <div className="text-3xl mb-3">📋</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                  Application Tracker
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Track applications, interviews, and generate follow-up emails
+                </p>
+                <div className="text-orange-400 text-sm">Kanban + List views</div>
               </Link>
             </div>
           </div>
