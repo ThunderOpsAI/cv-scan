@@ -98,6 +98,42 @@ export default function Dashboard() {
             </Link>
           </div>
 
+          {/* Job Applications */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Job Applications</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Link
+                href="/dashboard/scanner"
+                className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"
+                data-testid="ats-scanner-link"
+              >
+                <div className="text-3xl mb-3">📊</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">
+                  ATS Scanner
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Check how well your profile matches any job description
+                </p>
+                <div className="text-green-400 text-sm">Free 3/day, then 1 credit</div>
+              </Link>
+
+              <Link
+                href="/dashboard/job-packs"
+                className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30 hover:border-purple-400/50 transition-all group"
+                data-testid="job-packs-link"
+              >
+                <div className="text-3xl mb-3">📦</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                  Job Packs
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Complete application package: tailored resume, cover letter, ATS analysis
+                </p>
+                <div className="text-purple-400 text-sm">5 credits per pack</div>
+              </Link>
+            </div>
+          </div>
+
           {/* Intelligence Features */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Intelligence</h2>
