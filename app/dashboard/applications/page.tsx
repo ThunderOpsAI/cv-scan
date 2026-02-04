@@ -1,0 +1,439 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Application, ApplicationStatus, KanbanColumn } from "@/types/applications";
+
+const STATUS_CONFIG: { id: ApplicationStatus; title: string; color: string }[] = [
+  { id: 'saved', title: 'Saved', color: 'bg-gray-500' },
+  { id: 'applied', title: 'Applied', color: 'bg-blue-500' },
+  { id: 'screening', title: 'Screening', color: 'bg-yellow-500' },
+  { id: 'interviewing', title: 'Interviewing', color: 'bg-purple-500' },
+  { id: 'offer', title: 'Offer', color: 'bg-green-500' },
+  { id: 'rejected', title: 'Rejected', color: 'bg-red-500' },
+];
+
+export default function ApplicationsPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'kanban' | 'list'>('kanban');
+  const [showNewModal, setShowNewModal] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (status === "authenticated") {
+      fetchApplications();
+    }
+  }, [status, router]);
+
+  const fetchApplications = async () => {
+    try {
+      const res = await fetch("/api/applications");
+      const data = await res.json();
+      setApplications(data.applications || []);
+    } catch (err) {
+      console.error("Failed to fetch applications:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStatus = async (appId: string, newStatus: ApplicationStatus) => {
+    try {
+      await fetch(`/api/applications/${appId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setApplications(apps => 
+        apps.map(app => app.id === appId ? { ...app, status: newStatus } : app)
+      );
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
+  const getColumnApps = (status: ApplicationStatus) => 
+    applications.filter(app => app.status === status);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) return null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {/* Navigation */}
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+        <Link href="/dashboard" className="text-2xl font-bold text-white">
+          <span className="text-blue-400">CV</span>Scan
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+            Dashboard
+          </Link>
+          <div className="text-white">
+            <span className="text-gray-400">Credits:</span>{" "}
+            <span className="font-bold text-blue-400">{session.user.credits}</span>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Application Tracker</h1>
+            <p className="text-gray-400">
+              {applications.length} applications tracked
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* View Toggle */}
+            <div className="flex bg-white/10 rounded-lg p-1">
+              <button
+                onClick={() => setView('kanban')}
+                className={`px-4 py-2 rounded-md transition-colors ${
+                  view === 'kanban' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+                }`}
+                data-testid="view-kanban"
+              >
+                Kanban
+              </button>
+              <button
+                onClick={() => setView('list')}
+                className={`px-4 py-2 rounded-md transition-colors ${
+                  view === 'list' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+                }`}
+                data-testid="view-list"
+              >
+                List
+              </button>
+            </div>
+            <button
+              onClick={() => setShowNewModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              data-testid="new-application-btn"
+            >
+              + Add Application
+            </button>
+          </div>
+        </div>
+
+        {/* Kanban View */}
+        {view === 'kanban' && (
+          <div className="flex gap-4 overflow-x-auto pb-4" data-testid="kanban-board">
+            {STATUS_CONFIG.filter(s => s.id !== 'rejected').map((column) => (
+              <div
+                key={column.id}
+                className="flex-shrink-0 w-72 bg-white/5 rounded-xl p-4"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div className={`w-3 h-3 rounded-full ${column.color}`} />
+                  <h3 className="text-white font-semibold">{column.title}</h3>
+                  <span className="text-gray-400 text-sm">({getColumnApps(column.id).length})</span>
+                </div>
+                <div className="space-y-3">
+                  {getColumnApps(column.id).map((app) => (
+                    <Link
+                      key={app.id}
+                      href={`/dashboard/applications/${app.id}`}
+                      className="block bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-colors cursor-pointer"
+                      data-testid={`app-card-${app.id}`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="text-white font-medium truncate flex-1">{app.company}</h4>
+                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(app.priority)}`} />
+                      </div>
+                      <p className="text-gray-400 text-sm truncate mb-2">{app.title}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{formatDate(app.created_at)}</span>
+                        {app.ats_score && (
+                          <span className="text-blue-400">{app.ats_score}%</span>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                  {getColumnApps(column.id).length === 0 && (
+                    <div className="text-gray-500 text-sm text-center py-8">
+                      No applications
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* List View */}
+        {view === 'list' && (
+          <div className="bg-white/5 rounded-xl overflow-hidden" data-testid="list-view">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left text-gray-400 font-medium p-4">Company</th>
+                  <th className="text-left text-gray-400 font-medium p-4">Position</th>
+                  <th className="text-left text-gray-400 font-medium p-4">Status</th>
+                  <th className="text-left text-gray-400 font-medium p-4">Priority</th>
+                  <th className="text-left text-gray-400 font-medium p-4">ATS</th>
+                  <th className="text-left text-gray-400 font-medium p-4">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app) => (
+                  <tr
+                    key={app.id}
+                    className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                    onClick={() => router.push(`/dashboard/applications/${app.id}`)}
+                    data-testid={`list-row-${app.id}`}
+                  >
+                    <td className="p-4 text-white font-medium">{app.company}</td>
+                    <td className="p-4 text-gray-300">{app.title}</td>
+                    <td className="p-4">
+                      <select
+                        value={app.status}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          updateStatus(app.id, e.target.value as ApplicationStatus);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white/10 text-white text-sm rounded px-2 py-1 border border-white/20"
+                      >
+                        {STATUS_CONFIG.map(s => (
+                          <option key={s.id} value={s.id}>{s.title}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-block w-2 h-2 rounded-full ${getPriorityColor(app.priority)} mr-2`} />
+                      <span className="text-gray-300 capitalize">{app.priority}</span>
+                    </td>
+                    <td className="p-4 text-blue-400">{app.ats_score ? `${app.ats_score}%` : '-'}</td>
+                    <td className="p-4 text-gray-400">{formatDate(app.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {applications.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                No applications yet. Add your first application to get started.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* New Application Modal */}
+      {showNewModal && (
+        <NewApplicationModal
+          onClose={() => setShowNewModal(false)}
+          onCreated={() => {
+            setShowNewModal(false);
+            fetchApplications();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function NewApplicationModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [company, setCompany] = useState("");
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [location, setLocation] = useState("");
+  const [source, setSource] = useState("");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!company.trim() || !title.trim()) {
+      setError("Company and title are required");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company,
+          title,
+          url: url || undefined,
+          location: location || undefined,
+          source: source || undefined,
+          priority,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create application");
+      }
+
+      onCreated();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 rounded-2xl max-w-lg w-full p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-white">Add Application</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-white mb-1">Company *</label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              placeholder="e.g., Google"
+              data-testid="new-app-company"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-1">Position *</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              placeholder="e.g., Senior Product Manager"
+              data-testid="new-app-title"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-1">Job URL</label>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-white mb-1">Location</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                placeholder="Remote, NYC, etc."
+              />
+            </div>
+            <div>
+              <label className="block text-white mb-1">Source</label>
+              <select
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              >
+                <option value="">Select...</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="indeed">Indeed</option>
+                <option value="company_site">Company Site</option>
+                <option value="referral">Referral</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-white mb-1">Priority</label>
+            <div className="flex gap-4">
+              {(['low', 'medium', 'high'] as const).map((p) => (
+                <label key={p} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="priority"
+                    value={p}
+                    checked={priority === p}
+                    onChange={() => setPriority(p)}
+                    className="accent-blue-500"
+                  />
+                  <span className="text-gray-300 capitalize">{p}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white py-2 rounded-lg font-semibold"
+              data-testid="new-app-submit"
+            >
+              {loading ? "Creating..." : "Add Application"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
