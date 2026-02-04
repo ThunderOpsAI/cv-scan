@@ -1,0 +1,256 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Conversation, Message } from "@/types/intelligence";
+
+export default function CopilotPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversation, setCurrentConversation] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (status === "authenticated") {
+      fetchConversations();
+    }
+  }, [status, router]);
+
+  const fetchConversations = async () => {
+    try {
+      const res = await fetch("/api/copilot/conversations");
+      const data = await res.json();
+      setConversations(data.conversations || []);
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
+    }
+  };
+
+  const loadConversation = async (id: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/copilot/conversations/${id}`);
+      const data = await res.json();
+      setMessages(data.messages || []);
+      setCurrentConversation(id);
+    } catch (error) {
+      console.error("Failed to load conversation:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || sending) return;
+
+    setSending(true);
+    const userMessage = input;
+    setInput("");
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        conversation_id: currentConversation || "",
+        role: "user",
+        content: userMessage,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    try {
+      const res = await fetch("/api/copilot/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_id: currentConversation,
+          content: userMessage,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      if (!currentConversation) {
+        setCurrentConversation(data.conversation_id);
+        fetchConversations();
+      }
+
+      if (data.assistant_message) {
+        setMessages((prev) => [...prev, data.assistant_message]);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      alert("Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const startNewConversation = () => {
+    setCurrentConversation(null);
+    setMessages([]);
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+        <Link href="/dashboard" className="text-2xl font-bold text-white">
+          <span className="text-blue-400">CV</span>Scan
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+            Dashboard
+          </Link>
+          <div className="text-white">
+            <span className="text-gray-400">Credits:</span>{" "}
+            <span className="font-bold text-blue-400">{session?.user?.credits || 0}</span>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-6 h-[calc(100vh-12rem)]">
+            {/* Sidebar */}
+            <div className="md:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 overflow-y-auto">
+              <button
+                onClick={startNewConversation}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4"
+              >
+                New Chat
+              </button>
+
+              <div className="space-y-2">
+                {conversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => loadConversation(conv.id)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                      currentConversation === conv.id
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="truncate text-sm">{conv.title}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {new Date(conv.last_message_at).toLocaleDateString()}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat Area */}
+            <div className="md:col-span-3 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {messages.length === 0 && !currentConversation && (
+                  <div className="flex items-center justify-center h-full text-center">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-2">Job Search Copilot</h2>
+                      <p className="text-gray-400">
+                        Ask me anything about your job search, resume, or interview prep
+                      </p>
+                      <div className="mt-6 text-sm text-gray-400">
+                        <p>Try asking:</p>
+                        <ul className="mt-2 space-y-1">
+                          <li>• "Help me tailor my resume for a software engineer role"</li>
+                          <li>• "What should I know about working at Google?"</li>
+                          <li>• "How do I prepare for a technical interview?"</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {loading && (
+                  <div className="flex justify-center">
+                    <div className="text-white">Loading conversation...</div>
+                  </div>
+                )}
+
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        msg.role === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-white/20 text-gray-100"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      <div className="text-xs mt-1 opacity-70">
+                        {new Date(msg.created_at).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {sending && (
+                  <div className="flex justify-start">
+                    <div className="bg-white/20 text-gray-100 rounded-lg px-4 py-2">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <form onSubmit={sendMessage} className="p-4 border-t border-white/20">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask me anything..."
+                    disabled={sending}
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || sending}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Send
+                  </button>
+                </div>
+                <div className="text-xs text-gray-400 mt-2">
+                  1 credit per message
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

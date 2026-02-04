@@ -77,35 +77,93 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Action Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Profile Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Your Profile</h2>
             <Link
-              href="/generate/bullets"
-              className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              href="/dashboard/profile"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 border border-blue-500/50 hover:border-blue-400 transition-all block group"
             >
-              <div className="text-3xl mb-3">📝</div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                Generate Bullet Points
-              </h3>
-              <p className="text-gray-400 mb-3">
-                Transform job duties into polished, ATS-optimized resume bullets
-              </p>
-              <div className="text-blue-400 text-sm">1 credit per generation</div>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
+                    Build Your Professional Profile
+                  </h3>
+                  <p className="text-blue-100 mb-3">
+                    Create your profile with experiences, education, and skills for better job matching
+                  </p>
+                </div>
+                <div className="text-4xl">👤</div>
+              </div>
             </Link>
+          </div>
 
-            <Link
-              href="/generate/cover-letter"
-              className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-            >
-              <div className="text-3xl mb-3">✉️</div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                Generate Cover Letter
-              </h3>
-              <p className="text-gray-400 mb-3">
-                Create a tailored cover letter from your resume and job description
-              </p>
-              <div className="text-blue-400 text-sm">2 credits per generation</div>
-            </Link>
+          {/* Intelligence Features */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Intelligence</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Link
+                href="/dashboard/copilot"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🤖</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  Job Search Copilot
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Chat with your personal job search assistant for advice and guidance
+                </p>
+                <div className="text-blue-400 text-sm">1 credit per message</div>
+              </Link>
+
+              <Link
+                href="/dashboard/jobs"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🔍</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  Discover Jobs
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Find jobs matched to your profile with intelligent scoring
+                </p>
+                <div className="text-blue-400 text-sm">Free job discovery</div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Generation Tools */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Content Generation</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Link
+                href="/generate/bullets"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">📝</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  Generate Bullet Points
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Transform job duties into polished, ATS-optimized resume bullets
+                </p>
+                <div className="text-blue-400 text-sm">1 credit per generation</div>
+              </Link>
+
+              <Link
+                href="/generate/cover-letter"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">✉️</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  Generate Cover Letter
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Create a tailored cover letter from your resume and job description
+                </p>
+                <div className="text-blue-400 text-sm">2 credits per generation</div>
+              </Link>
+            </div>
           </div>
 
           {/* Buy Credits CTA */}
