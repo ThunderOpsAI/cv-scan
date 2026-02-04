@@ -14,3 +14,7 @@ node_modules/
 # Personal / local
 Important Info DO NOT COMMIT for my eyes only/
 
+-e 
+# Environment files
+*.env
+*.env.*
