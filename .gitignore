@@ -18,3 +18,7 @@ Important Info DO NOT COMMIT for my eyes only/
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
