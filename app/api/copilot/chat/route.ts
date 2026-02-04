@@ -94,9 +94,65 @@ export async function POST(req: NextRequest) {
 
     const conversationHistory = (conversationMessages || [])
       .slice(0, -1)
-      .map((msg: any) => `${msg.role}: ${msg.content}`)
+      .map((msg: any) => msg.role + ': ' + msg.content)
       .join('\n\n');
 
-    const fullPrompt = `${systemPrompt}
+    const fullPrompt = systemPrompt + '\n\n' +
+      (conversationHistory ? 'Previous conversation:\n' + conversationHistory + '\n\n' : '') +
+      'User: ' + body.content;
 
-${conversationHistory ? `Previous conversation:\n${conversationHistory}\n\n` : ''}User: ${body.content}
+    const result = await gemini.generateContent(fullPrompt);
+    const assistantResponse = result.response.text();
+
+    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
+      'deduct_credit',
+      {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: 'Copilot chat message',
+      }
+    );
+
+    if (deductError || !deductResult?.[0]?.success) {
+      console.error('Failed to deduct credit:', deductError);
+      return NextResponse.json(
+        { error: deductResult?.[0]?.error_message || 'Failed to deduct credit' },
+        { status: 500 }
+      );
+    }
+
+    const { data: assistantMessage, error: assistantError } = await (supabase
+      .from('messages')
+      .insert as any)({
+      conversation_id: conversationId,
+      role: 'assistant',
+      content: assistantResponse,
+    })
+      .select()
+      .single();
+
+    if (assistantError) {
+      console.error('Failed to save assistant message:', assistantError);
+    }
+
+    await (supabase
+      .from('conversations')
+      .update as any)({
+      last_message_at: new Date().toISOString(),
+    })
+      .eq('id', conversationId);
+
+    return NextResponse.json({
+      conversation_id: conversationId,
+      user_message: userMessage,
+      assistant_message: assistantMessage,
+      creditsRemaining: deductResult[0].new_credits,
+    });
+  } catch (error: any) {
+    console.error('Copilot chat error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to process message' },
+      { status: 500 }
+    );
+  }
+}
