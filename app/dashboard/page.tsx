@@ -231,6 +231,13 @@ export default function Dashboard() {
               </Link>
             </div>
           )}
+
+          {/* User ID Footer - Discreetly displayed */}
+          <div className="mt-12 pt-6 border-t border-white/10">
+            <p className="text-xs text-gray-600 font-mono">
+              User ID: <span className="select-all">{session.user.id}</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
