@@ -13,9 +13,9 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: conversations, error } = await (supabase
+    const { data: conversations, error } = await supabase
       .from('conversations')
-      .select as any)('*')
+      .select('*')
       .eq('user_id', session.user.id)
       .order('last_message_at', { ascending: false });
 

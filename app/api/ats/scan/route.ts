@@ -29,11 +29,11 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check free scans remaining today
-    const { data: freeCountResult } = await (supabase.rpc as any)(
+    const { data: freeCountResult } = await supabase.rpc(
       'count_free_scans_today',
       { p_user_id: session.user.id }
     );
-    
+
     const freeScansUsed = freeCountResult || 0;
     const freeScansRemaining = Math.max(0, FREE_SCANS_PER_DAY - freeScansUsed);
     const isFreeScan = freeScansRemaining > 0;
@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
     // If not free, check credits and deduct
     let creditsCharged = 0;
     if (!isFreeScan) {
-      const { data: user } = await (supabase
+      const { data: user } = await supabase
         .from('users')
-        .select as any)('credits')
+        .select('credits')
         .eq('id', session.user.id)
-        .single();
+        .single() as { data: { credits: number } | null };
 
       if (!user || user.credits < CREDIT_COST) {
         return NextResponse.json(
@@ -55,14 +55,14 @@ export async function POST(req: NextRequest) {
       }
 
       // Deduct credit
-      const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-        'deduct_credit',
+      const { data: deductResult, error: deductError } = await supabase.rpc(
+        'deduct_credits',
         {
           p_user_id: session.user.id,
           p_amount: CREDIT_COST,
           p_description: 'ATS scan',
         }
-      );
+      ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
       if (deductError || !deductResult?.[0]?.success) {
         return NextResponse.json(
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     // Load profile for analysis
     const profile = await loadProfileForTailoring(session.user.id, supabase);
-    
+
     if (!profile) {
       return NextResponse.json(
         { error: 'Please complete your profile before scanning' },
@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
     const analysis = await analyzeJobDescription(body.job_description, profile);
 
     // Store scan result
-    const { data: scan, error: scanError } = await (supabase
+    const { data: scan, error: scanError } = await supabase
       .from('ats_scans')
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         job_description: body.job_description,
         ats_score: analysis.score,
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         section_scores: analysis.section_scores,
         recommendations: analysis.recommendations,
         is_free_scan: isFreeScan,
-      })
+      } as any)
       .select()
       .single();
 
@@ -137,11 +137,11 @@ export async function GET(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: freeCountResult } = await (supabase.rpc as any)(
+    const { data: freeCountResult } = await supabase.rpc(
       'count_free_scans_today',
       { p_user_id: session.user.id }
     );
-    
+
     const freeScansUsed = freeCountResult || 0;
     const freeScansRemaining = Math.max(0, FREE_SCANS_PER_DAY - freeScansUsed);
 

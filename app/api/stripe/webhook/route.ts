@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
         // Add credits to user using Supabase function
         const supabase = createClient();
-        const { data, error } = await (supabase.rpc as any)("add_credits", {
+        const { data, error } = await supabase.rpc("add_credits", {
           p_user_id: userId,
           p_amount: credits,
           p_type: "purchase",
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
             amount_paid: session.amount_total,
             currency: session.currency,
           },
-        });
+        }) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
         if (error) {
           console.error("Failed to add credits:", error);
@@ -67,17 +67,17 @@ export async function POST(req: NextRequest) {
 
         // Update stripe_customer_id if not set
         if (session.customer && typeof session.customer === 'string') {
-          await (supabase
+          await supabase
             .from("users")
-            .update as any)({ stripe_customer_id: session.customer })
+            .update({ stripe_customer_id: session.customer } as any)
             .eq("id", userId);
         }
 
         // Send payment receipt email (non-blocking)
         if (process.env.RESEND_API_KEY && session.customer_email) {
-          const { data: user } = await (supabase
+          const { data: user } = await supabase
             .from("users")
-            .select as any)("name")
+            .select("name")
             .eq("id", userId)
             .single();
 

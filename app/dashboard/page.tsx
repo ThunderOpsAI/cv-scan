@@ -32,7 +32,7 @@ export default function Dashboard() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">Bullet</span>Pro
+          <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
           <div className="text-white">
@@ -51,28 +51,29 @@ export default function Dashboard() {
       {/* Dashboard Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Welcome back, {session.user.name}!
-          </h1>
-          <p className="text-gray-400 mb-8">
-            You have <span className="text-blue-400 font-semibold">{session.user.credits} credits</span> remaining
-          </p>
+          {/* Header with Welcome and Account Info */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Welcome back, {session.user.name}!
+              </h1>
+              <p className="text-gray-400">
+                Ready to optimize your job search
+              </p>
+            </div>
 
-          {/* User Info Card */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Account Information</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Email:</span>
-                <span className="text-white">{session.user.email}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">User ID:</span>
-                <span className="text-white font-mono text-sm">{session.user.id}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Credits:</span>
-                <span className="text-blue-400 font-bold">{session.user.credits}</span>
+            {/* Account Information - Compact Box */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 min-w-[280px]">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Account Info</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">Email:</span>
+                  <span className="text-white text-sm">{session.user.email}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">Credits:</span>
+                  <span className="text-blue-400 font-bold text-lg">{session.user.credits}</span>
+                </div>
               </div>
             </div>
           </div>

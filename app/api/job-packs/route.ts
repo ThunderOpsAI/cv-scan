@@ -30,11 +30,11 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check credits
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from('users')
-      .select as any)('credits')
+      .select('credits')
       .eq('id', session.user.id)
-      .single();
+      .single() as { data: { credits: number } | null };
 
     if (!user || user.credits < CREDIT_COST) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     // Load profile
     const profile = await loadProfileForTailoring(session.user.id, supabase);
-    
+
     if (!profile) {
       return NextResponse.json(
         { error: 'Please complete your profile before creating a job pack' },
@@ -62,14 +62,14 @@ export async function POST(req: NextRequest) {
     ]);
 
     // Deduct credits
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      'deduct_credit',
+    const { data: deductResult, error: deductError } = await supabase.rpc(
+      'deduct_credits',
       {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: `Job pack: ${body.job_title} at ${body.company}`,
       }
-    );
+    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(
@@ -79,9 +79,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Create job pack
-    const { data: jobPack, error: jobPackError } = await (supabase
+    const { data: jobPack, error: jobPackError } = await supabase
       .from('job_packs')
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         job_title: body.job_title,
         company: body.company,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         cover_letter: coverLetter,
         ats_score: atsAnalysis.score,
         cultural_fit_warnings: culturalWarnings,
-      })
+      } as any)
       .select()
       .single();
 
@@ -103,9 +103,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Store ATS scan linked to job pack
-    const { data: atsScan } = await (supabase
+    const { data: atsScan } = await supabase
       .from('ats_scans')
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         job_pack_id: jobPack.id,
         job_description: body.job_description,
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
         section_scores: atsAnalysis.section_scores,
         recommendations: atsAnalysis.recommendations,
         is_free_scan: false,
-      })
+      } as any)
       .select()
       .single();
 
@@ -148,9 +148,9 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Get job packs
-    const { data: jobPacks, error } = await (supabase
+    const { data: jobPacks, error } = await supabase
       .from('job_packs')
-      .select as any)('*', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -164,9 +164,9 @@ export async function GET(req: NextRequest) {
     }
 
     // Get total count
-    const { count } = await (supabase
+    const { count } = await supabase
       .from('job_packs')
-      .select as any)('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
       .eq('user_id', session.user.id);
 
     const response: JobPackListResponse = {

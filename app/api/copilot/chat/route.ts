@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from('users')
-      .select as any)('credits')
+      .select('credits')
       .eq('id', session.user.id)
-      .single();
+      .single() as { data: { credits: number } | null };
 
     if (!user || user.credits < CREDIT_COST) {
       return NextResponse.json(
@@ -44,12 +44,12 @@ export async function POST(req: NextRequest) {
 
     if (!conversationId) {
       const title = body.content.slice(0, 50) + (body.content.length > 50 ? '...' : '');
-      const { data: newConversation, error: convError } = await (supabase
+      const { data: newConversation, error: convError } = await supabase
         .from('conversations')
-        .insert as any)({
-        user_id: session.user.id,
-        title,
-      })
+        .insert({
+          user_id: session.user.id,
+          title,
+        } as any)
         .select()
         .single();
 
@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
       conversationId = newConversation.id;
     }
 
-    const { data: userMessage, error: msgError } = await (supabase
+    const { data: userMessage, error: msgError } = await supabase
       .from('messages')
-      .insert as any)({
-      conversation_id: conversationId,
-      role: 'user',
-      content: body.content,
-    })
+      .insert({
+        conversation_id: conversationId,
+        role: 'user',
+        content: body.content,
+      } as any)
       .select()
       .single();
 
@@ -82,9 +82,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: conversationMessages } = await (supabase
+    const { data: conversationMessages } = await supabase
       .from('messages')
-      .select as any)('*')
+      .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
       .limit(10);
@@ -104,14 +104,14 @@ export async function POST(req: NextRequest) {
     const result = await gemini.generateContent(fullPrompt);
     const assistantResponse = result.response.text();
 
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      'deduct_credit',
+    const { data: deductResult, error: deductError } = await supabase.rpc(
+      'deduct_credits',
       {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: 'Copilot chat message',
       }
-    );
+    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);
@@ -121,13 +121,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: assistantMessage, error: assistantError } = await (supabase
+    const { data: assistantMessage, error: assistantError } = await supabase
       .from('messages')
-      .insert as any)({
-      conversation_id: conversationId,
-      role: 'assistant',
-      content: assistantResponse,
-    })
+      .insert({
+        conversation_id: conversationId,
+        role: 'assistant',
+        content: assistantResponse,
+      } as any)
       .select()
       .single();
 
@@ -135,11 +135,11 @@ export async function POST(req: NextRequest) {
       console.error('Failed to save assistant message:', assistantError);
     }
 
-    await (supabase
+    await supabase
       .from('conversations')
-      .update as any)({
-      last_message_at: new Date().toISOString(),
-    })
+      .update({
+        last_message_at: new Date().toISOString(),
+      } as any)
       .eq('id', conversationId);
 
     return NextResponse.json({

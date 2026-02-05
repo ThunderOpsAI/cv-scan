@@ -6,7 +6,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="text-2xl font-bold text-white">
-          <span className="text-blue-400">Bullet</span>Pro
+          <span className="text-blue-400">CV</span>Scan
         </div>
         <div className="flex gap-4">
           <Link
@@ -72,7 +72,7 @@ export default function Home() {
           </div>
           <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6">
             <div className="text-green-400 font-semibold mb-3 flex items-center gap-2">
-              <span className="text-xl">✓</span> After (BulletPro)
+              <span className="text-xl">✓</span> After (CVScan)
             </div>
             <p className="text-gray-300">
               &quot;Led cross-functional team of 8, reducing customer complaint resolution time by 40% and improving satisfaction scores from 3.2 to 4.7/5&quot;
@@ -133,9 +133,8 @@ export default function Home() {
           ].map((plan) => (
             <div
               key={plan.name}
-              className={`relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${
-                plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
-              }`}
+              className={`relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
+                }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
@@ -166,7 +165,7 @@ export default function Home() {
             Ready to Upgrade Your Resume?
           </h2>
           <p className="text-blue-100 mb-8 max-w-xl mx-auto">
-            Join thousands of job seekers who have landed interviews with BulletPro-powered resumes.
+            Join thousands of job seekers who have landed interviews with CVScan-powered resumes.
           </p>
           <Link
             href="/auth/signin"
@@ -181,7 +180,7 @@ export default function Home() {
       <footer className="container mx-auto px-4 py-8 border-t border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-400">
-            © 2026 BulletPro. All rights reserved.
+            © 2026 CVScan. All rights reserved.
           </div>
           <div className="flex gap-6">
             <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">

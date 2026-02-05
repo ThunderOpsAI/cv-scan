@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check if user has enough credits
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from("users")
-      .select as any)("credits")
+      .select("credits")
       .eq("id", session.user.id)
-      .single();
+      .single() as { data: { credits: number } | null };
 
     if (!user || user.credits < CREDIT_COST) {
       return NextResponse.json(
@@ -81,14 +81,14 @@ Write the cover letter body now:`;
     }
 
     // Deduct credits using Supabase function
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      "deduct_credit",
+    const { data: deductResult, error: deductError } = await supabase.rpc(
+      "deduct_credits",
       {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: "Generated cover letter",
       }
-    );
+    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
@@ -99,15 +99,15 @@ Write the cover letter body now:`;
     }
 
     // Save generation to database
-    await (supabase
+    await supabase
       .from("generations")
-      .insert as any)({
-      user_id: session.user.id,
-      type: "cover_letter",
-      input: { resume, job_description: jobDescription },
-      output: coverLetter,
-      credits_used: CREDIT_COST,
-    });
+      .insert({
+        user_id: session.user.id,
+        type: "cover_letter",
+        input: { resume, job_description: jobDescription } as any,
+        output: coverLetter,
+        credits_used: CREDIT_COST,
+      } as any);
 
     return NextResponse.json({
       coverLetter,

@@ -1,3 +1,23 @@
+# Database Setup Instructions
+
+## Issue
+The `deduct_credit` and `add_credits` functions are missing from your Supabase database.
+
+## Solution
+
+### Step 1: Open Supabase SQL Editor
+1. Go to https://supabase.com/dashboard
+2. Select your project
+3. Click "SQL Editor" in the left sidebar
+4. Click "New query"
+
+### Step 2: Run the Functions SQL
+
+Copy the entire contents of `database/supabase-functions.sql` and paste it into the SQL editor, then click "Run".
+
+Alternatively, you can copy this SQL directly:
+
+```sql
 -- Function to atomically add credits and log transaction
 -- Used when users purchase credits via Stripe
 CREATE OR REPLACE FUNCTION add_credits(
@@ -48,7 +68,7 @@ $$ LANGUAGE plpgsql;
 -- Function to atomically deduct credits and log transaction
 -- This prevents race conditions when multiple requests happen simultaneously
 
-CREATE OR REPLACE FUNCTION deduct_credit(
+CREATE OR REPLACE FUNCTION deduct_credits(
   p_user_id UUID,
   p_amount INTEGER,
   p_description TEXT
@@ -90,3 +110,33 @@ BEGIN
   RETURN QUERY SELECT TRUE, v_new_credits, NULL::TEXT;
 END;
 $$ LANGUAGE plpgsql;
+```
+
+### Step 3: Restart the Dev Server
+
+After applying the functions, restart your Next.js dev server:
+
+```bash
+# Stop the current server (Ctrl+C)
+# Then restart it
+npm run dev
+```
+
+### Step 4: Test
+
+1. Try generating resume bullets again
+2. Try purchasing credits with Stripe test card
+3. Verify credits are added/deducted correctly
+
+## Verification
+
+After running the SQL, you can verify the functions exist by running this query in Supabase SQL Editor:
+
+```sql
+SELECT routine_name 
+FROM information_schema.routines 
+WHERE routine_schema = 'public' 
+AND routine_name IN ('add_credits', 'deduct_credits');
+```
+
+You should see both functions listed.

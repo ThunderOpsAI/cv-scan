@@ -81,7 +81,7 @@ export default function GenerateBullets() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">Bullet</span>Pro
+          <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
           <div className="text-white">

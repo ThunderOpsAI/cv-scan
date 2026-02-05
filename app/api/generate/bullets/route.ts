@@ -26,11 +26,11 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check if user has enough credits
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from("users")
-      .select as any)("credits")
+      .select("credits")
       .eq("id", session.user.id)
-      .single();
+      .single() as { data: { credits: number } | null };
 
     if (!user || user.credits < CREDIT_COST) {
       return NextResponse.json(
@@ -72,14 +72,14 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     // Deduct credit using Supabase function
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      "deduct_credit",
+    const { data: deductResult, error: deductError } = await supabase.rpc(
+      "deduct_credits",
       {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: "Generated resume bullets",
       }
-    );
+    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
@@ -90,15 +90,15 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     // Save generation to database
-    await (supabase
+    await supabase
       .from("generations")
-      .insert as any)({
-      user_id: session.user.id,
-      type: "bullets",
-      input: { job_duty: jobDuty },
-      output: bullets.join("\n"),
-      credits_used: CREDIT_COST,
-    });
+      .insert({
+        user_id: session.user.id,
+        type: "bullets",
+        input: { job_duty: jobDuty } as any,
+        output: bullets.join("\n"),
+        credits_used: CREDIT_COST,
+      } as any);
 
     return NextResponse.json({
       bullets,
