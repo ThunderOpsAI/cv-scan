@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
+import { deductCredits } from '@/lib/supabase/credits';
 import { SendMessageRequest } from '@/types/intelligence';
 import { buildCopilotContext, buildSystemPrompt } from '@/lib/copilot/utils';
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     const { data: user } = await supabase
       .from('users')
@@ -104,14 +105,11 @@ export async function POST(req: NextRequest) {
     const result = await gemini.generateContent(fullPrompt);
     const assistantResponse = result.response.text();
 
-    const { data: deductResult, error: deductError } = await supabase.rpc(
-      'deduct_credits',
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: 'Copilot chat message',
-      }
-    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: 'Copilot chat message',
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);
@@ -135,7 +133,7 @@ export async function POST(req: NextRequest) {
       console.error('Failed to save assistant message:', assistantError);
     }
 
-    await supabase
+    await (supabase as any)
       .from('conversations')
       .update({
         last_message_at: new Date().toISOString(),
