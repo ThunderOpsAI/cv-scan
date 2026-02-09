@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { generateEmail } from '@/lib/applications/email-generator';
+import { deductCredits } from '@/lib/supabase/credits';
 import { GenerateEmailRequest, GenerateEmailResponse } from '@/types/applications';
 
 const CREDIT_COST = 1;
@@ -74,14 +75,11 @@ export async function POST(req: NextRequest) {
     });
 
     // Deduct credit
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      'deduct_credit',
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: `Email generation: ${body.email_type}`,
-      }
-    );
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Email generation: ${body.email_type}`,
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(

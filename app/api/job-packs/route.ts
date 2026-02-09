@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { deductCredits } from '@/lib/supabase/credits';
 import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { tailorResumeToJob, generateCoverLetter } from '@/lib/ats/tailor';
 import { detectCulturalWarnings } from '@/lib/ats/cultural-analysis';
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     // Check credits
     const { data: user } = await supabase
@@ -62,14 +63,11 @@ export async function POST(req: NextRequest) {
     ]);
 
     // Deduct credits
-    const { data: deductResult, error: deductError } = await supabase.rpc(
-      'deduct_credits',
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: `Job pack: ${body.job_title} at ${body.company}`,
-      }
-    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Job pack: ${body.job_title} at ${body.company}`,
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(
@@ -120,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     const response: JobPackResponse = {
       job_pack: jobPack,
-      ats_scan: atsScan,
+      ats_scan: (atsScan || undefined) as any,
     };
 
     return NextResponse.json(response);

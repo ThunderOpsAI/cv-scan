@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
+import { deductCredits } from '@/lib/supabase/credits';
 import { MineMetricsRequest, SubmitMetricsAnswersRequest } from '@/types/profile';
 
 const CREDIT_COST = 1;
@@ -167,14 +168,11 @@ Return ONLY the enhanced bullet point, nothing else.`;
     );
   }
 
-  const { data: deductResult, error: deductError } = await supabase.rpc(
-    'deduct_credit',
-    {
-      p_user_id: userId,
-      p_amount: CREDIT_COST,
-      p_description: 'Metric mining enhancement',
-    }
-  );
+  const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    p_user_id: userId,
+    p_amount: CREDIT_COST,
+    p_description: 'Metric mining enhancement',
+  });
 
   if (deductError || !deductResult?.[0]?.success) {
     console.error('Failed to deduct credit:', deductError);

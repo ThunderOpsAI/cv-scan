@@ -1,16 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 import { gemini } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
+import { deductCredits } from "@/lib/supabase/credits";
 
 const CREDIT_COST = 2;
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = createClient();
 
-    if (!session?.user?.id) {
+    const token = await getToken({ req: req as any });
+    const email = (token as any)?.email as string | undefined;
+
+    let userId: string | undefined;
+    if (email) {
+      const { data: dbUser } = await (supabase
+        .from("users")
+        .select as any)("id")
+        .eq("email", email)
+        .single();
+      userId = dbUser?.id;
+    }
+
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -30,13 +43,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient();
-
     // Check if user has enough credits
     const { data: user } = await supabase
       .from("users")
       .select("credits")
-      .eq("id", session.user.id)
+      .eq("id", userId)
       .single() as { data: { credits: number } | null };
 
     if (!user || user.credits < CREDIT_COST) {
@@ -81,14 +92,11 @@ Write the cover letter body now:`;
     }
 
     // Deduct credits using Supabase function
-    const { data: deductResult, error: deductError } = await supabase.rpc(
-      "deduct_credits",
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: "Generated cover letter",
-      }
-    ) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: userId,
+      p_amount: CREDIT_COST,
+      p_description: "Generated cover letter",
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
@@ -102,7 +110,7 @@ Write the cover letter body now:`;
     await supabase
       .from("generations")
       .insert({
-        user_id: session.user.id,
+        user_id: userId,
         type: "cover_letter",
         input: { resume, job_description: jobDescription } as any,
         output: coverLetter,

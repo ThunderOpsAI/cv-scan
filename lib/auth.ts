@@ -60,17 +60,23 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
+      console.log("[DEBUG session callback] Starting, session.user.email:", session.user?.email);
       if (session.user) {
         const supabase = createClient();
-        const { data: dbUser } = await (supabase
+        const { data: dbUser, error: dbError } = await (supabase
           .from("users")
           .select as any)("id, credits")
           .eq("email", session.user.email!)
           .single();
 
+        console.log("[DEBUG session callback] Supabase result:", { dbUser, dbError });
+
         if (dbUser) {
           session.user.id = dbUser.id;
           session.user.credits = dbUser.credits;
+          console.log("[DEBUG session callback] Set session.user.id:", dbUser.id);
+        } else {
+          console.log("[DEBUG session callback] No dbUser found for email:", session.user.email);
         }
       }
       return session;
