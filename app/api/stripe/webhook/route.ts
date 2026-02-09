@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendPaymentReceiptEmail } from "@/lib/email/resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
+  apiVersion: "2024-06-20" as any,
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -44,19 +44,11 @@ export async function POST(req: NextRequest) {
 
         // Add credits to user using Supabase function
         const supabase = createClient();
-        const { data, error } = await supabase.rpc("add_credits", {
+        const { data, error } = await (supabase.rpc as any)("add_credits", {
           p_user_id: userId,
           p_amount: credits,
           p_type: "purchase",
-          p_description: `Purchased ${credits} credits (${packageType})`,
-          p_metadata: {
-            stripe_session_id: session.id,
-            stripe_payment_intent: session.payment_intent,
-            package_type: packageType,
-            amount_paid: session.amount_total,
-            currency: session.currency,
-          },
-        }) as { data: Array<{ success: boolean; new_credits: number; error_message?: string }> | null; error: any };
+        });
 
         if (error) {
           console.error("Failed to add credits:", error);
@@ -75,9 +67,9 @@ export async function POST(req: NextRequest) {
 
         // Send payment receipt email (non-blocking)
         if (process.env.RESEND_API_KEY && session.customer_email) {
-          const { data: user } = await supabase
+          const { data: user } = await (supabase
             .from("users")
-            .select("name")
+            .select as any)("name")
             .eq("id", userId)
             .single();
 
