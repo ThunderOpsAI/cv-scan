@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
         packageType,
       },
       customer_email: session.user.email,
+      allow_promotion_codes: true,
     });
 
     return NextResponse.json({ sessionId: checkoutSession.id, url: checkoutSession.url });
