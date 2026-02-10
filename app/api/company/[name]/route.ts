@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
+import { deductCredits } from '@/lib/supabase/credits';
 import { CompanyData } from '@/types/intelligence';
 
 const CREDIT_COST = 1;
@@ -57,14 +58,11 @@ export async function GET(
 
     const companyData = await fetchCompanyResearch(companyName);
 
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      'deduct_credit',
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: `Company research: ${companyName}`,
-      }
-    );
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Company research: ${companyName}`,
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);

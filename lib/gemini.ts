@@ -6,6 +6,5 @@ const genAI = new GoogleGenerativeAI(
 );
 
 export const gemini = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash", // fast + free-tier friendly
+  model: "gemini-2.0-flash", // Updated to Gemini 2.0 Flash
 });
-

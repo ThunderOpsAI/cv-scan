@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendPaymentReceiptEmail } from "@/lib/email/resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
+  apiVersion: "2024-06-20" as any,
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -49,13 +49,7 @@ export async function POST(req: NextRequest) {
           p_amount: credits,
           p_type: "purchase",
           p_description: `Purchased ${credits} credits (${packageType})`,
-          p_metadata: {
-            stripe_session_id: session.id,
-            stripe_payment_intent: session.payment_intent,
-            package_type: packageType,
-            amount_paid: session.amount_total,
-            currency: session.currency,
-          },
+          p_metadata: session.metadata || {},
         });
 
         if (error) {
@@ -67,9 +61,9 @@ export async function POST(req: NextRequest) {
 
         // Update stripe_customer_id if not set
         if (session.customer && typeof session.customer === 'string') {
-          await (supabase
+          await supabase
             .from("users")
-            .update as any)({ stripe_customer_id: session.customer })
+            .update({ stripe_customer_id: session.customer } as any)
             .eq("id", userId);
         }
 

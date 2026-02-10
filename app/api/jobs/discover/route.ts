@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     const radius = parseInt(searchParams.get('radius') || '50');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
+    const country = searchParams.get('country') || 'au';
 
     const supabase = createClient();
 
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
       radius,
       page,
       results_per_page: limit,
+      country,
     });
 
     const jobsWithScores = adzunaResults.results.map((job) => {
@@ -65,22 +67,22 @@ export async function GET(req: NextRequest) {
       await (supabase
         .from('discovered_jobs')
         .upsert as any)({
-        user_id: session.user.id,
-        external_id: job.external_id,
-        source: job.source,
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        description: job.description,
-        url: job.url,
-        salary_min: job.salary_min,
-        salary_max: job.salary_max,
-        posted_at: job.posted_at,
-        match_score: job.match_score,
-        match_reasons: job.match_reasons,
-      }, {
-        onConflict: 'user_id,external_id,source'
-      });
+          user_id: session.user.id,
+          external_id: job.external_id,
+          source: job.source,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          description: job.description,
+          url: job.url,
+          salary_min: job.salary_min,
+          salary_max: job.salary_max,
+          posted_at: job.posted_at,
+          match_score: job.match_score,
+          match_reasons: job.match_reasons,
+        }, {
+          onConflict: 'user_id,external_id,source'
+        });
     }
 
     return NextResponse.json({

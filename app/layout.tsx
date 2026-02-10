@@ -6,9 +6,9 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BulletPro – AI Resume Bullet Point Generator",
+  title: "CVScan – AI Resume & Job Application Assistant",
   description:
-    "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI.",
+    "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI. Track applications and optimize your job search.",
   keywords: [
     "resume",
     "bullet points",
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     "ATS",
   ],
   openGraph: {
-    title: "BulletPro – AI Resume Bullet Point Generator",
+    title: "CVScan – AI Resume & Job Application Assistant",
     description:
-      "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI.",
+      "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI. Track applications and optimize your job search.",
     type: "website",
   },
 };

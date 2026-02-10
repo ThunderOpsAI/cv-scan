@@ -102,9 +102,11 @@ CREATE INDEX IF NOT EXISTS idx_reminders_scheduled ON reminders(user_id, schedul
 -- TRIGGERS
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_applications_updated_at ON applications;
 CREATE TRIGGER update_applications_updated_at BEFORE UPDATE ON applications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_application_stages_updated_at ON application_stages;
 CREATE TRIGGER update_application_stages_updated_at BEFORE UPDATE ON application_stages
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -118,19 +120,24 @@ ALTER TABLE generated_emails ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
 
 -- Applications policies
+DROP POLICY IF EXISTS "Users can view own applications" ON applications;
 CREATE POLICY "Users can view own applications"
   ON applications FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own applications" ON applications;
 CREATE POLICY "Users can insert own applications"
   ON applications FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own applications" ON applications;
 CREATE POLICY "Users can update own applications"
   ON applications FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own applications" ON applications;
 CREATE POLICY "Users can delete own applications"
   ON applications FOR DELETE USING (auth.uid() = user_id);
 
 -- Application stages policies
+DROP POLICY IF EXISTS "Users can view own application stages" ON application_stages;
 CREATE POLICY "Users can view own application stages"
   ON application_stages FOR SELECT
   USING (EXISTS (
@@ -139,6 +146,7 @@ CREATE POLICY "Users can view own application stages"
     AND applications.user_id = auth.uid()
   ));
 
+DROP POLICY IF EXISTS "Users can insert own application stages" ON application_stages;
 CREATE POLICY "Users can insert own application stages"
   ON application_stages FOR INSERT
   WITH CHECK (EXISTS (
@@ -147,6 +155,7 @@ CREATE POLICY "Users can insert own application stages"
     AND applications.user_id = auth.uid()
   ));
 
+DROP POLICY IF EXISTS "Users can update own application stages" ON application_stages;
 CREATE POLICY "Users can update own application stages"
   ON application_stages FOR UPDATE
   USING (EXISTS (
@@ -155,6 +164,7 @@ CREATE POLICY "Users can update own application stages"
     AND applications.user_id = auth.uid()
   ));
 
+DROP POLICY IF EXISTS "Users can delete own application stages" ON application_stages;
 CREATE POLICY "Users can delete own application stages"
   ON application_stages FOR DELETE
   USING (EXISTS (
@@ -164,27 +174,35 @@ CREATE POLICY "Users can delete own application stages"
   ));
 
 -- Generated emails policies
+DROP POLICY IF EXISTS "Users can view own generated emails" ON generated_emails;
 CREATE POLICY "Users can view own generated emails"
   ON generated_emails FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own generated emails" ON generated_emails;
 CREATE POLICY "Users can insert own generated emails"
   ON generated_emails FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own generated emails" ON generated_emails;
 CREATE POLICY "Users can update own generated emails"
   ON generated_emails FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own generated emails" ON generated_emails;
 CREATE POLICY "Users can delete own generated emails"
   ON generated_emails FOR DELETE USING (auth.uid() = user_id);
 
 -- Reminders policies
+DROP POLICY IF EXISTS "Users can view own reminders" ON reminders;
 CREATE POLICY "Users can view own reminders"
   ON reminders FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own reminders" ON reminders;
 CREATE POLICY "Users can insert own reminders"
   ON reminders FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own reminders" ON reminders;
 CREATE POLICY "Users can update own reminders"
   ON reminders FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own reminders" ON reminders;
 CREATE POLICY "Users can delete own reminders"
   ON reminders FOR DELETE USING (auth.uid() = user_id);

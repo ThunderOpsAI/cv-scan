@@ -49,6 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_ats_scans_is_free ON ats_scans(user_id, is_free_s
 -- TRIGGERS
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_job_packs_updated_at ON job_packs;
 CREATE TRIGGER update_job_packs_updated_at BEFORE UPDATE ON job_packs
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -60,35 +61,43 @@ ALTER TABLE job_packs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ats_scans ENABLE ROW LEVEL SECURITY;
 
 -- Job Packs: Users can only access their own job packs
+DROP POLICY IF EXISTS "Users can view own job packs" ON job_packs;
 CREATE POLICY "Users can view own job packs"
   ON job_packs FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own job packs" ON job_packs;
 CREATE POLICY "Users can insert own job packs"
   ON job_packs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own job packs" ON job_packs;
 CREATE POLICY "Users can update own job packs"
   ON job_packs FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own job packs" ON job_packs;
 CREATE POLICY "Users can delete own job packs"
   ON job_packs FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ATS Scans: Users can only access their own scans
+DROP POLICY IF EXISTS "Users can view own ats scans" ON ats_scans;
 CREATE POLICY "Users can view own ats scans"
   ON ats_scans FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own ats scans" ON ats_scans;
 CREATE POLICY "Users can insert own ats scans"
   ON ats_scans FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own ats scans" ON ats_scans;
 CREATE POLICY "Users can update own ats scans"
   ON ats_scans FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own ats scans" ON ats_scans;
 CREATE POLICY "Users can delete own ats scans"
   ON ats_scans FOR DELETE
   USING (auth.uid() = user_id);

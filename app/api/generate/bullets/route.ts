@@ -93,12 +93,12 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     await (supabase
       .from("generations")
       .insert as any)({
-      user_id: session.user.id,
-      type: "bullets",
-      input: { job_duty: jobDuty },
-      output: bullets.join("\n"),
-      credits_used: CREDIT_COST,
-    });
+        user_id: session.user.id,
+        type: "bullets",
+        input: { job_duty: jobDuty },
+        output: bullets.join("\n"),
+        credits_used: CREDIT_COST,
+      });
 
     return NextResponse.json({
       bullets,

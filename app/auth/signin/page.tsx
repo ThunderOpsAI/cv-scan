@@ -9,7 +9,7 @@ export default function SignIn() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link href="/" className="text-4xl font-bold text-white inline-block">
-            <span className="text-blue-400">Bullet</span>Pro
+            <span className="text-blue-400">CV</span>Scan
           </Link>
           <p className="text-gray-400 mt-4">
             Sign in to start generating professional resume bullet points
@@ -44,7 +44,7 @@ export default function SignIn() {
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Get 3 free credits to try BulletPro
+              Get 3 free credits to try CVScan
             </p>
           </div>
         </div>
