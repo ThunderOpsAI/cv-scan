@@ -216,6 +216,23 @@ export default function Dashboard() {
                 <div className="text-blue-400 text-sm">2 credits per generation</div>
               </Link>
             </div>
+            {/* Buy Credits Permanent Link */}
+            <div className="mt-6">
+              <Link
+                href="/buy-credits"
+                className="block bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group text-center"
+              >
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <span className="text-2xl">💎</span>
+                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                    Buy More Credits
+                  </h3>
+                </div>
+                <p className="text-gray-400">
+                  Top up your account to keep generating amazing content
+                </p>
+              </Link>
+            </div>
           </div>
 
           {/* Buy Credits CTA */}

@@ -12,28 +12,28 @@ const CREDIT_PACKAGES = [
   {
     id: "starter",
     name: "Starter Pack",
-    credits: 10,
+    credits: 20,
     price: 4.99,
     description: "Perfect for trying out the service",
-    features: ["10 generations", "No expiration", "Instant delivery"],
+    features: ["20 generations", "No expiration", "Instant delivery"],
     popular: false,
   },
   {
     id: "popular",
     name: "Popular Pack",
-    credits: 25,
+    credits: 50,
     price: 9.99,
     description: "Best value for regular users",
-    features: ["25 generations", "No expiration", "Instant delivery", "20% savings"],
+    features: ["50 generations", "No expiration", "Instant delivery", "20% savings"],
     popular: true,
   },
   {
     id: "pro",
     name: "Pro Pack",
-    credits: 50,
+    credits: 100,
     price: 17.99,
     description: "For power users and professionals",
-    features: ["50 generations", "No expiration", "Instant delivery", "28% savings"],
+    features: ["100 generations", "No expiration", "Instant delivery", "28% savings"],
     popular: false,
   },
 ];
@@ -107,7 +107,7 @@ function BuyCreditsContent() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">Bullet</span>Pro
+          <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
           <div className="text-white">
@@ -150,11 +150,10 @@ function BuyCreditsContent() {
             {CREDIT_PACKAGES.map((pkg) => (
               <div
                 key={pkg.id}
-                className={`relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${
-                  pkg.popular
+                className={`relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${pkg.popular
                     ? "border-blue-500 shadow-lg shadow-blue-500/20"
                     : "border-white/20"
-                }`}
+                  }`}
               >
                 {pkg.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
@@ -196,15 +195,13 @@ function BuyCreditsContent() {
                 <button
                   onClick={() => handlePurchase(pkg.id)}
                   disabled={loading !== null}
-                  className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${
-                    pkg.popular
+                  className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${pkg.popular
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
-                  } ${
-                    loading === pkg.id
+                    } ${loading === pkg.id
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
-                  }`}
+                    }`}
                 >
                   {loading === pkg.id ? "Processing..." : "Purchase Now"}
                 </button>

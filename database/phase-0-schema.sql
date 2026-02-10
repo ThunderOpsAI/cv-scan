@@ -130,21 +130,27 @@ CREATE INDEX IF NOT EXISTS idx_star_stories_tags ON star_stories USING GIN (tags
 -- TRIGGERS
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_experiences_updated_at ON experiences;
 CREATE TRIGGER update_experiences_updated_at BEFORE UPDATE ON experiences
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_bullets_updated_at ON bullets;
 CREATE TRIGGER update_bullets_updated_at BEFORE UPDATE ON bullets
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_education_updated_at ON education;
 CREATE TRIGGER update_education_updated_at BEFORE UPDATE ON education
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
 CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON skills
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_star_stories_updated_at ON star_stories;
 CREATE TRIGGER update_star_stories_updated_at BEFORE UPDATE ON star_stories
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -160,23 +166,28 @@ ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE star_stories ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Users can only access their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own profile" ON profiles;
 CREATE POLICY "Users can delete own profile"
   ON profiles FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Experiences: Users can only access their own experiences
+DROP POLICY IF EXISTS "Users can view own experiences" ON experiences;
 CREATE POLICY "Users can view own experiences"
   ON experiences FOR SELECT
   USING (
@@ -187,6 +198,7 @@ CREATE POLICY "Users can view own experiences"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own experiences" ON experiences;
 CREATE POLICY "Users can insert own experiences"
   ON experiences FOR INSERT
   WITH CHECK (
@@ -197,6 +209,7 @@ CREATE POLICY "Users can insert own experiences"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own experiences" ON experiences;
 CREATE POLICY "Users can update own experiences"
   ON experiences FOR UPDATE
   USING (
@@ -207,6 +220,7 @@ CREATE POLICY "Users can update own experiences"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own experiences" ON experiences;
 CREATE POLICY "Users can delete own experiences"
   ON experiences FOR DELETE
   USING (
@@ -218,6 +232,7 @@ CREATE POLICY "Users can delete own experiences"
   );
 
 -- Bullets: Users can only access bullets from their own experiences
+DROP POLICY IF EXISTS "Users can view own bullets" ON bullets;
 CREATE POLICY "Users can view own bullets"
   ON bullets FOR SELECT
   USING (
@@ -229,6 +244,7 @@ CREATE POLICY "Users can view own bullets"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own bullets" ON bullets;
 CREATE POLICY "Users can insert own bullets"
   ON bullets FOR INSERT
   WITH CHECK (
@@ -240,6 +256,7 @@ CREATE POLICY "Users can insert own bullets"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own bullets" ON bullets;
 CREATE POLICY "Users can update own bullets"
   ON bullets FOR UPDATE
   USING (
@@ -251,6 +268,7 @@ CREATE POLICY "Users can update own bullets"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own bullets" ON bullets;
 CREATE POLICY "Users can delete own bullets"
   ON bullets FOR DELETE
   USING (
@@ -263,6 +281,7 @@ CREATE POLICY "Users can delete own bullets"
   );
 
 -- Education: Users can only access their own education
+DROP POLICY IF EXISTS "Users can view own education" ON education;
 CREATE POLICY "Users can view own education"
   ON education FOR SELECT
   USING (
@@ -273,6 +292,7 @@ CREATE POLICY "Users can view own education"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own education" ON education;
 CREATE POLICY "Users can insert own education"
   ON education FOR INSERT
   WITH CHECK (
@@ -283,6 +303,7 @@ CREATE POLICY "Users can insert own education"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own education" ON education;
 CREATE POLICY "Users can update own education"
   ON education FOR UPDATE
   USING (
@@ -293,6 +314,7 @@ CREATE POLICY "Users can update own education"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own education" ON education;
 CREATE POLICY "Users can delete own education"
   ON education FOR DELETE
   USING (
@@ -304,6 +326,7 @@ CREATE POLICY "Users can delete own education"
   );
 
 -- Skills: Users can only access their own skills
+DROP POLICY IF EXISTS "Users can view own skills" ON skills;
 CREATE POLICY "Users can view own skills"
   ON skills FOR SELECT
   USING (
@@ -314,6 +337,7 @@ CREATE POLICY "Users can view own skills"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own skills" ON skills;
 CREATE POLICY "Users can insert own skills"
   ON skills FOR INSERT
   WITH CHECK (
@@ -324,6 +348,7 @@ CREATE POLICY "Users can insert own skills"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own skills" ON skills;
 CREATE POLICY "Users can update own skills"
   ON skills FOR UPDATE
   USING (
@@ -334,6 +359,7 @@ CREATE POLICY "Users can update own skills"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own skills" ON skills;
 CREATE POLICY "Users can delete own skills"
   ON skills FOR DELETE
   USING (
@@ -345,6 +371,7 @@ CREATE POLICY "Users can delete own skills"
   );
 
 -- STAR Stories: Users can only access their own stories
+DROP POLICY IF EXISTS "Users can view own star stories" ON star_stories;
 CREATE POLICY "Users can view own star stories"
   ON star_stories FOR SELECT
   USING (
@@ -355,6 +382,7 @@ CREATE POLICY "Users can view own star stories"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own star stories" ON star_stories;
 CREATE POLICY "Users can insert own star stories"
   ON star_stories FOR INSERT
   WITH CHECK (
@@ -365,6 +393,7 @@ CREATE POLICY "Users can insert own star stories"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own star stories" ON star_stories;
 CREATE POLICY "Users can update own star stories"
   ON star_stories FOR UPDATE
   USING (
@@ -375,6 +404,7 @@ CREATE POLICY "Users can update own star stories"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own star stories" ON star_stories;
 CREATE POLICY "Users can delete own star stories"
   ON star_stories FOR DELETE
   USING (

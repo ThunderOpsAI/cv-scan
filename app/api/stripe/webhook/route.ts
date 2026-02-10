@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
           p_user_id: userId,
           p_amount: credits,
           p_type: "purchase",
+          p_description: `Purchased ${credits} credits (${packageType})`,
+          p_metadata: session.metadata || {},
         });
 
         if (error) {

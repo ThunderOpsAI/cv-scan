@@ -127,13 +127,14 @@ export default function Home() {
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { name: "Starter Pack", credits: 10, price: "$4.99", desc: "Perfect for trying out" },
-            { name: "Popular Pack", credits: 25, price: "$9.99", desc: "Best value - 20% off", popular: true },
-            { name: "Pro Pack", credits: 50, price: "$17.99", desc: "Power users - 28% off" },
+            { name: "Starter Pack", credits: 20, price: "$4.99", desc: "Perfect for trying out" },
+            { name: "Popular Pack", credits: 50, price: "$9.99", desc: "Best value - 20% off", popular: true },
+            { name: "Pro Pack", credits: 100, price: "$17.99", desc: "Power users - 28% off" },
           ].map((plan) => (
-            <div
+            <Link
+              href="/buy-credits"
               key={plan.name}
-              className={`relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
+              className={`block relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
                 }`}
             >
               {plan.popular && (
@@ -145,7 +146,7 @@ export default function Home() {
               <div className="text-3xl font-bold text-white mb-1">{plan.price}</div>
               <div className="text-blue-400 mb-4">{plan.credits} credits</div>
               <p className="text-gray-400 text-sm">{plan.desc}</p>
-            </div>
+            </Link>
           ))}
         </div>
         <div className="text-center mt-8">
@@ -189,7 +190,7 @@ export default function Home() {
             <Link href="/buy-credits" className="text-gray-400 hover:text-white transition-colors">
               Pricing
             </Link>
-            <a href="mailto:support@bulletpro.com" className="text-gray-400 hover:text-white transition-colors">
+            <a href="mailto:support@cv-scan.com" className="text-gray-400 hover:text-white transition-colors">
               Support
             </a>
           </div>

@@ -10,22 +10,22 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Credit packages
 const CREDIT_PACKAGES = {
   starter: {
-    credits: 10,
+    credits: 20,
     price: 499, // $4.99 in cents
     name: "Starter Pack",
-    description: "10 credits for resume bullets and cover letters",
+    description: "20 credits for resume bullets and cover letters",
   },
   popular: {
-    credits: 25,
+    credits: 50,
     price: 999, // $9.99 in cents (20% discount)
     name: "Popular Pack",
-    description: "25 credits - Best value!",
+    description: "50 credits - Best value!",
   },
   pro: {
-    credits: 50,
+    credits: 100,
     price: 1799, // $17.99 in cents (28% discount)
     name: "Pro Pack",
-    description: "50 credits for power users",
+    description: "100 credits for power users",
   },
 };
 

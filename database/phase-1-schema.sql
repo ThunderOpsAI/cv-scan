@@ -101,12 +101,15 @@ CREATE INDEX IF NOT EXISTS idx_discovered_jobs_posted_at ON discovered_jobs(post
 -- TRIGGERS
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_conversations_updated_at ON conversations;
 CREATE TRIGGER update_conversations_updated_at BEFORE UPDATE ON conversations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_saved_searches_updated_at ON saved_searches;
 CREATE TRIGGER update_saved_searches_updated_at BEFORE UPDATE ON saved_searches
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_discovered_jobs_updated_at ON discovered_jobs;
 CREATE TRIGGER update_discovered_jobs_updated_at BEFORE UPDATE ON discovered_jobs
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -121,23 +124,28 @@ ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE discovered_jobs ENABLE ROW LEVEL SECURITY;
 
 -- Conversations: Users can only access their own conversations
+DROP POLICY IF EXISTS "Users can view own conversations" ON conversations;
 CREATE POLICY "Users can view own conversations"
   ON conversations FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own conversations" ON conversations;
 CREATE POLICY "Users can insert own conversations"
   ON conversations FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own conversations" ON conversations;
 CREATE POLICY "Users can update own conversations"
   ON conversations FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own conversations" ON conversations;
 CREATE POLICY "Users can delete own conversations"
   ON conversations FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Messages: Users can only access messages from their own conversations
+DROP POLICY IF EXISTS "Users can view own messages" ON messages;
 CREATE POLICY "Users can view own messages"
   ON messages FOR SELECT
   USING (
@@ -148,6 +156,7 @@ CREATE POLICY "Users can view own messages"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own messages" ON messages;
 CREATE POLICY "Users can insert own messages"
   ON messages FOR INSERT
   WITH CHECK (
@@ -158,6 +167,7 @@ CREATE POLICY "Users can insert own messages"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own messages" ON messages;
 CREATE POLICY "Users can update own messages"
   ON messages FOR UPDATE
   USING (
@@ -168,6 +178,7 @@ CREATE POLICY "Users can update own messages"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete own messages" ON messages;
 CREATE POLICY "Users can delete own messages"
   ON messages FOR DELETE
   USING (
@@ -179,45 +190,55 @@ CREATE POLICY "Users can delete own messages"
   );
 
 -- Company cache: All authenticated users can read (shared cache)
+DROP POLICY IF EXISTS "All users can view company cache" ON company_cache;
 CREATE POLICY "All users can view company cache"
   ON company_cache FOR SELECT
   USING (auth.uid() IS NOT NULL);
 
 -- Service role can manage cache
+DROP POLICY IF EXISTS "Service role can manage company cache" ON company_cache;
 CREATE POLICY "Service role can manage company cache"
   ON company_cache FOR ALL
   USING (auth.jwt() ->> 'role' = 'service_role');
 
 -- Saved searches: Users can only access their own searches
+DROP POLICY IF EXISTS "Users can view own saved searches" ON saved_searches;
 CREATE POLICY "Users can view own saved searches"
   ON saved_searches FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own saved searches" ON saved_searches;
 CREATE POLICY "Users can insert own saved searches"
   ON saved_searches FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own saved searches" ON saved_searches;
 CREATE POLICY "Users can update own saved searches"
   ON saved_searches FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own saved searches" ON saved_searches;
 CREATE POLICY "Users can delete own saved searches"
   ON saved_searches FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Discovered jobs: Users can only access their own discovered jobs
+DROP POLICY IF EXISTS "Users can view own discovered jobs" ON discovered_jobs;
 CREATE POLICY "Users can view own discovered jobs"
   ON discovered_jobs FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own discovered jobs" ON discovered_jobs;
 CREATE POLICY "Users can insert own discovered jobs"
   ON discovered_jobs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own discovered jobs" ON discovered_jobs;
 CREATE POLICY "Users can update own discovered jobs"
   ON discovered_jobs FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own discovered jobs" ON discovered_jobs;
 CREATE POLICY "Users can delete own discovered jobs"
   ON discovered_jobs FOR DELETE
   USING (auth.uid() = user_id);
