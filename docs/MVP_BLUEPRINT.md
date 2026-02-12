@@ -1,4 +1,4 @@
-# BulletPro MVP Blueprint v2.0
+# CVScan MVP Blueprint v2.0
 ## Job Search Command Center - Built by Claude Code
 
 ---
@@ -7,7 +7,7 @@
 
 ## Product Vision
 
-> **"BulletPro is your AI career coach that scores, tailors, and coaches you through every job application - from discovery to offer."**
+> **"CVScan is your AI career coach that scores, tailors, and coaches you through every job application - from discovery to offer."**
 
 ## Core Value Loop
 
@@ -19,7 +19,7 @@ DISCOVER → SCORE → TAILOR → APPLY → INTERVIEW → WIN
 
 ## Key Differentiators
 
-| Feature | ChatGPT | Jobscan | BulletPro |
+| Feature | ChatGPT | Jobscan | CVScan |
 |---------|---------|---------|-----------|
 | ATS Scoring | ❌ | ✅ | ✅ |
 | Tailored Generation | Generic | ❌ | ✅ Contextual |
@@ -381,7 +381,7 @@ Here are today's best matches for "Remote PM at Series B+":
 ### Extension Popup
 ```
 ┌─────────────────────────────────────────┐
-│ 🎯 BulletPro                        [x] │
+│ 🎯 CVScan                           [x] │
 ├─────────────────────────────────────────┤
 │ Detected: Senior PM at Stripe           │
 │                                         │

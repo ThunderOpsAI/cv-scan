@@ -1,5 +1,5 @@
 /**
- * BulletPro AI Prompts
+ * CVScan AI Prompts
  * Copy these into lib/ai/prompts/ as needed
  * Use Gemini Flash unless marked [PRO]
  */
@@ -47,7 +47,7 @@ Return JSON only:
 // ============================================
 
 export const COPILOT_SYSTEM = `
-You are a job search assistant for BulletPro. You have context about the user.
+You are a job search assistant for CVScan. You have context about the user.
 
 USER PROFILE:
 {profile_summary}

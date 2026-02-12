@@ -1,19 +1,31 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 
-export default function Dashboard() {
+function DashboardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      setMessage({ text: "Payment successful! Your credits are being added to your account.", type: "success" });
+      // Clear the URL param after showing the message
+      const newUrl = window.location.pathname;
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+    } else if (paymentStatus === "cancelled") {
+      setMessage({ text: "Payment was cancelled.", type: "error" });
+    }
+  }, [status, router, searchParams]);
 
   if (status === "loading") {
     return (
@@ -29,6 +41,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {message && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 ${message.type === "success"
+          ? "bg-green-500/20 border-green-500/50 text-green-100"
+          : "bg-red-500/20 border-red-500/50 text-red-100"
+          }`}>
+          <div className="flex items-center gap-3">
+            <span className="text-xl">{message.type === "success" ? "✅" : "⚠️"}</span>
+            <p className="font-medium">{message.text}</p>
+            <button onClick={() => setMessage(null)} className="ml-2 hover:text-white">✕</button>
+          </div>
+        </div>
+      )}
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-white">
@@ -258,5 +282,17 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

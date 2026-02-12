@@ -1,4 +1,4 @@
--- BulletPro Database Schema
+-- CVScan Database Schema
 -- Supabase PostgreSQL Schema
 
 -- ============================================
@@ -109,7 +109,7 @@ CREATE POLICY "Users can view own generations"
 
 -- Function to atomically deduct credits and log transaction
 -- This prevents race conditions when multiple requests happen simultaneously
-CREATE OR REPLACE FUNCTION deduct_credit(
+CREATE OR REPLACE FUNCTION deduct_credits(
   p_user_id UUID,
   p_amount INTEGER,
   p_description TEXT

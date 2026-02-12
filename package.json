@@ -1,7 +1,7 @@
 {
-  "name": "bulletpro",
+  "name": "cvscan",
   "version": "0.1.0",
-  "description": "AI Resume Bullet Point & Cover Letter Generator",
+  "description": "AI Resume & Career Coach - Score, Tailor, and Land Your Dream Job",
   "private": true,
   "scripts": {
     "dev": "next dev",
