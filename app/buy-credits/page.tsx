@@ -13,27 +13,27 @@ const CREDIT_PACKAGES = [
     id: "starter",
     name: "Starter Pack",
     credits: 20,
-    price: 4.99,
+    price: 9.00,
     description: "Perfect for trying out the service",
-    features: ["20 generations", "No expiration", "Instant delivery"],
+    features: ["20 credits", "No expiration", "Instant delivery"],
     popular: false,
   },
   {
     id: "popular",
     name: "Popular Pack",
     credits: 50,
-    price: 9.99,
+    price: 19.00,
     description: "Best value for regular users",
-    features: ["50 generations", "No expiration", "Instant delivery", "20% savings"],
+    features: ["50 credits", "No expiration", "Instant delivery", "15% savings"],
     popular: true,
   },
   {
     id: "pro",
     name: "Pro Pack",
     credits: 100,
-    price: 17.99,
+    price: 29.00,
     description: "For power users and professionals",
-    features: ["100 generations", "No expiration", "Instant delivery", "28% savings"],
+    features: ["100 credits", "No expiration", "Instant delivery", "35% savings"],
     popular: false,
   },
 ];
@@ -151,8 +151,8 @@ function BuyCreditsContent() {
               <div
                 key={pkg.id}
                 className={`relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${pkg.popular
-                    ? "border-blue-500 shadow-lg shadow-blue-500/20"
-                    : "border-white/20"
+                  ? "border-blue-500 shadow-lg shadow-blue-500/20"
+                  : "border-white/20"
                   }`}
               >
                 {pkg.popular && (
@@ -196,8 +196,8 @@ function BuyCreditsContent() {
                   onClick={() => handlePurchase(pkg.id)}
                   disabled={loading !== null}
                   className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${pkg.popular
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white border border-white/20"
                     } ${loading === pkg.id
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"

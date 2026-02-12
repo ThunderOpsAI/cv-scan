@@ -11,19 +11,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const CREDIT_PACKAGES = {
   starter: {
     credits: 20,
-    price: 499, // $4.99 in cents
+    price: 900, // $9.00 AUD
     name: "Starter Pack",
     description: "20 credits for resume bullets and cover letters",
   },
   popular: {
     credits: 50,
-    price: 999, // $9.99 in cents (20% discount)
+    price: 1900, // $19.00 AUD (15% discount)
     name: "Popular Pack",
     description: "50 credits - Best value!",
   },
   pro: {
     credits: 100,
-    price: 1799, // $17.99 in cents (28% discount)
+    price: 2900, // $29.00 AUD (35% discount)
     name: "Pro Pack",
     description: "100 credits for power users",
   },
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "aud",
             product_data: {
               name: pkg.name,
               description: pkg.description,
