@@ -12,14 +12,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
+      // We are using the Resend API via sendVerificationRequest, so no SMTP server config is needed.
       from: process.env.EMAIL_FROM,
       sendVerificationRequest: async ({ identifier, url, provider }) => {
         const { Resend } = await import("resend");
