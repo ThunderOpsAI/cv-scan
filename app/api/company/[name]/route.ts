@@ -11,8 +11,9 @@ const CACHE_DURATION_DAYS = 7;
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { name: string } }
+  props: { params: Promise<{ name: string }> }
 ) {
+  const params = await props.params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -78,10 +79,10 @@ export async function GET(
     await (supabase
       .from('company_cache')
       .upsert as any)({
-      company_name: companyName,
-      data: companyData,
-      expires_at: expiresAt.toISOString(),
-    });
+        company_name: companyName,
+        data: companyData,
+        expires_at: expiresAt.toISOString(),
+      });
 
     return NextResponse.json({
       company: companyData,
@@ -144,8 +145,9 @@ Format your response as JSON with these exact keys: name, description, industry,
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { name: string } }
+  props: { params: Promise<{ name: string }> }
 ) {
+  const params = await props.params; // await params
   try {
     const session = await getServerSession(authOptions);
 
