@@ -57,29 +57,71 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    // Adapter handles user creation. We just enrich the session.
+    // Adapter handles user creation in next_auth.users.
+    // We sync to public.users (where credits live) on sign-in.
+    async signIn({ user, account, profile }) {
+      if (!user.email) return false;
+
+      try {
+        const supabase = createClient();
+
+        // Check if user exists in public.users
+        const { data: existingUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("email", user.email)
+          .single();
+
+        if (!existingUser) {
+          // Create user in public.users with 3 free credits
+          await (supabase.from("users").insert as any)({
+            email: user.email,
+            name: user.name || null,
+            image: user.image || null,
+          });
+        } else {
+          // Update existing user info
+          await (supabase.from("users").update as any)({
+            name: user.name || undefined,
+            image: user.image || undefined,
+            updated_at: new Date().toISOString(),
+          }).eq("email", user.email);
+        }
+      } catch (error) {
+        console.error("Error syncing user to public.users:", error);
+        // Don't block sign-in if sync fails
+      }
+
+      return true;
+    },
+
+    // Enrich the JWT with user email so session callback can use it
+    async jwt({ token, user }) {
+      if (user) {
+        token.email = user.email;
+      }
+      return token;
+    },
+
+    // Enrich the session with credits from public.users
     async session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-        // Fetch credits manually since JWT doesn't have it by default
+      if (session.user && token.email) {
+        session.user.id = token.sub || "";
+        // Fetch credits from public.users by email
         const supabase = createClient();
         const { data: dbUser } = await supabase
           .from("users")
-          .select("credits")
-          .eq("id", token.sub) // token.sub is the user UUID from adapter
+          .select("id, credits")
+          .eq("email", token.email as string)
           .single();
 
         if (dbUser) {
+          session.user.id = (dbUser as any).id;
           session.user.credits = (dbUser as any).credits;
         }
       }
       return session;
     },
-
-    // Optional: Add logging or extra checks on sign in
-    async signIn({ user, account, profile }) {
-      return true;
-    }
   },
 };
 
