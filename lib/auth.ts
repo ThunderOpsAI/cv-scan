@@ -70,7 +70,7 @@ export const authOptions: NextAuthOptions = {
           .single();
 
         if (dbUser) {
-          session.user.credits = dbUser.credits;
+          session.user.credits = (dbUser as any).credits;
         }
       }
       return session;
