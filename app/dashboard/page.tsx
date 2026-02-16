@@ -1,19 +1,31 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 
-export default function Dashboard() {
+function DashboardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      setMessage({ text: "Payment successful! Your credits are being added to your account.", type: "success" });
+      // Clear the URL param after showing the message
+      const newUrl = window.location.pathname;
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+    } else if (paymentStatus === "cancelled") {
+      setMessage({ text: "Payment was cancelled.", type: "error" });
+    }
+  }, [status, router, searchParams]);
 
   if (status === "loading") {
     return (
@@ -29,6 +41,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {message && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 ${message.type === "success"
+          ? "bg-green-500/20 border-green-500/50 text-green-100"
+          : "bg-red-500/20 border-red-500/50 text-red-100"
+          }`}>
+          <div className="flex items-center gap-3">
+            <span className="text-xl">{message.type === "success" ? "✅" : "⚠️"}</span>
+            <p className="font-medium">{message.text}</p>
+            <button onClick={() => setMessage(null)} className="ml-2 hover:text-white">✕</button>
+          </div>
+        </div>
+      )}
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-white">
@@ -181,6 +205,34 @@ export default function Dashboard() {
                 </p>
                 <div className="text-blue-400 text-sm">Free job discovery</div>
               </Link>
+
+              <Link
+                href="/dashboard/profile/stories"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🌟</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  STAR Stories
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Structure your interview answers with the STAR method
+                </p>
+                <div className="text-blue-400 text-sm">Profile context</div>
+              </Link>
+
+              <Link
+                href="/dashboard/profile/goals"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  SMART Goals
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Set and track specific career objectives
+                </p>
+                <div className="text-blue-400 text-sm">Career tracking</div>
+              </Link>
             </div>
           </div>
 
@@ -257,6 +309,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

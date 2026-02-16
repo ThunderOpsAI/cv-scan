@@ -107,7 +107,7 @@ Write the cover letter body now:`;
     }
 
     // Save generation to database
-    await supabase
+    const { error: insertError } = await supabase
       .from("generations")
       .insert({
         user_id: userId,
@@ -117,6 +117,12 @@ Write the cover letter body now:`;
         credits_used: CREDIT_COST,
       } as any);
 
+    if (insertError) {
+      console.error("Failed to save generation:", insertError);
+      // We still return the cover letter since it was generated, 
+      // but the failure to save is logged.
+    }
+
     return NextResponse.json({
       coverLetter,
       creditsRemaining: deductResult[0].new_credits,
@@ -125,6 +131,49 @@ Write the cover letter body now:`;
     console.error("Generate cover letter error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate cover letter" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const supabase = createClient();
+    const token = await getToken({ req: req as any });
+    const email = (token as any)?.email as string | undefined;
+
+    let userId: string | undefined;
+    if (email) {
+      const { data: dbUser } = await (supabase
+        .from("users")
+        .select as any)("id")
+        .eq("email", email)
+        .single();
+      userId = dbUser?.id;
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: generations, error } = await supabase
+      .from("generations")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("type", "cover_letter")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Failed to fetch generations:", error);
+      return NextResponse.json({ error: "Failed to fetch saved items" }, { status: 500 });
+    }
+
+    return NextResponse.json({ generations });
+  } catch (error: any) {
+    console.error("Fetch generations error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch saved items" },
       { status: 500 }
     );
   }

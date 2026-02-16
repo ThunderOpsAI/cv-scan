@@ -161,6 +161,15 @@ export default function ProfilePage() {
           {/* Profile Form/View */}
           {editing ? (
             <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+              <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <p className="text-yellow-100 font-semibold">Unsaved Changes</p>
+                  <p className="text-yellow-200/80 text-sm">
+                    You must click "Save Profile" at the bottom to apply your changes. Leaving this page will discard them.
+                  </p>
+                </div>
+              </div>
               <div className="space-y-6">
                 <div>
                   <label className="block text-white mb-2">Full Name *</label>
@@ -354,29 +363,50 @@ export default function ProfilePage() {
           ) : null}
 
           {/* Quick Links */}
-          <div className="grid md:grid-cols-3 gap-4 mt-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             <Link
               href="/dashboard/profile/experience"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
             >
-              <h3 className="text-lg font-bold text-white mb-2">Experience</h3>
+              <div className="text-2xl mb-2">💼</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Experience</h3>
               <p className="text-gray-400 text-sm">Add your work history</p>
             </Link>
 
             <Link
               href="/dashboard/profile/education"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
             >
-              <h3 className="text-lg font-bold text-white mb-2">Education</h3>
+              <div className="text-2xl mb-2">🎓</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Education</h3>
               <p className="text-gray-400 text-sm">Add your degrees</p>
             </Link>
 
             <Link
               href="/dashboard/profile/skills"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
             >
-              <h3 className="text-lg font-bold text-white mb-2">Skills</h3>
+              <div className="text-2xl mb-2">⚡</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Skills</h3>
               <p className="text-gray-400 text-sm">List your expertise</p>
+            </Link>
+
+            <Link
+              href="/dashboard/profile/stories"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+            >
+              <div className="text-2xl mb-2">🌟</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">STAR Stories</h3>
+              <p className="text-gray-400 text-sm">Build interview answers</p>
+            </Link>
+
+            <Link
+              href="/dashboard/profile/goals"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+            >
+              <div className="text-2xl mb-2">🎯</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">SMART Goals</h3>
+              <p className="text-gray-400 text-sm">Track career goals</p>
             </Link>
           </div>
         </div>

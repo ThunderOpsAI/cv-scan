@@ -211,16 +211,18 @@ export default function ExperiencePage() {
               <h1 className="text-4xl font-bold text-white mb-2">Work Experience</h1>
               <p className="text-gray-400">Add your professional history with metrics</p>
             </div>
-            <button
-              onClick={() => {
-                resetExpForm();
-                setEditingExp(null);
-                setShowExpForm(true);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            >
-              Add Experience
-            </button>
+            {!showExpForm && (
+              <button
+                onClick={() => {
+                  resetExpForm();
+                  setEditingExp(null);
+                  setShowExpForm(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              >
+                Add Experience
+              </button>
+            )}
           </div>
 
           {/* Experience Form */}

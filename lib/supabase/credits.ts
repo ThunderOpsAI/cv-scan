@@ -10,32 +10,30 @@ export async function deductCredits(
   supabase: SupabaseClient<any>,
   args: { p_user_id: string; p_amount: number; p_description: string }
 ): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  const sb: any = supabase as any;
+  // Aliased version
+  return await _deductCredits(supabase, args);
+}
 
-  const fnNames = ["deduct_credits", "deduct_credit", "educt_credit"] as const;
+export const deductCredit = deductCredits;
 
-  for (const fnName of fnNames) {
-    const res = await sb.rpc(fnName, args);
-    if (!res?.error) {
-      return res;
-    }
+async function _deductCredits(
+  supabase: SupabaseClient<any>,
+  args: { p_user_id: string; p_amount: number; p_description: string }
+): Promise<{ data: CreditRpcResult[] | null; error: any }> {
+  // Use the standard rpc method
+  const res = await supabase.rpc("deduct_credits", args);
 
-    const msg = String(res.error?.message || res.error);
-    const normalized = msg.toLowerCase();
-    const code = String((res.error as any)?.code || "");
-    const looksLikeMissingFn =
-      code === "PGRST202" ||
-      (normalized.includes("function") &&
-        (normalized.includes("does not exist") ||
-          normalized.includes("not found") ||
-          normalized.includes("unknown") ||
-          normalized.includes("could not find"))) ||
-      (normalized.includes("schema cache") && normalized.includes("could not find"));
+  // If successful or the error is not "function not found", return the result
+  if (!res.error) return res as any;
 
-    if (!looksLikeMissingFn) {
-      return res;
-    }
+  const errorMsg = res.error?.message || "";
+  const isFunctionNotFound = errorMsg.includes("function") &&
+    (errorMsg.includes("does not exist") || errorMsg.includes("not found"));
+
+  // Fallback to singular "deduct_credit" if "deduct_credits" doesn't exist (backwards compatibility)
+  if (isFunctionNotFound) {
+    return await supabase.rpc("deduct_credit", args) as any;
   }
 
-  return await sb.rpc("deduct_credit", args);
+  return res as any;
 }

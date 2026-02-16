@@ -76,7 +76,7 @@ export function calculateMatchScore(
       totalScore += weight;
       reasons.push({
         type: 'education',
-        value: edu.degree,
+        value: relevantEdu.degree,
         weight,
       });
     }

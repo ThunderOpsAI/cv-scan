@@ -9,7 +9,8 @@ const WEIGHTS = {
   experiences: 30,
   education: 20,
   skills: 20,
-  star_stories: 10,
+  star_stories: 5,
+  smart_goals: 5, // Split 10 points between stories and goals
 };
 
 export async function GET() {
@@ -37,6 +38,7 @@ export async function GET() {
           education: { completed: false, weight: WEIGHTS.education, count: 0 },
           skills: { completed: false, weight: WEIGHTS.skills, count: 0 },
           star_stories: { completed: false, weight: WEIGHTS.star_stories, count: 0 },
+          smart_goals: { completed: false, weight: WEIGHTS.smart_goals, count: 0 },
         },
         recommendations: [
           'Create your profile with basic information',
@@ -44,6 +46,7 @@ export async function GET() {
           'Add your education background',
           'List your top 5-10 skills',
           'Create 3-5 STAR stories for interview prep',
+          'Set a SMART goal for your career',
         ],
       };
       return NextResponse.json({ strength });
@@ -69,10 +72,16 @@ export async function GET() {
       .select as any)('id')
       .eq('profile_id', profile.id);
 
+    const { data: smartGoals } = await (supabase
+      .from('smart_goals')
+      .select as any)('id')
+      .eq('profile_id', profile.id);
+
     const experiencesCount = experiences?.length || 0;
     const educationCount = education?.length || 0;
     const skillsCount = skills?.length || 0;
     const starStoriesCount = starStories?.length || 0;
+    const smartGoalsCount = smartGoals?.length || 0;
 
     const basicInfoComplete =
       !!profile.full_name &&
@@ -84,6 +93,7 @@ export async function GET() {
     const educationComplete = educationCount >= 1;
     const skillsComplete = skillsCount >= 5;
     const starStoriesComplete = starStoriesCount >= 3;
+    const smartGoalsComplete = smartGoalsCount >= 1; // At least 1 goal
 
     let totalScore = 0;
     if (basicInfoComplete) totalScore += WEIGHTS.basic_info;
@@ -91,6 +101,7 @@ export async function GET() {
     if (educationComplete) totalScore += WEIGHTS.education;
     if (skillsComplete) totalScore += WEIGHTS.skills;
     if (starStoriesComplete) totalScore += WEIGHTS.star_stories;
+    if (smartGoalsComplete) totalScore += WEIGHTS.smart_goals;
 
     const recommendations: string[] = [];
     if (!basicInfoComplete) {
@@ -108,13 +119,16 @@ export async function GET() {
     if (!starStoriesComplete) {
       recommendations.push(`Create ${3 - starStoriesCount} more STAR stor${starStoriesCount === 2 ? 'y' : 'ies'} for interview prep`);
     }
+    if (!smartGoalsComplete) {
+      recommendations.push('Set at least 1 SMART goal for your career');
+    }
 
     if (recommendations.length === 0) {
       recommendations.push('Your profile is complete! Keep it updated with new experiences.');
     }
 
     const strength: ProfileStrength = {
-      overall_percentage: totalScore,
+      overall_percentage: Math.min(totalScore, 100), // Cap at 100
       sections: {
         basic_info: {
           completed: basicInfoComplete,
@@ -139,6 +153,11 @@ export async function GET() {
           completed: starStoriesComplete,
           weight: WEIGHTS.star_stories,
           count: starStoriesCount,
+        },
+        smart_goals: {
+          completed: smartGoalsComplete,
+          weight: WEIGHTS.smart_goals,
+          count: smartGoalsCount,
         },
       },
       recommendations,

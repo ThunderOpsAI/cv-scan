@@ -109,6 +109,8 @@ export interface ProfileForTailoring {
   experiences: ExperienceForTailoring[];
   education: EducationForTailoring[];
   skills: SkillForTailoring[];
+  star_stories: StarStoryForTailoring[];
+  smart_goals: SmartGoalForTailoring[];
 }
 
 export interface ExperienceForTailoring {
@@ -133,4 +135,20 @@ export interface SkillForTailoring {
   name: string;
   category: string;
   proficiency?: string;
+}
+
+export interface StarStoryForTailoring {
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  tags?: string[];
+}
+
+export interface SmartGoalForTailoring {
+  goal: string;
+  status: string;
+  achievable?: string;
+  relevant?: string;
 }

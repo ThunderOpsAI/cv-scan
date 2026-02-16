@@ -47,8 +47,8 @@ export async function GET(
     if (format === 'pdf') {
       // Generate PDF using simple text-based approach
       const pdfContent = await generatePDF(jobPack, resumeContent, coverLetterContent);
-      
-      return new NextResponse(pdfContent, {
+
+      return new NextResponse(new Uint8Array(pdfContent), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="${jobPack.company}-${jobPack.job_title}-pack.pdf"`,
@@ -57,8 +57,8 @@ export async function GET(
     } else {
       // Generate DOCX
       const docxContent = await generateDOCX(jobPack, resumeContent, coverLetterContent);
-      
-      return new NextResponse(docxContent, {
+
+      return new NextResponse(new Uint8Array(docxContent), {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'Content-Disposition': `attachment; filename="${jobPack.company}-${jobPack.job_title}-pack.docx"`,
@@ -174,7 +174,7 @@ async function generateDOCX(
 ): Promise<Buffer> {
   // Simple DOCX generation - returns a basic Open XML structure
   // For production, use the 'docx' library
-  
+
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
@@ -194,7 +194,7 @@ async function generateDOCX(
 
   // Return as simple text for now - in production, create proper DOCX zip structure
   const textContent = `TAILORED RESUME\n${jobPack.job_title} at ${jobPack.company}\nATS Score: ${jobPack.ats_score || 'N/A'}%\n\n${resumeContent}\n\n---\n\nCOVER LETTER\n\n${coverLetterContent}`;
-  
+
   return Buffer.from(textContent, 'utf-8');
 }
 

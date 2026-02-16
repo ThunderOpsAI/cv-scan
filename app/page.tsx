@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Navigation */}
@@ -8,19 +12,28 @@ export default function Home() {
         <div className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <Link
             href="/pricing"
             className="text-gray-300 hover:text-white transition-colors"
           >
             Pricing
           </Link>
-          <Link
-            href="/auth/signin"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Sign In
-          </Link>
+          {session ? (
+            <Link
+              href="/dashboard"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg shadow-blue-500/20"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/auth/signin"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </nav>
 

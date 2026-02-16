@@ -91,6 +91,21 @@ export interface StarStory {
   updated_at: string;
 }
 
+export interface SmartGoal {
+  id: string;
+  profile_id: string;
+  goal: string;
+  specific?: string;
+  measurable?: string;
+  achievable?: string;
+  relevant?: string;
+  time_bound?: string;
+  status: 'in_progress' | 'completed';
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Request/Response types for API
 
 export interface CreateProfileRequest {
@@ -104,7 +119,7 @@ export interface CreateProfileRequest {
   github_url?: string;
 }
 
-export interface UpdateProfileRequest extends Partial<CreateProfileRequest> {}
+export interface UpdateProfileRequest extends Partial<CreateProfileRequest> { }
 
 export interface CreateExperienceRequest {
   profile_id: string;
@@ -117,7 +132,7 @@ export interface CreateExperienceRequest {
   description?: string;
 }
 
-export interface UpdateExperienceRequest extends Partial<CreateExperienceRequest> {}
+export interface UpdateExperienceRequest extends Partial<CreateExperienceRequest> { }
 
 export interface CreateBulletRequest {
   experience_id: string;
@@ -165,7 +180,7 @@ export interface CreateEducationRequest {
   description?: string;
 }
 
-export interface UpdateEducationRequest extends Partial<CreateEducationRequest> {}
+export interface UpdateEducationRequest extends Partial<CreateEducationRequest> { }
 
 export interface CreateSkillRequest {
   profile_id: string;
@@ -175,7 +190,7 @@ export interface CreateSkillRequest {
   years_of_experience?: number;
 }
 
-export interface UpdateSkillRequest extends Partial<Omit<CreateSkillRequest, 'profile_id'>> {}
+export interface UpdateSkillRequest extends Partial<Omit<CreateSkillRequest, 'profile_id'>> { }
 
 export interface CreateStarStoryRequest {
   profile_id: string;
@@ -187,7 +202,20 @@ export interface CreateStarStoryRequest {
   tags?: string[];
 }
 
-export interface UpdateStarStoryRequest extends Partial<CreateStarStoryRequest> {}
+export interface UpdateStarStoryRequest extends Partial<CreateStarStoryRequest> { }
+
+export interface CreateSmartGoalRequest {
+  profile_id: string;
+  goal: string;
+  specific?: string;
+  measurable?: string;
+  achievable?: string;
+  relevant?: string;
+  time_bound?: string;
+  status?: 'in_progress' | 'completed';
+}
+
+export interface UpdateSmartGoalRequest extends Partial<Omit<CreateSmartGoalRequest, 'profile_id'>> { }
 
 export interface ProfileStrength {
   overall_percentage: number;
@@ -212,6 +240,11 @@ export interface ProfileStrength {
       count: number;
     };
     star_stories: {
+      completed: boolean;
+      weight: number;
+      count: number;
+    };
+    smart_goals: {
       completed: boolean;
       weight: number;
       count: number;

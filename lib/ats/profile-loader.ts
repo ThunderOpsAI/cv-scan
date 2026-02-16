@@ -79,6 +79,28 @@ export async function loadProfileForTailoring(
       proficiency: skill.proficiency,
     }));
 
+    // Load STAR stories
+    const { data: starStories, error: starError } = await (supabase
+      .from('star_stories')
+      .select as any)('*')
+      .eq('profile_id', profile.id)
+      .order('created_at', { ascending: false });
+
+    if (starError) {
+      console.error('Failed to load STAR stories:', starError);
+    }
+
+    // Load SMART goals
+    const { data: smartGoals, error: smartError } = await (supabase
+      .from('smart_goals')
+      .select as any)('*')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true });
+
+    if (smartError) {
+      console.error('Failed to load SMART goals:', smartError);
+    }
+
     return {
       full_name: profile.full_name,
       headline: profile.headline,
@@ -89,6 +111,20 @@ export async function loadProfileForTailoring(
       experiences: formattedExperiences,
       education: formattedEducation,
       skills: formattedSkills,
+      star_stories: (starStories || []).map((s: any) => ({
+        title: s.title,
+        situation: s.situation,
+        task: s.task,
+        action: s.action,
+        result: s.result,
+        tags: s.tags,
+      })),
+      smart_goals: (smartGoals || []).map((g: any) => ({
+        goal: g.goal,
+        status: g.status,
+        achievable: g.achievable,
+        relevant: g.relevant,
+      })),
     };
   } catch (error) {
     console.error('Error loading profile for tailoring:', error);
