@@ -4,14 +4,14 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { UpdateStarStoryRequest } from '@/types/profile';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await params;
         const body: UpdateStarStoryRequest = await req.json();
         const supabase = createClient();
 
@@ -63,14 +63,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await params;
         const supabase = createClient();
 
         // Verify ownership indirectly via RLS or explicit check

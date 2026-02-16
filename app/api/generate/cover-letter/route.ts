@@ -106,23 +106,6 @@ Write the cover letter body now:`;
       );
     }
 
-    // Save generation to database
-    const { error: insertError } = await supabase
-      .from("generations")
-      .insert({
-        user_id: userId,
-        type: "cover_letter",
-        input: { resume, job_description: jobDescription } as any,
-        output: coverLetter,
-        credits_used: CREDIT_COST,
-      } as any);
-
-    if (insertError) {
-      console.error("Failed to save generation:", insertError);
-      // We still return the cover letter since it was generated, 
-      // but the failure to save is logged.
-    }
-
     return NextResponse.json({
       coverLetter,
       creditsRemaining: deductResult[0].new_credits,
@@ -174,6 +157,116 @@ export async function GET(req: NextRequest) {
     console.error("Fetch generations error:", error);
     return NextResponse.json(
       { error: "Failed to fetch saved items" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const supabase = createClient();
+    const token = await getToken({ req: req as any });
+    const email = (token as any)?.email as string | undefined;
+
+    let userId: string | undefined;
+    if (email) {
+      const { data: dbUser } = await (supabase
+        .from("users")
+        .select as any)("id")
+        .eq("email", email)
+        .single();
+      userId = dbUser?.id;
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { coverLetter, resume, jobDescription } = await req.json();
+
+    if (!coverLetter || !resume || !jobDescription) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Save to database
+    const { error: insertError } = await supabase
+      .from("generations")
+      .insert({
+        user_id: userId,
+        type: "cover_letter",
+        input: { resume, job_description: jobDescription } as any,
+        output: coverLetter,
+        credits_used: 0, // No credits used for saving (already deducted during generation)
+      } as any);
+
+    if (insertError) {
+      console.error("Failed to save cover letter:", insertError);
+      return NextResponse.json(
+        { error: "Failed to save cover letter" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Save cover letter error:", error);
+    return NextResponse.json(
+      { error: "Failed to save cover letter" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const supabase = createClient();
+    const token = await getToken({ req: req as any });
+    const email = (token as any)?.email as string | undefined;
+
+    let userId: string | undefined;
+    if (email) {
+      const { data: dbUser } = await (supabase
+        .from("users")
+        .select as any)("id")
+        .eq("email", email)
+        .single();
+      userId = dbUser?.id;
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
+
+    // Delete from database
+    const { error: deleteError } = await supabase
+      .from("generations")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userId); // Ensure user can only delete their own
+
+    if (deleteError) {
+      console.error("Failed to delete cover letter:", deleteError);
+      return NextResponse.json(
+        { error: "Failed to delete cover letter" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Delete cover letter error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete cover letter" },
       { status: 500 }
     );
   }

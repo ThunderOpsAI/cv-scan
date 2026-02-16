@@ -13,6 +13,8 @@ export default function GenerateCoverLetter() {
   const [loading, setLoading] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -51,9 +53,8 @@ export default function GenerateCoverLetter() {
       }
 
       setCoverLetter(data.coverLetter);
-
-      // Refresh history
-      fetchHistory();
+      setSaved(false); // Reset saved state for new generation
+      setSaveMessage("");
 
       // Update session to reflect new credit count
       router.refresh();
@@ -66,6 +67,31 @@ export default function GenerateCoverLetter() {
 
   const copyCoverLetter = () => {
     navigator.clipboard.writeText(coverLetter);
+  };
+
+  const saveCoverLetter = async () => {
+    try {
+      const res = await fetch("/api/generate/cover-letter", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverLetter, resume, jobDescription }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save cover letter");
+      }
+
+      setSaved(true);
+      setSaveMessage("Saved to your library!");
+      fetchHistory(); // Refresh history sidebar
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveMessage(""), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to save");
+    }
   };
 
   /* Fetch history */
@@ -186,12 +212,27 @@ export default function GenerateCoverLetter() {
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white">Result</h2>
-                    <button
-                      onClick={copyCoverLetter}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all"
-                    >
-                      Copy
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {saveMessage && (
+                        <span className="text-green-400 text-sm font-medium">{saveMessage}</span>
+                      )}
+                      <button
+                        onClick={copyCoverLetter}
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold transition-all border border-white/20"
+                      >
+                        Copy
+                      </button>
+                      <button
+                        onClick={saveCoverLetter}
+                        disabled={saved}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${saved
+                            ? "bg-green-600 text-white cursor-default"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
+                          }`}
+                      >
+                        {saved ? "✓ Saved" : "Save"}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="bg-white/5 border border-white/20 rounded-xl p-6">
