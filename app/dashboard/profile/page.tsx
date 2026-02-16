@@ -387,7 +387,9 @@ export default function ProfilePage() {
               <h3 className="text-lg font-bold text-white mb-2">Skills</h3>
               <p className="text-gray-400 text-sm">List your expertise</p>
             </Link>
+          </div>
 
+          <div className="grid md:grid-cols-2 gap-4 mt-4 max-w-2xl mx-auto">
             <Link
               href="/dashboard/profile/stories"
               className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
