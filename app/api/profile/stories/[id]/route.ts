@@ -20,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             .from('star_stories')
             .select('profile_id')
             .eq('id', id)
-            .single();
+            .single() as { data: { profile_id: string } | null };
 
         if (!story) {
             return NextResponse.json({ error: 'Story not found' }, { status: 404 });
@@ -31,7 +31,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             .select('id')
             .eq('user_id', session.user.id)
             .eq('id', story.profile_id)
-            .single();
+            .single() as { data: { id: string } | null };
 
         if (!profile) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -79,7 +79,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             .from('star_stories')
             .select('profile_id')
             .eq('id', id)
-            .single();
+            .single() as { data: { profile_id: string } | null };
 
         if (!story) {
             return NextResponse.json({ error: 'Story not found' }, { status: 404 });
@@ -90,7 +90,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             .select('id')
             .eq('user_id', session.user.id)
             .eq('id', story.profile_id)
-            .single();
+            .single() as { data: { id: string } | null };
 
         if (!profile) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

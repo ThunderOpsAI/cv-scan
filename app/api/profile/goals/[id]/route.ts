@@ -20,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             .from('smart_goals')
             .select('profile_id')
             .eq('id', id)
-            .single();
+            .single() as { data: { profile_id: string } | null };
 
         if (!goal) {
             return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
@@ -31,7 +31,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             .select('id')
             .eq('user_id', session.user.id)
             .eq('id', goal.profile_id)
-            .single();
+            .single() as { data: { id: string } | null };
 
         if (!profile) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -79,7 +79,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             .from('smart_goals')
             .select('profile_id')
             .eq('id', id)
-            .single();
+            .single() as { data: { profile_id: string } | null };
 
         if (!goal) {
             return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
@@ -90,7 +90,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             .select('id')
             .eq('user_id', session.user.id)
             .eq('id', goal.profile_id)
-            .single();
+            .single() as { data: { id: string } | null };
 
         if (!profile) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
