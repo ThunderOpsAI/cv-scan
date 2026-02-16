@@ -205,6 +205,34 @@ function DashboardContent() {
                 </p>
                 <div className="text-blue-400 text-sm">Free job discovery</div>
               </Link>
+
+              <Link
+                href="/dashboard/profile/stories"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🌟</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  STAR Stories
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Structure your interview answers with the STAR method
+                </p>
+                <div className="text-blue-400 text-sm">Profile context</div>
+              </Link>
+
+              <Link
+                href="/dashboard/profile/goals"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  SMART Goals
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Set and track specific career objectives
+                </p>
+                <div className="text-blue-400 text-sm">Career tracking</div>
+              </Link>
             </div>
           </div>
 
@@ -281,7 +309,7 @@ function DashboardContent() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

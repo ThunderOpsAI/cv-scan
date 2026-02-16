@@ -107,7 +107,7 @@ Write the cover letter body now:`;
     }
 
     // Save generation to database
-    await supabase
+    const { error: insertError } = await supabase
       .from("generations")
       .insert({
         user_id: userId,
@@ -116,6 +116,12 @@ Write the cover letter body now:`;
         output: coverLetter,
         credits_used: CREDIT_COST,
       } as any);
+
+    if (insertError) {
+      console.error("Failed to save generation:", insertError);
+      // We still return the cover letter since it was generated, 
+      // but the failure to save is logged.
+    }
 
     return NextResponse.json({
       coverLetter,

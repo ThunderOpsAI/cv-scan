@@ -52,6 +52,9 @@ export default function GenerateCoverLetter() {
 
       setCoverLetter(data.coverLetter);
 
+      // Refresh history
+      fetchHistory();
+
       // Update session to reflect new credit count
       router.refresh();
     } catch (err: any) {
@@ -68,17 +71,21 @@ export default function GenerateCoverLetter() {
   /* Fetch history */
   const [history, setHistory] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/generate/cover-letter")
-        .then(res => res.json())
-        .then(data => {
-          if (data.generations) {
-            setHistory(data.generations);
-          }
-        })
-        .catch(err => console.error("Failed to load history", err));
+  const fetchHistory = async () => {
+    if (status !== "authenticated") return;
+    try {
+      const res = await fetch("/api/generate/cover-letter");
+      const data = await res.json();
+      if (data.generations) {
+        setHistory(data.generations);
+      }
+    } catch (err) {
+      console.error("Failed to load history", err);
     }
+  };
+
+  useEffect(() => {
+    fetchHistory();
   }, [status]);
 
   if (status === "loading") {
