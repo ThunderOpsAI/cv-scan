@@ -16,6 +16,7 @@ export function CustomSupabaseAdapter(): Adapter {
 
     return {
         async createUser(user: any) {
+            console.log("[Adapter] createUser:", user.email);
             const { data, error } = await supabase
                 .from("users")
                 .insert({
@@ -27,11 +28,15 @@ export function CustomSupabaseAdapter(): Adapter {
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error("[Adapter] createUser error:", error);
+                throw error;
+            }
             return formatUser(data);
         },
 
         async getUser(id: string) {
+            // console.log("[Adapter] getUser:", id);
             const { data, error } = await supabase
                 .from("users")
                 .select()
@@ -44,6 +49,7 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async getUserByEmail(email: string) {
+            console.log("[Adapter] getUserByEmail:", email);
             const { data, error } = await supabase
                 .from("users")
                 .select()
@@ -51,19 +57,29 @@ export function CustomSupabaseAdapter(): Adapter {
                 .maybeSingle();
 
             if (error) throw error;
-            if (!data) return null;
+            if (!data) {
+                console.log("[Adapter] getUserByEmail: Not found");
+                return null;
+            }
             return formatUser(data);
         },
 
         async getUserByAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
+            console.log("[Adapter] getUserByAccount:", provider, providerAccountId);
             const { data: account, error: accErr } = await supabase
                 .from("accounts")
                 .select("userId")
                 .match({ provider, providerAccountId })
                 .maybeSingle();
 
-            if (accErr) throw accErr;
-            if (!account) return null;
+            if (accErr) {
+                console.error("[Adapter] getUserByAccount error:", accErr);
+                throw accErr;
+            }
+            if (!account) {
+                console.log("[Adapter] getUserByAccount: Account not found");
+                return null;
+            }
 
             const { data: user, error: userErr } = await supabase
                 .from("users")
@@ -77,6 +93,7 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async updateUser(user: any) {
+            console.log("[Adapter] updateUser:", user.id);
             const { data, error } = await supabase
                 .from("users")
                 .update({
@@ -89,7 +106,10 @@ export function CustomSupabaseAdapter(): Adapter {
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error("[Adapter] updateUser error:", error);
+                throw error;
+            }
             return formatUser(data);
         },
 
@@ -98,6 +118,7 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async linkAccount(account: any) {
+            console.log("[Adapter] linkAccount:", account.provider, account.userId);
             const { error } = await supabase.from("accounts").insert({
                 userId: account.userId,
                 type: account.type,
@@ -112,7 +133,10 @@ export function CustomSupabaseAdapter(): Adapter {
                 session_state: (account.session_state as string) ?? null,
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error("[Adapter] linkAccount error:", error);
+                throw error;
+            }
         },
 
         async unlinkAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
