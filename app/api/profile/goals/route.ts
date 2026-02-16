@@ -14,8 +14,8 @@ export async function GET() {
         const supabase = createClient();
 
         // Get profile first
-        const { data: profile } = await supabase
-            .from('profiles')
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -54,8 +54,8 @@ export async function POST(req: Request) {
         const supabase = createClient();
 
         // Verify profile ownership
-        const { data: profile } = await supabase
-            .from('profiles')
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -65,8 +65,8 @@ export async function POST(req: Request) {
         }
 
         // Get max sort_order
-        const { data: maxOrder } = await supabase
-            .from('smart_goals')
+        const { data: maxOrder } = await (supabase
+            .from('smart_goals') as any)
             .select('sort_order')
             .eq('profile_id', profile.id)
             .order('sort_order', { ascending: false })
@@ -75,8 +75,8 @@ export async function POST(req: Request) {
 
         const nextOrder = (maxOrder?.sort_order ?? -1) + 1;
 
-        const { data: goal, error } = await supabase
-            .from('smart_goals')
+        const { data: goal, error } = await (supabase
+            .from('smart_goals') as any)
             .insert({
                 profile_id: profile.id,
                 goal: body.goal,
