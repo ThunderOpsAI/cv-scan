@@ -16,7 +16,7 @@ export async function GET() {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -25,8 +25,8 @@ export async function GET() {
     }
 
     const { data: skills, error } = await (supabase
-      .from('skills')
-      .select as any)('*')
+      .from('skills') as any)
+      .select('*')
       .eq('profile_id', profile.id)
       .order('category', { ascending: true })
       .order('sort_order', { ascending: true });
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: maxSort } = await (supabase
-      .from('skills')
-      .select as any)('sort_order')
+      .from('skills') as any)
+      .select('sort_order')
       .eq('profile_id', profile.id)
       .eq('category', body.category)
       .order('sort_order', { ascending: false })
@@ -93,15 +93,15 @@ export async function POST(req: NextRequest) {
     const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
 
     const { data: skill, error } = await (supabase
-      .from('skills')
-      .insert as any)({
-      profile_id: profile.id,
-      category: body.category,
-      name: body.name,
-      proficiency: body.proficiency,
-      years_of_experience: body.years_of_experience,
-      sort_order: nextSortOrder,
-    })
+      .from('skills') as any)
+      .insert({
+        profile_id: profile.id,
+        category: body.category,
+        name: body.name,
+        proficiency: body.proficiency,
+        years_of_experience: body.years_of_experience,
+        sort_order: nextSortOrder,
+      })
       .select()
       .single();
 

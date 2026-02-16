@@ -16,7 +16,7 @@ export async function GET() {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -25,8 +25,8 @@ export async function GET() {
     }
 
     const { data: experiences, error } = await (supabase
-      .from('experiences')
-      .select as any)('*')
+      .from('experiences') as any)
+      .select('*')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: true });
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: maxSort } = await (supabase
-      .from('experiences')
-      .select as any)('sort_order')
+      .from('experiences') as any)
+      .select('sort_order')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: false })
       .limit(1)
@@ -91,18 +91,18 @@ export async function POST(req: NextRequest) {
     const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
 
     const { data: experience, error } = await (supabase
-      .from('experiences')
-      .insert as any)({
-      profile_id: profile.id,
-      company: body.company,
-      title: body.title,
-      location: body.location,
-      start_date: body.start_date,
-      end_date: body.end_date,
-      is_current: body.is_current,
-      description: body.description,
-      sort_order: nextSortOrder,
-    })
+      .from('experiences') as any)
+      .insert({
+        profile_id: profile.id,
+        company: body.company,
+        title: body.title,
+        location: body.location,
+        start_date: body.start_date,
+        end_date: body.end_date,
+        is_current: body.is_current,
+        description: body.description,
+        sort_order: nextSortOrder,
+      })
       .select()
       .single();
 

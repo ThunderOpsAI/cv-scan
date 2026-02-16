@@ -16,7 +16,7 @@ export async function GET() {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -25,8 +25,8 @@ export async function GET() {
     }
 
     const { data: education, error } = await (supabase
-      .from('education')
-      .select as any)('*')
+      .from('education') as any)
+      .select('*')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: true });
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const { data: profile } = await (supabase
       .from('profiles') as any)
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: maxSort } = await (supabase
-      .from('education')
-      .select as any)('sort_order')
+      .from('education') as any)
+      .select('sort_order')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: false })
       .limit(1)
@@ -91,20 +91,20 @@ export async function POST(req: NextRequest) {
     const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
 
     const { data: education, error } = await (supabase
-      .from('education')
-      .insert as any)({
-      profile_id: profile.id,
-      institution: body.institution,
-      degree: body.degree,
-      field_of_study: body.field_of_study,
-      location: body.location,
-      start_date: body.start_date,
-      end_date: body.end_date,
-      gpa: body.gpa,
-      honors: body.honors,
-      description: body.description,
-      sort_order: nextSortOrder,
-    })
+      .from('education') as any)
+      .insert({
+        profile_id: profile.id,
+        institution: body.institution,
+        degree: body.degree,
+        field_of_study: body.field_of_study,
+        location: body.location,
+        start_date: body.start_date,
+        end_date: body.end_date,
+        gpa: body.gpa,
+        honors: body.honors,
+        description: body.description,
+        sort_order: nextSortOrder,
+      })
       .select()
       .single();
 
