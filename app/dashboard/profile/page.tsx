@@ -161,6 +161,15 @@ export default function ProfilePage() {
           {/* Profile Form/View */}
           {editing ? (
             <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+              <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <p className="text-yellow-100 font-semibold">Unsaved Changes</p>
+                  <p className="text-yellow-200/80 text-sm">
+                    You must click "Save Profile" at the bottom to apply your changes. Leaving this page will discard them.
+                  </p>
+                </div>
+              </div>
               <div className="space-y-6">
                 <div>
                   <label className="block text-white mb-2">Full Name *</label>
