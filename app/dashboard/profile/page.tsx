@@ -387,6 +387,22 @@ export default function ProfilePage() {
               <h3 className="text-lg font-bold text-white mb-2">Skills</h3>
               <p className="text-gray-400 text-sm">List your expertise</p>
             </Link>
+
+            <Link
+              href="/dashboard/profile/stories"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+            >
+              <h3 className="text-lg font-bold text-white mb-2">STAR Stories</h3>
+              <p className="text-gray-400 text-sm">Build interview answers</p>
+            </Link>
+
+            <Link
+              href="/dashboard/profile/goals"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+            >
+              <h3 className="text-lg font-bold text-white mb-2">SMART Goals</h3>
+              <p className="text-gray-400 text-sm">Track career goals</p>
+            </Link>
           </div>
         </div>
       </div>
