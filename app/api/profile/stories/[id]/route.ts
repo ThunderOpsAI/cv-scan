@@ -38,9 +38,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
 
-        // @ts-ignore - Supabase type inference issue
-        const { data: updatedStory, error } = await supabase
-            .from('star_stories')
+        const { data: updatedStory, error } = await (supabase
+            .from('star_stories') as any)
             .update({
                 title: body.title,
                 situation: body.situation,

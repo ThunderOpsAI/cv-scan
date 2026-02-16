@@ -38,9 +38,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
 
-        // @ts-ignore - Supabase type inference issue
-        const { data: updatedGoal, error } = await supabase
-            .from('smart_goals')
+        const { data: updatedGoal, error } = await (supabase
+            .from('smart_goals') as any)
             .update({
                 goal: body.goal,
                 specific: body.specific,
