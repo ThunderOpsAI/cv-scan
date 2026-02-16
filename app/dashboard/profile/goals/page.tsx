@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild - 2026-02-17
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
