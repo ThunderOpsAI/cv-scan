@@ -16,86 +16,36 @@ export async function GET() {
         SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ SET" : "❌ MISSING",
     };
 
-    // 2. Check Supabase connection + public.users table
+    // 2. Check all public schema tables
     try {
         const supabase = createSupabaseClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
             { auth: { persistSession: false } }
-        );
+        ) as any;
 
-        const { data, error } = await supabase.from("users").select("id").limit(1);
-        results.publicUsers = error
-            ? `❌ Error: ${error.message}`
-            : `✅ OK (found ${data?.length ?? 0} rows)`;
+        // Check public.users
+        const { data: u, error: ue } = await supabase.from("users").select("id").limit(1);
+        results["public.users"] = ue ? `❌ ${ue.message}` : `✅ OK`;
 
-        // Check public.users columns
-        const { data: cols, error: colErr } = await supabase
-            .from("users")
-            .select("id, email, name, image, credits")
-            .limit(0);
-        results.publicUsersColumns = colErr
-            ? `❌ Column check failed: ${colErr.message}`
-            : "✅ All columns exist (id, email, name, image, credits)";
+        // Check public.accounts
+        const { data: a, error: ae } = await supabase.from("accounts").select("id").limit(1);
+        results["public.accounts"] = ae ? `❌ ${ae.message}` : `✅ OK`;
+
+        // Check public.sessions
+        const { data: s, error: se } = await supabase.from("sessions").select("id").limit(1);
+        results["public.sessions"] = se ? `❌ ${se.message}` : `✅ OK`;
+
+        // Check public.verification_tokens
+        const { data: v, error: ve } = await supabase.from("verification_tokens").select("identifier").limit(1);
+        results["public.verification_tokens"] = ve ? `❌ ${ve.message}` : `✅ OK`;
+
+        // Check emailVerified column on users
+        const { error: evErr } = await supabase.from("users").select("emailVerified").limit(0);
+        results["users.emailVerified_column"] = evErr ? `❌ ${evErr.message}` : `✅ OK`;
     } catch (e: any) {
-        results.publicUsers = `❌ Exception: ${e.message}`;
+        results.dbError = `❌ ${e.message}`;
     }
-
-    // 3. Check next_auth schema tables
-    try {
-        const supabaseNextAuth = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                db: { schema: "next_auth" },
-                auth: { persistSession: false },
-            }
-        );
-
-        // Check next_auth.users
-        const { data: naUsers, error: naUsersErr } = await supabaseNextAuth
-            .from("users")
-            .select("id")
-            .limit(1);
-        results.nextAuthUsers = naUsersErr
-            ? `❌ Error: ${naUsersErr.message}`
-            : `✅ OK (found ${naUsers?.length ?? 0} rows)`;
-
-        // Check next_auth.accounts
-        const { data: naAccounts, error: naAccountsErr } = await supabaseNextAuth
-            .from("accounts")
-            .select("id")
-            .limit(1);
-        results.nextAuthAccounts = naAccountsErr
-            ? `❌ Error: ${naAccountsErr.message}`
-            : `✅ OK (found ${naAccounts?.length ?? 0} rows)`;
-
-        // Check next_auth.sessions
-        const { data: naSessions, error: naSessionsErr } = await supabaseNextAuth
-            .from("sessions")
-            .select("id")
-            .limit(1);
-        results.nextAuthSessions = naSessionsErr
-            ? `❌ Error: ${naSessionsErr.message}`
-            : `✅ OK (found ${naSessions?.length ?? 0} rows)`;
-
-        // Check next_auth.verification_tokens
-        const { data: naTokens, error: naTokensErr } = await supabaseNextAuth
-            .from("verification_tokens")
-            .select("id")
-            .limit(1);
-        results.nextAuthVerificationTokens = naTokensErr
-            ? `❌ Error: ${naTokensErr.message}`
-            : `✅ OK (found ${naTokens?.length ?? 0} rows)`;
-    } catch (e: any) {
-        results.nextAuthSchema = `❌ Exception: ${e.message}`;
-    }
-
-    // 4. Check NextAuth route handler exists
-    results.info = {
-        nodeVersion: process.version,
-        timestamp: new Date().toISOString(),
-    };
 
     return NextResponse.json(results, { status: 200 });
 }

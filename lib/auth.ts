@@ -2,28 +2,20 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/types";
-import { sendWelcomeEmail } from "@/lib/email/resend";
-
-import { SupabaseAdapter } from "@auth/supabase-adapter";
+import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
 
 export const authOptions: NextAuthOptions = {
-  // Add the Supabase Adapter. This handles user/session/account/verification storage.
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  }),
+  // Custom adapter using public schema (no next_auth schema needed)
+  adapter: CustomSupabaseAdapter() as any,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true, // Allow linking Google to existing email accounts
+      allowDangerousEmailAccountLinking: true,
     }),
     EmailProvider({
-      // We rely on the adapter for token storage.
-      // Custom verification request via Resend API
-      server: null, // Disable SMTP
-      from: process.env.EMAIL_FROM,
+      server: {}, // Not used — sendVerificationRequest overrides
+      from: process.env.EMAIL_FROM || "noreply@example.com",
       sendVerificationRequest: async ({ identifier, url, provider }) => {
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY!);
@@ -32,13 +24,14 @@ export const authOptions: NextAuthOptions = {
 
         try {
           await resend.emails.send({
-            from: "CVScan <auth@cv-scan.com>",
+            from: process.env.EMAIL_FROM || "CVScan <onboarding@resend.dev>",
             to: identifier,
             subject: `Sign in to ${host}`,
             text: text({ url, host }),
             html: html({ url, host }),
           });
         } catch (error) {
+          console.error("Failed to send verification email:", error);
           throw new Error("Failed to send verification email");
         }
       },
@@ -49,53 +42,19 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
-    verifyRequest: "/auth/verify-request", // Optional: Add a custom verification page later
   },
 
   session: {
-    strategy: "jwt", // Use JWT session strategy (common with NextAuth)
+    strategy: "jwt",
   },
 
   callbacks: {
-    // Adapter handles user creation in next_auth.users.
-    // We sync to public.users (where credits live) on sign-in.
-    async signIn({ user, account, profile }) {
-      if (!user.email) return false;
-
-      try {
-        const supabase = createClient();
-
-        // Check if user exists in public.users
-        const { data: existingUser } = await supabase
-          .from("users")
-          .select("id")
-          .eq("email", user.email)
-          .single();
-
-        if (!existingUser) {
-          // Create user in public.users with 3 free credits
-          await (supabase.from("users").insert as any)({
-            email: user.email,
-            name: user.name || null,
-            image: user.image || null,
-          });
-        } else {
-          // Update existing user info
-          await (supabase.from("users").update as any)({
-            name: user.name || undefined,
-            image: user.image || undefined,
-            updated_at: new Date().toISOString(),
-          }).eq("email", user.email);
-        }
-      } catch (error) {
-        console.error("Error syncing user to public.users:", error);
-        // Don't block sign-in if sync fails
-      }
-
-      return true;
+    // The adapter creates users in public.users.
+    // No manual sync needed anymore.
+    async signIn({ user }) {
+      return !!user.email;
     },
 
-    // Enrich the JWT with user email so session callback can use it
     async jwt({ token, user }) {
       if (user) {
         token.email = user.email;
@@ -103,11 +62,9 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    // Enrich the session with credits from public.users
     async session({ session, token }) {
       if (session.user && token.email) {
         session.user.id = token.sub || "";
-        // Fetch credits from public.users by email
         const supabase = createClient();
         const { data: dbUser } = await supabase
           .from("users")
