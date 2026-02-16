@@ -47,7 +47,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 relevant: body.relevant,
                 time_bound: body.time_bound,
                 status: body.status,
-            })
+            } as any)
             .eq('id', id)
             .select()
             .single();
