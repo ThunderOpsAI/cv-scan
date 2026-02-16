@@ -37,6 +37,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
+
+        // @ts-ignore - Supabase type inference issue
         const { data: updatedGoal, error } = await supabase
             .from('smart_goals')
             .update({
@@ -47,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 relevant: body.relevant,
                 time_bound: body.time_bound,
                 status: body.status,
-            } as any)
+            })
             .eq('id', id)
             .select()
             .single();

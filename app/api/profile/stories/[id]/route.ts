@@ -37,6 +37,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
+
+        // @ts-ignore - Supabase type inference issue
         const { data: updatedStory, error } = await supabase
             .from('star_stories')
             .update({
@@ -46,7 +48,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 action: body.action,
                 result: body.result,
                 tags: body.tags,
-            } as any)
+            })
             .eq('id', id)
             .select()
             .single();
