@@ -11,19 +11,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const CREDIT_PACKAGES = {
   starter: {
     credits: 20,
-    price: 900, // $9.00 AUD
+    price: 299, // $2.99 AUD
     name: "Starter Pack",
     description: "20 credits for resume bullets and cover letters",
   },
   popular: {
     credits: 50,
-    price: 1900, // $19.00 AUD (15% discount)
+    price: 499, // $4.99 AUD
     name: "Popular Pack",
     description: "50 credits - Best value!",
   },
   pro: {
     credits: 100,
-    price: 2900, // $29.00 AUD (35% discount)
+    price: 799, // $7.99 AUD
     name: "Pro Pack",
     description: "100 credits for power users",
   },

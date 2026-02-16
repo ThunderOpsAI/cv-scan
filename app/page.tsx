@@ -140,9 +140,9 @@ export default async function Home() {
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { name: "Starter Pack", credits: 20, price: "$4.99", desc: "Perfect for trying out" },
-            { name: "Popular Pack", credits: 50, price: "$9.99", desc: "Best value - 20% off", popular: true },
-            { name: "Pro Pack", credits: 100, price: "$17.99", desc: "Power users - 28% off" },
+            { name: "Starter Pack", credits: 20, price: "$2.99", desc: "Perfect for trying out" },
+            { name: "Popular Pack", credits: 50, price: "$4.99", desc: "Best value", popular: true },
+            { name: "Pro Pack", credits: 100, price: "$7.99", desc: "Most credits" },
           ].map((plan) => (
             <Link
               href="/buy-credits"
