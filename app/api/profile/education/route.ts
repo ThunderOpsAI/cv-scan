@@ -15,7 +15,7 @@ export async function GET() {
     const supabase = createClient();
 
     const { data: profile } = await (supabase
-      .from('profiles')
+      .from('profiles') as any)
       .select as any)('id')
       .eq('user_id', session.user.id)
       .single();
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     const { data: profile } = await (supabase
-      .from('profiles')
+      .from('profiles') as any)
       .select as any)('id')
       .eq('user_id', session.user.id)
       .single();

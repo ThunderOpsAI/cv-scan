@@ -14,8 +14,8 @@ export async function GET() {
         const supabase = createClient();
 
         // Get profile first
-        const { data: profile } = await supabase
-            .from('profiles')
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -24,8 +24,8 @@ export async function GET() {
             return NextResponse.json({ stories: [] });
         }
 
-        const { data: stories, error } = await supabase
-            .from('star_stories')
+        const { data: stories, error } = await (supabase
+            .from('star_stories') as any)
             .select('*')
             .eq('profile_id', profile.id)
             .order('created_at', { ascending: false });
@@ -53,8 +53,8 @@ export async function POST(req: Request) {
         const supabase = createClient();
 
         // Verify profile ownership
-        const { data: profile } = await supabase
-            .from('profiles')
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -63,8 +63,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        const { data: story, error } = await supabase
-            .from('star_stories')
+        const { data: story, error } = await (supabase
+            .from('star_stories') as any)
             .insert({
                 profile_id: profile.id,
                 title: body.title,
