@@ -14,7 +14,7 @@ export default async function Home() {
         </div>
         <div className="flex gap-4 items-center">
           <Link
-            href="/pricing"
+            href="/buy-credits"
             className="text-gray-300 hover:text-white transition-colors"
           >
             Pricing
@@ -40,18 +40,17 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="inline-block mb-4 px-4 py-1 bg-blue-500/20 rounded-full text-blue-300 text-sm">
-          Powered by AI
+          AI Career & Application Platform
         </div>
         <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-          Turn Job Duties Into
+          Supercharge Your Job Search
           <br />
           <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            Powerful Resume Bullets
+            Resume, Cover Letter, Tracking & More
           </span>
         </h1>
         <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-          Stop struggling with resume writing. Our AI transforms your job responsibilities
-          into ATS-optimized, achievement-focused bullet points in seconds.
+          CVScan is your all-in-one AI platform for job search, resume optimization, cover letter generation, application tracking, interview prep, and more.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
@@ -68,7 +67,7 @@ export default async function Home() {
           </Link>
         </div>
         <p className="mt-4 text-gray-400 text-sm">
-          No credit card required. Start improving your resume today.
+          No credit card required. Start improving your career today.
         </p>
       </section>
 
@@ -104,27 +103,27 @@ export default async function Home() {
             <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
               1
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Paste Your Duties</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">Discover & Track</h3>
             <p className="text-gray-400">
-              Enter your job title and paste your current responsibilities or job description.
+              Find relevant jobs, track your applications, and organize your entire job search in one place.
             </p>
           </div>
           <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
             <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
               2
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">AI Transforms</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">Score & Tailor</h3>
             <p className="text-gray-400">
-              Our AI rewrites them with strong action verbs, quantified achievements, and ATS keywords.
+              Get AI-powered scoring and ATS optimization for your resume, cover letters, and job applications.
             </p>
           </div>
           <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
             <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
               3
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Copy & Use</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">Apply & Land Offers</h3>
             <p className="text-gray-400">
-              Copy your polished bullet points directly into your resume. Land more interviews.
+              Submit tailored applications with confidence and track your progress toward landing your dream job.
             </p>
           </div>
         </div>

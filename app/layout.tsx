@@ -6,9 +6,9 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CVScan – AI Resume & Job Application Assistant",
+  title: "CVScan – AI Job Search Assistant",
   description:
-    "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI. Track applications and optimize your job search.",
+    "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
   keywords: [
     "resume",
     "bullet points",
@@ -16,11 +16,13 @@ export const metadata: Metadata = {
     "AI",
     "job search",
     "ATS",
+    "job applications",
+    "career assistant",
   ],
   openGraph: {
-    title: "CVScan – AI Resume & Job Application Assistant",
+    title: "CVScan – AI Job Search Assistant",
     description:
-      "Transform your job responsibilities into powerful, ATS-optimized resume bullet points using AI. Track applications and optimize your job search.",
+      "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
     type: "website",
   },
 };
