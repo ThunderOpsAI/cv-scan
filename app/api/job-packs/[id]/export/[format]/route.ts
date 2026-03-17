@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { Document, Paragraph, TextRun, Packer } from 'docx';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function GET(
   req: NextRequest,
@@ -14,18 +16,16 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id, format } = await params;
+    const { id, format: rawFormat } = await params;
+    const format = rawFormat.toLowerCase();
 
     if (format !== 'pdf' && format !== 'docx') {
-      return NextResponse.json(
-        { error: 'Invalid format. Use pdf or docx' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
     }
 
     const supabase = createClient();
 
-    // Get job pack
+    // Fetch Job Pack
     const { data: jobPack, error } = await (supabase
       .from('job_packs')
       .select as any)('*')
@@ -34,175 +34,129 @@ export async function GET(
       .single();
 
     if (error || !jobPack) {
-      return NextResponse.json(
-        { error: 'Job pack not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Job pack not found' }, { status: 404 });
     }
 
-    // Build content
-    const resumeContent = jobPack.resume_version || 'No tailored resume available';
-    const coverLetterContent = jobPack.cover_letter || 'No cover letter available';
+    const { company, job_title, resume_version, cover_letter } = jobPack;
+    const documentName = `${company}_${job_title}_Application`.replace(/\s+/g, '_');
 
-    if (format === 'pdf') {
-      // Generate PDF using simple text-based approach
-      const pdfContent = await generatePDF(jobPack, resumeContent, coverLetterContent);
-
-      return new NextResponse(new Uint8Array(pdfContent), {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="${jobPack.company}-${jobPack.job_title}-pack.pdf"`,
-        },
+    // Generate DOCX
+    if (format === 'docx') {
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Application for ${job_title} at ${company}`,
+                    bold: true,
+                    size: 32,
+                  }),
+                ],
+                spacing: { after: 400 },
+              }),
+              new Paragraph({
+                children: [new TextRun({ text: "COVER LETTER", bold: true, size: 28 })],
+                spacing: { before: 200, after: 200 },
+              }),
+              ...(cover_letter || "No cover letter.").split('\n').map(
+                (line: string) => new Paragraph({ text: line, spacing: { after: 120 } })
+              ),
+              new Paragraph({
+                children: [new TextRun({ text: "RESUME", bold: true, size: 28 })],
+                spacing: { before: 400, after: 200 },
+                pageBreakBefore: true,
+              }),
+              ...(resume_version || "No resume tailored.").split('\n').map(
+                (line: string) => new Paragraph({ text: line, spacing: { after: 120 } })
+              ),
+            ],
+          },
+        ],
       });
-    } else {
-      // Generate DOCX
-      const docxContent = await generateDOCX(jobPack, resumeContent, coverLetterContent);
 
-      return new NextResponse(new Uint8Array(docxContent), {
+      const buffer = await Packer.toBuffer(doc);
+      return new Response(buffer as any, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'Content-Disposition': `attachment; filename="${jobPack.company}-${jobPack.job_title}-pack.docx"`,
+          'Content-Disposition': `attachment; filename="${documentName}.docx"`,
         },
       });
     }
+
+    // Generate PDF
+    if (format === 'pdf') {
+      const pdfDoc = await PDFDocument.create();
+      const timesRomanFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      let page = pdfDoc.addPage();
+      const { width, height } = page.getSize();
+      let y = height - 50;
+
+      const drawText = (text: string, font: any, size: number, options: any = {}) => {
+        if (y < 50) {
+          page = pdfDoc.addPage();
+          y = height - 50;
+        }
+        page.drawText(text, { x: 50, y, size, font, color: rgb(0, 0, 0), ...options });
+        y -= (size + 5);
+      };
+
+      const drawLines = (textContext: string) => {
+        const lines = textContext.split('\n');
+        for (const line of lines) {
+           // Basic wrap if too long
+           if (line.length > 80) {
+              let currentLine = '';
+              const words = line.split(' ');
+              for (const word of words) {
+                 if ((currentLine + word).length > 80) {
+                    drawText(currentLine, timesRomanFont, 10);
+                    currentLine = word + ' ';
+                 } else {
+                    currentLine += word + ' ';
+                 }
+              }
+              if (currentLine) drawText(currentLine, timesRomanFont, 10);
+           } else {
+             drawText(line, timesRomanFont, 10);
+           }
+        }
+      }
+
+      drawText(`Application for ${job_title} at ${company}`, timesRomanBoldFont, 18);
+      y -= 20;
+
+      drawText("COVER LETTER", timesRomanBoldFont, 14);
+      y -= 10;
+      drawLines(cover_letter || "No cover letter.");
+
+      page = pdfDoc.addPage();
+      y = height - 50;
+      
+      drawText("RESUME", timesRomanBoldFont, 14);
+      y -= 10;
+      drawLines(resume_version || "No resume tailored.");
+
+      const pdfBytes = await pdfDoc.save();
+
+      return new Response(pdfBytes as any, {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${documentName}.pdf"`,
+        },
+      });
+    }
+
+    return NextResponse.json({ error: 'Unsupported format' }, { status: 400 });
   } catch (error: any) {
     console.error('Export error:', error);
     return NextResponse.json(
-      { error: 'Failed to export job pack' },
+      { error: error.message || 'Failed to export document' },
       { status: 500 }
     );
   }
-}
-
-async function generatePDF(
-  jobPack: any,
-  resumeContent: string,
-  coverLetterContent: string
-): Promise<Buffer> {
-  // Simple PDF generation without external dependencies
-  // This creates a basic PDF structure
-  const content = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 5 0 R /Resources << /Font << /F1 6 0 R >> >> >>
-endobj
-4 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 6 0 R >> >> >>
-endobj
-6 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-5 0 obj
-<< /Length ${getStreamLength(resumeContent, jobPack)} >>
-stream
-BT
-/F1 16 Tf
-50 750 Td
-(TAILORED RESUME) Tj
-/F1 10 Tf
-0 -30 Td
-(${jobPack.job_title} at ${jobPack.company}) Tj
-0 -20 Td
-(ATS Score: ${jobPack.ats_score || 'N/A'}%) Tj
-0 -30 Td
-${formatTextForPDF(resumeContent)}
-ET
-endstream
-endobj
-7 0 obj
-<< /Length ${getStreamLength(coverLetterContent, jobPack)} >>
-stream
-BT
-/F1 16 Tf
-50 750 Td
-(COVER LETTER) Tj
-/F1 10 Tf
-0 -30 Td
-(${jobPack.job_title} at ${jobPack.company}) Tj
-0 -30 Td
-${formatTextForPDF(coverLetterContent)}
-ET
-endstream
-endobj
-xref
-0 8
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000264 00000 n 
-0000000413 00000 n 
-0000000363 00000 n 
-0000000500 00000 n 
-trailer
-<< /Size 8 /Root 1 0 R >>
-startxref
-600
-%%EOF`;
-
-  return Buffer.from(content, 'utf-8');
-}
-
-function getStreamLength(content: string, jobPack: any): number {
-  return 200 + content.length;
-}
-
-function formatTextForPDF(text: string): string {
-  // Escape special PDF characters and format for display
-  const lines = text.split('\n').slice(0, 50); // Limit lines
-  return lines
-    .map((line, i) => {
-      const escaped = line
-        .replace(/\\/g, '\\\\')
-        .replace(/\(/g, '\\(')
-        .replace(/\)/g, '\\)')
-        .substring(0, 80); // Limit line length
-      return `(${escaped}) Tj\n0 -12 Td`;
-    })
-    .join('\n');
-}
-
-async function generateDOCX(
-  jobPack: any,
-  resumeContent: string,
-  coverLetterContent: string
-): Promise<Buffer> {
-  // Simple DOCX generation - returns a basic Open XML structure
-  // For production, use the 'docx' library
-
-  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:body>
-    <w:p><w:r><w:t>TAILORED RESUME</w:t></w:r></w:p>
-    <w:p><w:r><w:t>${jobPack.job_title} at ${jobPack.company}</w:t></w:r></w:p>
-    <w:p><w:r><w:t>ATS Score: ${jobPack.ats_score || 'N/A'}%</w:t></w:r></w:p>
-    <w:p><w:r><w:t></w:t></w:r></w:p>
-    ${resumeContent.split('\n').map(line => `<w:p><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`).join('\n')}
-    <w:p><w:r><w:t></w:t></w:r></w:p>
-    <w:p><w:r><w:t>---</w:t></w:r></w:p>
-    <w:p><w:r><w:t></w:t></w:r></w:p>
-    <w:p><w:r><w:t>COVER LETTER</w:t></w:r></w:p>
-    <w:p><w:r><w:t></w:t></w:r></w:p>
-    ${coverLetterContent.split('\n').map(line => `<w:p><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`).join('\n')}
-  </w:body>
-</w:document>`;
-
-  // Return as simple text for now - in production, create proper DOCX zip structure
-  const textContent = `TAILORED RESUME\n${jobPack.job_title} at ${jobPack.company}\nATS Score: ${jobPack.ats_score || 'N/A'}%\n\n${resumeContent}\n\n---\n\nCOVER LETTER\n\n${coverLetterContent}`;
-
-  return Buffer.from(textContent, 'utf-8');
-}
-
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
 }

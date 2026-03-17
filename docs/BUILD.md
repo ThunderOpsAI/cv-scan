@@ -4,7 +4,7 @@
 
 **Auth** ✅ NextAuth + Google OAuth → `lib/auth/`, `app/(auth)/`
 **DB** ✅ Supabase + RLS → `lib/supabase/`
-**Payments** ✅ Stripe ($4.99→15cr, $9.99→25cr, $17.99→50cr) → `app/api/stripe/`, `lib/stripe/`
+**Payments** ✅ Stripe ($2.99→20cr, $4.99→50cr, $7.99→100cr) → `app/api/stripe/`, `lib/stripe/`
 **AI** ✅ Gemini (bullets 1cr, cover letter 2cr) → `lib/ai/`, `app/api/generate/`
 **Email** ✅ Resend (welcome, receipt, low credit) → `lib/email/`
 **Landing** ✅ Dark blue gradient, pricing, before/after → `app/page.tsx`

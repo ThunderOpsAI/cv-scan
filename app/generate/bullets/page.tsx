@@ -146,6 +146,12 @@ export default function GenerateBullets() {
           {bullets.length > 0 && (
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
               <h2 className="text-2xl font-bold text-white mb-4">Your Resume Bullets</h2>
+              <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
+                <span className="text-blue-400 text-xl">🤖</span>
+                <p className="text-blue-200 text-sm leading-relaxed">
+                  <strong>AI-Generated Drafts:</strong> Please review and edit these bullet points to ensure they perfectly match your actual experience before using them in applications.
+                </p>
+              </div>
               <p className="text-gray-400 mb-6">
                 Click any bullet point to copy it to your clipboard
               </p>

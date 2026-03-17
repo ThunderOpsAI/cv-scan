@@ -184,10 +184,24 @@ function DashboardContent() {
               >
                 <div className="text-3xl mb-3">🤖</div>
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Job Search Copilot
+                  Career Copilot
                 </h3>
                 <p className="text-gray-400 mb-3">
-                  Chat with your personal job search assistant for advice and guidance
+                  Chat with your personal assistant for general career advice
+                </p>
+                <div className="text-blue-400 text-sm">1 credit per message</div>
+              </Link>
+
+              <Link
+                href="/dashboard/interview"
+                className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🎙️</div>
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  Mock Interview
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Practice answering questions with an AI hiring manager
                 </p>
                 <div className="text-blue-400 text-sm">1 credit per message</div>
               </Link>

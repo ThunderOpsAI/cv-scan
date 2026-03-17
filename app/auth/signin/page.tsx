@@ -7,9 +7,16 @@ import { useState } from "react";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consent) {
+      setError("Please agree to the Terms and Privacy Policy to continue.");
+      return;
+    }
+    setError("");
     setLoading(true);
 
     try {
@@ -50,9 +57,32 @@ export default function SignIn() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
               />
             </div>
+            
+            <div className="mb-6 flex items-start gap-3">
+              <div className="flex items-center h-5">
+                <input
+                  id="consent"
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => {
+                    setConsent(e.target.checked);
+                    if (e.target.checked) setError("");
+                  }}
+                  className="w-4 h-4 rounded border-gray-600 bg-white/5 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
+                />
+              </div>
+              <label htmlFor="consent" className="text-xs text-gray-400">
+                I agree to the <Link href="/trust" className="text-blue-400 hover:underline">Terms & Trust Policy</Link> and consent to the processing of my candidate data.
+              </label>
+            </div>
+
+            {error && (
+              <div className="mb-4 text-red-400 text-sm">{error}</div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -74,7 +104,13 @@ export default function SignIn() {
           </div>
 
           <button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => {
+              if (!consent) {
+                setError("Please agree to the Terms and Privacy Policy to continue.");
+                return;
+              }
+              signIn("google", { callbackUrl: "/dashboard" });
+            }}
             className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

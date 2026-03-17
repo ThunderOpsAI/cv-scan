@@ -210,6 +210,12 @@ export default function GenerateCoverLetter() {
               {/* Results */}
               {coverLetter && (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
+                  <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
+                    <span className="text-blue-400 text-xl">🤖</span>
+                    <p className="text-blue-200 text-sm leading-relaxed">
+                      <strong>AI-Generated Draft:</strong> Please review and edit this cover letter to ensure it perfectly matches your actual experience before using it in applications.
+                    </p>
+                  </div>
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white">Result</h2>
                     <div className="flex items-center gap-3">
