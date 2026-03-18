@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ATSScan, ATSScanResponse } from "@/types/job-packs";
+import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
 
 export default function ScannerPage() {
   const { data: session, status } = useSession();
@@ -78,11 +79,7 @@ export default function ScannerPage() {
   };
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <ScannerPageSkeleton />;
   }
 
   if (!session) return null;

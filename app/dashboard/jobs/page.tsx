@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DiscoveredJob, SavedSearch } from "@/types/intelligence";
+import { JobsPageSkeleton } from "@/components/ui/dashboard-skeletons";
 
 export default function JobsPage() {
   const { data: session, status } = useSession();
@@ -108,11 +109,7 @@ export default function JobsPage() {
   };
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <JobsPageSkeleton />;
   }
 
   return (
@@ -209,8 +206,29 @@ export default function JobsPage() {
 
               {/* Jobs List */}
               {loading ? (
-                <div className="text-center text-white py-12">
-                  Discovering jobs and calculating match scores...
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="animate-pulse rounded-2xl border border-white/20 bg-white/10 p-6"
+                    >
+                      <div className="mb-4 flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="h-7 w-3/5 rounded-lg bg-white/10" />
+                          <div className="h-5 w-2/5 rounded-lg bg-white/10" />
+                          <div className="h-4 w-1/3 rounded-lg bg-white/10" />
+                        </div>
+                        <div className="h-14 w-16 rounded-2xl bg-white/10" />
+                      </div>
+                      <div className="mb-3 h-4 w-1/4 rounded-lg bg-white/10" />
+                      <div className="mb-2 h-4 w-full rounded-lg bg-white/10" />
+                      <div className="mb-2 h-4 w-11/12 rounded-lg bg-white/10" />
+                      <div className="mb-4 h-4 w-2/3 rounded-lg bg-white/10" />
+                      <div className="text-sm text-blue-300">
+                        Discovering jobs and calculating match scores...
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : jobs.length === 0 ? (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">

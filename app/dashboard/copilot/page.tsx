@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Conversation, Message } from "@/types/intelligence";
+import { CopilotPageSkeleton } from "@/components/ui/dashboard-skeletons";
 
 export default function CopilotPage() {
   const { data: session, status } = useSession();
@@ -106,11 +107,7 @@ export default function CopilotPage() {
   };
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <CopilotPageSkeleton />;
   }
 
   return (
@@ -187,7 +184,11 @@ export default function CopilotPage() {
 
                 {loading && (
                   <div className="flex justify-center">
-                    <div className="text-white">Loading conversation...</div>
+                    <div className="w-full max-w-2xl animate-pulse space-y-3">
+                      <div className="h-20 w-3/4 rounded-2xl bg-white/10" />
+                      <div className="ml-auto h-16 w-1/2 rounded-2xl bg-white/10" />
+                      <div className="h-24 w-2/3 rounded-2xl bg-white/10" />
+                    </div>
                   </div>
                 )}
 
