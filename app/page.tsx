@@ -8,11 +8,11 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+      <nav className="container mx-auto px-4 py-4 sm:py-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <div className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="w-full sm:w-auto flex gap-4 items-center justify-between sm:justify-start">
           <Link
             href="/buy-credits"
             className="text-gray-300 hover:text-white transition-colors"
@@ -38,18 +38,18 @@ export default async function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
+      <section className="container mx-auto px-4 py-16 sm:py-20 text-center">
         <div className="inline-block mb-4 px-4 py-1 bg-blue-500/20 rounded-full text-blue-300 text-sm">
           AI Career & Application Platform
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
           Supercharge Your Job Search
           <br />
           <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             Resume, Cover Letter, Tracking & More
           </span>
         </h1>
-        <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+        <p className="text-base sm:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
           CVScan is your all-in-one AI platform for job search, resume optimization, cover letter generation, application tracking, interview prep, and more.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -72,7 +72,7 @@ export default async function Home() {
       </section>
 
       {/* Before/After Example */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-12 sm:py-16">
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
             <div className="text-red-400 font-semibold mb-3 flex items-center gap-2">
@@ -94,7 +94,7 @@ export default async function Home() {
       </section>
 
       {/* Features */}
-      <section id="how-it-works" className="container mx-auto px-4 py-20">
+      <section id="how-it-works" className="container mx-auto px-4 py-16 sm:py-20">
         <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
           How It Works
         </h2>
@@ -130,7 +130,7 @@ export default async function Home() {
       </section>
 
       {/* Pricing Preview */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-16 sm:py-20">
         <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
           Simple, Affordable Pricing
         </h2>
@@ -172,8 +172,8 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-12 text-center">
+      <section className="container mx-auto px-4 py-16 sm:py-20">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-6 sm:p-12 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Upgrade Your Resume?
           </h2>

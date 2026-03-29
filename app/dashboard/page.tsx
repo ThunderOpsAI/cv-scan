@@ -42,7 +42,7 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {message && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 ${message.type === "success"
+        <div className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 ${message.type === "success"
           ? "bg-green-500/20 border-green-500/50 text-green-100"
           : "bg-red-500/20 border-red-500/50 text-red-100"
           }`}>
@@ -54,11 +54,11 @@ function DashboardContent() {
         </div>
       )}
       {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+      <nav className="container mx-auto px-4 py-4 sm:py-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <Link href="/" className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="w-full sm:w-auto flex items-center justify-between gap-4">
           <div className="text-white">
             <span className="text-gray-400">Credits:</span>{" "}
             <span className="font-bold text-blue-400">{session.user.credits}</span>
@@ -73,12 +73,12 @@ function DashboardContent() {
       </nav>
 
       {/* Dashboard Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header with Welcome and Account Info */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 Welcome back, {session.user.name}!
               </h1>
               <p className="text-gray-400">
@@ -87,12 +87,12 @@ function DashboardContent() {
             </div>
 
             {/* Account Information - Compact Box */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 min-w-[280px]">
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 w-full md:min-w-[280px]">
               <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Account Info</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 text-sm">Email:</span>
-                  <span className="text-white text-sm">{session.user.email}</span>
+                  <span className="text-white text-sm max-w-[65%] truncate text-right">{session.user.email}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 text-sm">Credits:</span>
@@ -107,18 +107,18 @@ function DashboardContent() {
             <h2 className="text-2xl font-bold text-white mb-4">Your Profile</h2>
             <Link
               href="/dashboard/profile"
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 border border-blue-500/50 hover:border-blue-400 transition-all block group"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-5 sm:p-6 border border-blue-500/50 hover:border-blue-400 transition-all block group"
             >
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-start sm:items-center gap-3">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
                     Build Your Professional Profile
                   </h3>
                   <p className="text-blue-100 mb-3">
                     Create your profile with experiences, education, and skills for better job matching
                   </p>
                 </div>
-                <div className="text-4xl">👤</div>
+                <div className="text-3xl sm:text-4xl shrink-0">👤</div>
               </div>
             </Link>
           </div>
@@ -126,14 +126,14 @@ function DashboardContent() {
           {/* Job Applications */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Job Applications</h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
               <Link
                 href="/dashboard/scanner"
-                className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"
+                className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"
                 data-testid="ats-scanner-link"
               >
                 <div className="text-3xl mb-3">📊</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">
                   ATS Scanner
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -144,11 +144,11 @@ function DashboardContent() {
 
               <Link
                 href="/dashboard/job-packs"
-                className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30 hover:border-purple-400/50 transition-all group"
+                className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-purple-500/30 hover:border-purple-400/50 transition-all group"
                 data-testid="job-packs-link"
               >
                 <div className="text-3xl mb-3">📦</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
                   Job Packs
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -159,11 +159,11 @@ function DashboardContent() {
 
               <Link
                 href="/dashboard/applications"
-                className="bg-gradient-to-r from-orange-600/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-6 border border-orange-500/30 hover:border-orange-400/50 transition-all group"
+                className="bg-gradient-to-r from-orange-600/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-orange-500/30 hover:border-orange-400/50 transition-all group"
                 data-testid="application-tracker-link"
               >
                 <div className="text-3xl mb-3">📋</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
                   Application Tracker
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -177,13 +177,13 @@ function DashboardContent() {
           {/* Intelligence Features */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Intelligence</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
               <Link
                 href="/dashboard/copilot"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
               >
                 <div className="text-3xl mb-3">🤖</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   Career Copilot
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -194,10 +194,10 @@ function DashboardContent() {
 
               <Link
                 href="/dashboard/interview"
-                className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group"
+                className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group"
               >
                 <div className="text-3xl mb-3">🎙️</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   Mock Interview
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -208,10 +208,10 @@ function DashboardContent() {
 
               <Link
                 href="/dashboard/jobs"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
               >
                 <div className="text-3xl mb-3">🔍</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   Discover Jobs
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -222,10 +222,10 @@ function DashboardContent() {
 
               <Link
                 href="/dashboard/profile/stories"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
               >
                 <div className="text-3xl mb-3">🌟</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   STAR Stories
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -253,13 +253,13 @@ function DashboardContent() {
           {/* Generation Tools */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Content Generation</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
               <Link
                 href="/generate/bullets"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
               >
                 <div className="text-3xl mb-3">📝</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   Generate Bullet Points
                 </h3>
                 <p className="text-gray-400 mb-3">
@@ -270,10 +270,10 @@ function DashboardContent() {
 
               <Link
                 href="/generate/cover-letter"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
               >
                 <div className="text-3xl mb-3">✉️</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                   Generate Cover Letter
                 </h3>
                 <p className="text-gray-400 mb-3">
