@@ -1,0 +1,21 @@
+{
+  "$schema": "./contracts/task.schema.json",
+  "tasks": [
+    {
+      "id": "repo-structure-001",
+      "title": "Adopt standard workspace project structure",
+      "status": "done",
+      "priority": "high",
+      "owner": "codex",
+      "notes": "Moved the runnable Next.js codebase into /app and created standard root folders."
+    },
+    {
+      "id": "verification-001",
+      "title": "Verify app runs cleanly from nested /app directory",
+      "status": "todo",
+      "priority": "high",
+      "owner": "unassigned",
+      "notes": "Run install, dev, build, and tests from /app after the restructure."
+    }
+  ]
+}

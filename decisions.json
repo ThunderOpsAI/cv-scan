@@ -1,0 +1,17 @@
+{
+  "$schema": "./contracts/decision.schema.json",
+  "decisions": [
+    {
+      "id": "adr-001",
+      "title": "Use standard root project shell with nested runnable app",
+      "status": "accepted",
+      "date": "2026-04-10",
+      "context": "Projects in this workspace should share one predictable top-level layout for docs, contracts, agents, and automation.",
+      "decision": "Move the existing CVScan implementation into /app and keep project coordination assets at the repository root.",
+      "consequences": [
+        "App commands now run from /app",
+        "Docs and agent metadata are easier to find consistently across repos"
+      ]
+    }
+  ]
+}
