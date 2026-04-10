@@ -1,0 +1,16 @@
+{
+  "$schema": "./contracts/pattern.schema.json",
+  "patterns": [
+    {
+      "id": "pattern-001",
+      "name": "Nested Application Root",
+      "problem": "Project coordination files and runtime code compete for the same root-level space.",
+      "solution": "Keep the runnable application in /app and reserve the repository root for shared project metadata, docs, automation, and agent assets.",
+      "examples": [
+        "Run the product locally from /app",
+        "Store PRD, SRS, and architecture docs in /docs"
+      ],
+      "tags": ["repo-structure", "workspace-standard"]
+    }
+  ]
+}

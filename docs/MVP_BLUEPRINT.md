@@ -52,13 +52,11 @@ DISCOVER → SCORE → TAILOR → APPLY → INTERVIEW → WIN
 | **Complete Job Pack** | **5** | Mixed |
 | **Job Pack + Interview** | **7** | Mixed |
 
-## Pricing Tiers
-
 | Tier | Price | Credits | ~Applications |
 |------|-------|---------|---------------|
-| Starter | $4.99 | 15 | 3-5 |
-| Professional | $9.99 | 35 | 7-12 |
-| Power User | $17.99 | 80 | 16-25 |
+| Starter Pack | $2.99 | 20 | 4-5 |
+| Popular Pack | $4.99 | 50 | 10-12 |
+| Pro Pack | $7.99 | 100 | 20-25 |
 
 ## Free Tier
 - 3 credits on signup
