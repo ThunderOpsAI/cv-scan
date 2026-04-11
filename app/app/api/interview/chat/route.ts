@@ -3,6 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { gemini } from '@/lib/gemini';
 import { createClient } from '@/lib/supabase/server';
+import { deductCredits } from '@/lib/supabase/credits';
+
+const CREDIT_COST = 1;
+
+type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,11 +26,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Messages array is required' }, { status: 400 });
     }
 
+    const sanitizedMessages: ChatMessage[] = messages
+      .filter((message: Partial<ChatMessage>) =>
+        (message.role === 'user' || message.role === 'assistant') &&
+        typeof message.content === 'string' &&
+        message.content.trim().length > 0
+      )
+      .map((message: ChatMessage) => ({
+        role: message.role,
+        content: message.content.trim(),
+      }));
+
+    if (sanitizedMessages.length === 0) {
+      return NextResponse.json({ error: 'At least one message is required' }, { status: 400 });
+    }
+
+    const supabase = createClient();
+
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('credits')
+      .eq('id', session.user.id)
+      .single() as { data: { credits: number } | null; error: any };
+
+    if (userError || !user) {
+      console.error('Failed to load user credits for interview chat:', userError);
+      return NextResponse.json(
+        { error: 'Unable to verify your credit balance. Please try again.' },
+        { status: 500 }
+      );
+    }
+
+    if (user.credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: 'Insufficient credits. Mock interview replies cost 1 credit.' },
+        { status: 402 }
+      );
+    }
+
     // Since this is a specialized interview bot, let's construct the prompt
     // We combine the history into a single prompt for Gemini or use an array if supported. 
     // We'll format it as a script for the AI.
 
-    let conversationHistory = messages.map(m => `${m.role === 'user' ? 'Candidate' : 'Interviewer'}: ${m.content}`).join('\n');
+    const conversationHistory = sanitizedMessages
+      .map((message) => `${message.role === 'user' ? 'Candidate' : 'Interviewer'}: ${message.content}`)
+      .join('\n');
 
     const systemPrompt = `You are a professional technical recruiter and hiring manager conducting an interview for the role of ${role} at ${company}. 
 Your goal is to practice interviewing the candidate. 
@@ -40,28 +88,33 @@ ${conversationHistory}
 
 Based on the above, write your next response as the Interviewer. Remember to give feedback if the candidate just answered, and then ask the next question.`;
 
-    // Deduct 1 credit for interview practice turn (optional, but consistent with copilot)
-    const supabase = createClient();
-    if (session.user.credits < 1) {
-      return NextResponse.json({ error: 'Insufficient credits (1 required per message)' }, { status: 402 });
-    }
-
-    // Deduct credit
-    const { error: creditError } = await (supabase.rpc as any)('deduct_credits', {
-      user_id_param: session.user.id,
-      credits_to_deduct: 1,
-    });
-
-    if (creditError) {
-      console.error('Credit deduction failed:', creditError);
-      return NextResponse.json({ error: 'Failed to process credits' }, { status: 500 });
-    }
-
     const result = await gemini.generateContent(systemPrompt);
     const aiResponse = result.response.text();
 
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Mock interview reply: ${role} at ${company}`,
+    });
+
+    if (deductError || !deductResult?.[0]?.success) {
+      console.error('Interview credit deduction failed:', {
+        error: deductError,
+        rpcResult: deductResult,
+        userId: session.user.id,
+      });
+      return NextResponse.json(
+        {
+          error: deductResult?.[0]?.error_message ||
+            'Unable to process credits. Your balance was not changed; please try again.',
+        },
+        { status: deductResult?.[0]?.error_message === 'Insufficient credits' ? 402 : 500 }
+      );
+    }
+
     return NextResponse.json({ 
       response: aiResponse,
+      creditsRemaining: deductResult[0].new_credits,
     });
   } catch (error: any) {
     console.error('Interview Chat error:', error);

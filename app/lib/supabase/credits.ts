@@ -26,9 +26,25 @@ async function _deductCredits(
   // If successful or the error is not "function not found", return the result
   if (!res.error) return res as any;
 
-  const errorMsg = res.error?.message || "";
-  const isFunctionNotFound = errorMsg.includes("function") &&
-    (errorMsg.includes("does not exist") || errorMsg.includes("not found"));
+  const errorMsg = [
+    res.error?.code,
+    res.error?.message,
+    res.error?.details,
+    res.error?.hint,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const normalizedError = errorMsg.toLowerCase();
+  const isFunctionNotFound =
+    normalizedError.includes("pgrst202") ||
+    (
+      normalizedError.includes("function") &&
+      (
+        normalizedError.includes("does not exist") ||
+        normalizedError.includes("not found") ||
+        normalizedError.includes("could not find")
+      )
+    );
 
   // Fallback to singular "deduct_credit" if "deduct_credits" doesn't exist (backwards compatibility)
   if (isFunctionNotFound) {

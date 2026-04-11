@@ -20,6 +20,7 @@ export default function InterviewPracticePage() {
   const [role, setRole] = useState("Software Engineer");
   const [company, setCompany] = useState("Google");
   const [isStarted, setIsStarted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -35,6 +36,7 @@ export default function InterviewPracticePage() {
   }, [messages]);
 
   const startInterview = async () => {
+    setErrorMessage("");
     setIsStarted(true);
     setMessages([{ 
       id: Date.now().toString(), 
@@ -48,13 +50,14 @@ export default function InterviewPracticePage() {
     if (!input.trim() || sending) return;
 
     if ((session?.user?.credits || 0) < 1) {
-      alert("You need at least 1 credit to send a message.");
+      setErrorMessage("You need at least 1 credit to send a mock interview reply.");
       return;
     }
 
     const userMessage = input;
     setInput("");
     setSending(true);
+    setErrorMessage("");
 
     const newMessages: ChatMessage[] = [
       ...messages,
@@ -74,10 +77,18 @@ export default function InterviewPracticePage() {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : { error: (await res.text()) || "The server returned an unexpected response." };
 
-      if (data.error) {
-        alert(data.error);
+      if (!res.ok || data.error) {
+        setErrorMessage(data.error || "Failed to send your reply. Please try again.");
+        return;
+      }
+
+      if (!data.response) {
+        setErrorMessage("The interviewer did not return a response. Please try again.");
         return;
       }
 
@@ -89,7 +100,7 @@ export default function InterviewPracticePage() {
       router.refresh(); // refresh credits in header
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      setErrorMessage("Failed to send your reply. Please try again.");
     } finally {
       setSending(false);
     }
@@ -206,6 +217,14 @@ export default function InterviewPracticePage() {
               </div>
 
               <form onSubmit={sendMessage} className="p-4 bg-black/20 border-t border-white/10">
+                {errorMessage && (
+                  <div
+                    role="alert"
+                    className="mb-3 rounded-lg border border-red-400/40 bg-red-500/15 px-4 py-3 text-sm text-red-100"
+                  >
+                    {errorMessage}
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <input
                     type="text"
