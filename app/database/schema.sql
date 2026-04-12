@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS users (
   terms_accepted_at TIMESTAMPTZ,
   privacy_accepted_at TIMESTAMPTZ,
   consent_version TEXT DEFAULT '2026-04-12',
+  career_path TEXT CHECK (
+    career_path IS NULL OR career_path IN (
+      'new_grad',
+      'career_switcher',
+      'employed',
+      'laid_off',
+      'international'
+    )
+  ),
+  onboarding_completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -127,6 +137,23 @@ CREATE INDEX IF NOT EXISTS idx_fit_analyses_user_id ON fit_analyses(user_id);
 CREATE INDEX IF NOT EXISTS idx_fit_analyses_job_id ON fit_analyses(job_id, created_at DESC);
 
 -- ============================================
+-- GENERATED ASSETS (Phase 2.2)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS generated_assets (
+  asset_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  job_id UUID REFERENCES jobs(job_id) ON DELETE SET NULL,
+  asset_type TEXT NOT NULL CHECK (asset_type IN ('tailored_bullets', 'cover_letter', 'follow_up')),
+  content TEXT NOT NULL CHECK (char_length(trim(content)) > 0),
+  evidence_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_generated_assets_user_id ON generated_assets(user_id);
+CREATE INDEX IF NOT EXISTS idx_generated_assets_job_id ON generated_assets(user_id, job_id, created_at DESC);
+
+-- ============================================
 -- TRIGGERS
 -- ============================================
 
@@ -158,6 +185,7 @@ ALTER TABLE profile_facts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resume_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fit_analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE generated_assets ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own data
 CREATE POLICY "Users can view own data"
@@ -241,6 +269,18 @@ CREATE POLICY "Users can insert own fit analyses"
 
 CREATE POLICY "Users can delete own fit analyses"
   ON fit_analyses FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own generated assets"
+  ON generated_assets FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own generated assets"
+  ON generated_assets FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own generated assets"
+  ON generated_assets FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Service role can do everything (bypass RLS)

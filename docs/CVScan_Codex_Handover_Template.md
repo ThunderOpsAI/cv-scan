@@ -120,9 +120,8 @@ If a file is missing, continue with the available files and state what was missi
 ## 6. Current session state (UPDATE THIS EVERY SESSION)
 
 ### Current phase
-- Foundation — Phase 1 complete locally (auth, career memory, profile facts management).
-- Activation — Phase 2 in progress: **Phase 2.1 P0** (jobs + fit analyses + job fit UI + APIs) implemented locally; SQL not applied to live Supabase.
-- Outstanding Phase 2 scope: 2.1 P1 fit history polish, 2.2 tailored generation + `generated_assets`, 2.3 export, 2.4 onboarding — see Build Spec.
+- Foundation — Phase 1 complete locally.
+- Activation — **Phase 2 implemented locally** (jobs, fit analyses, tailored generation + `generated_assets`, export APIs, follow-up draft, onboarding). **Apply local SQL to Supabase** before exercising end-to-end against a real database.
 
 ### Branch worked on
 - `codex/nextauth-setup`
@@ -186,10 +185,11 @@ If a file is missing, continue with the available files and state what was missi
 - `DELETE /api/profile/facts/[id]` removes a fact with user scope.
 - `/dashboard/profile/facts`: manual add form (POST with `source: manual`), full list with edit (inline), pause/resume generation (`is_approved`), and delete; sidebar shows “Active in generation” count.
 - Local SQL (`app/database/phase-1-career-memory.sql` and `app/database/schema.sql`): `profile_facts` **UPDATE** RLS `WITH CHECK` relaxed from `(is_approved = TRUE)` to user id only so policies match toggling approval when Supabase auth is used against RLS. Re-apply or alter the policy on any environment that already ran the older version.
-- Phase 2.1 P0 (Activation) — **jobs** and **fit_analyses** tables in `app/database/phase-2-activation.sql` + `schema.sql`; types in `app/types/fit.ts` and `lib/supabase/types.ts`.
-- APIs: `GET/POST /api/jobs`, `GET /api/jobs/[jobId]`, `POST /api/jobs/[jobId]/fit` (1 credit, approved facts required, Gemini), `GET /api/jobs/[jobId]/analyses`.
-- UI: `/dashboard/job-fit` with verdict styling (apply / stretch / skip), signals columns, links to job pack (prefill `jd`, `title`, `company`) and scanner; dashboard card under Job Applications.
-- `app/lib/fit/analyze.ts`: grounded fit prompt (no invented credentials).
+- **Phase 2 — Activation (local):**
+  - **2.1** `jobs`, `fit_analyses` (`phase-2-activation.sql` + `schema.sql`); fit APIs; `/dashboard/job-fit` with verdict UI, fit history list, primary CTA to `/dashboard/tailor/[jobId]`; `lib/fit/analyze.ts`.
+  - **2.2** `generated_assets` + `users.career_path` / `onboarding_completed_at` (`phase-2-generated-assets-onboarding.sql` + `schema.sql`); `POST/GET /api/generated-assets`, `DELETE /api/generated-assets/[assetId]`; job-scoped `POST .../generate/bullets` (1 cr) and `.../generate/cover-letter` (2 cr); `lib/generation/tailored-bullets.ts`, `cover-letter-evidence.ts`, `follow-up-draft.ts`; `/dashboard/tailor/[jobId]` — diff-style bullet table, accept/reject, explicit save only; cover letter edit + evidence; follow-up via `POST /api/generate/follow-up` (1 cr).
+  - **2.3** `POST /api/export/pdf`, `/api/export/docx`, `/api/export/pack` (zip via JSZip); client copy + `.txt` downloads on tailor page.
+  - **2.4** `GET/PATCH /api/onboarding`; `/dashboard/onboarding` (5-step progress, skip-friendly); dashboard “Activation checklist” card; first-value messaging on tailor (`?fromFit=1`).
 
 ### What was not completed / carry forward
 - Supabase SQL was not run against a live database in this session; SQL files were updated only.
@@ -197,8 +197,8 @@ If a file is missing, continue with the available files and state what was missi
 - Runtime still uses the Supabase service-role server client, so route-level ownership checks are the local enforcement layer while RLS policies are documented in SQL. Live RLS behavior still needs verification after applying SQL to Supabase.
 - Resume upload is implemented as browser text extraction via `File.text()` plus paste support. True PDF/DOCX parsing is not implemented yet.
 - Phase 1.2 P2 profile completeness updates for approved facts are not built yet.
-- Phase 2.1 SQL (`jobs`, `fit_analyses`) not applied to live Supabase; routes will fail at insert/select until tables exist.
-- Phase 2.2+ (evidence-tagged tailoring, `generated_assets`, export, onboarding) not started.
+- SQL files to apply (in order): `phase-1-career-memory.sql`, `phase-2-activation.sql`, `phase-2-generated-assets-onboarding.sql`, or reconcile from merged `schema.sql`.
+- `users.career_path` and `users.onboarding_completed_at` require the Phase 2 onboarding migration; `generated_assets` requires the same batch.
 - Full repo lint cleanup remains separate work because failures are broad and pre-existing.
 - Do not commit/push or apply live Supabase SQL until product owner asks.
 - Next product work should proceed only after product owner confirmation.

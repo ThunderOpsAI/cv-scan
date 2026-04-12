@@ -12,6 +12,14 @@ export type Database = {
           terms_accepted_at: string | null;
           privacy_accepted_at: string | null;
           consent_version: string | null;
+          career_path:
+            | "new_grad"
+            | "career_switcher"
+            | "employed"
+            | "laid_off"
+            | "international"
+            | null;
+          onboarding_completed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -25,6 +33,14 @@ export type Database = {
           terms_accepted_at?: string | null;
           privacy_accepted_at?: string | null;
           consent_version?: string | null;
+          career_path?:
+            | "new_grad"
+            | "career_switcher"
+            | "employed"
+            | "laid_off"
+            | "international"
+            | null;
+          onboarding_completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -38,6 +54,14 @@ export type Database = {
           terms_accepted_at?: string | null;
           privacy_accepted_at?: string | null;
           consent_version?: string | null;
+          career_path?:
+            | "new_grad"
+            | "career_switcher"
+            | "employed"
+            | "laid_off"
+            | "international"
+            | null;
+          onboarding_completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -228,6 +252,35 @@ export type Database = {
             stretch_areas: string[];
           };
           rationale?: string;
+          created_at?: string;
+        };
+      };
+      generated_assets: {
+        Row: {
+          asset_id: string;
+          user_id: string;
+          job_id: string | null;
+          asset_type: "tailored_bullets" | "cover_letter" | "follow_up";
+          content: string;
+          evidence_json: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: {
+          asset_id?: string;
+          user_id: string;
+          job_id?: string | null;
+          asset_type: "tailored_bullets" | "cover_letter" | "follow_up";
+          content: string;
+          evidence_json?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: {
+          asset_id?: string;
+          user_id?: string;
+          job_id?: string | null;
+          asset_type?: "tailored_bullets" | "cover_letter" | "follow_up";
+          content?: string;
+          evidence_json?: Record<string, unknown>;
           created_at?: string;
         };
       };

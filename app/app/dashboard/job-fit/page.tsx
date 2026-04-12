@@ -57,6 +57,7 @@ function JobFitContent() {
 
   const [latestAnalysis, setLatestAnalysis] = useState<FitAnalysisRecord | null>(null);
   const [analysisJob, setAnalysisJob] = useState<JobRecord | null>(null);
+  const [analysisHistory, setAnalysisHistory] = useState<FitAnalysisRecord[]>([]);
 
   const loadJobs = useCallback(async () => {
     setLoadingJobs(true);
@@ -95,6 +96,7 @@ function JobFitContent() {
     setMessage("");
     setLatestAnalysis(null);
     setAnalysisJob(null);
+    setAnalysisHistory([]);
 
     if (!title.trim() || !company.trim() || rawDescription.trim().length < 20) {
       setError("Enter job title, company, and a description (at least 20 characters).");
@@ -128,8 +130,11 @@ function JobFitContent() {
         throw new Error(fitData.error || "Failed to run job fit analysis");
       }
 
-      setLatestAnalysis(fitData.analysis as FitAnalysisRecord);
-      setAnalysisJob(fitData.job as JobRecord);
+      const analysis = fitData.analysis as FitAnalysisRecord;
+      const savedJob = fitData.job as JobRecord;
+      setLatestAnalysis(analysis);
+      setAnalysisJob(savedJob);
+      setAnalysisHistory([analysis]);
       setMessage(
         typeof fitData.new_credits === "number"
           ? `Analysis saved. You have ${fitData.new_credits} credits remaining.`
@@ -151,6 +156,7 @@ function JobFitContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load analyses");
       const list = (data.analyses || []) as FitAnalysisRecord[];
+      setAnalysisHistory(list);
       if (list.length === 0) {
         setLatestAnalysis(null);
         setAnalysisJob(job);
@@ -307,14 +313,20 @@ function JobFitContent() {
               </div>
               <div className="flex flex-col gap-2 shrink-0">
                 <Link
+                  href={`/dashboard/tailor/${analysisJob.job_id}?fromFit=1`}
+                  className="text-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                >
+                  Tailor bullets & cover letter
+                </Link>
+                <Link
                   href={`/dashboard/job-packs/new?${new URLSearchParams({
                     jd: analysisJob.raw_description,
                     title: analysisJob.title,
                     company: analysisJob.company,
                   }).toString()}`}
-                  className="text-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700"
+                  className="text-center rounded-lg bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-600"
                 >
-                  Tailor application (job pack)
+                  Full job pack (legacy flow)
                 </Link>
                 <Link
                   href="/dashboard/scanner"
@@ -363,6 +375,25 @@ function JobFitContent() {
                 </ul>
               </div>
             </div>
+
+            {analysisHistory.length > 1 && (
+              <div className="mt-8 border-t border-white/20 pt-6">
+                <h3 className="text-white font-semibold mb-3">Fit history (newest first)</h3>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  {analysisHistory.map((a) => (
+                    <li
+                      key={a.analysis_id}
+                      className="flex flex-wrap justify-between gap-2 rounded-lg bg-black/20 px-3 py-2 border border-white/10"
+                    >
+                      <span className="uppercase text-xs font-bold text-gray-400">{a.verdict}</span>
+                      <span className="text-gray-500 text-xs">
+                        {new Date(a.created_at).toLocaleString()}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
         )}
       </main>

@@ -64,6 +64,35 @@ export function formatApprovedFactsForPrompt(
     .join("\n");
 }
 
+/** Lists each fact with full `fact_id` UUID for models that must cite IDs exactly. */
+export function formatApprovedFactsWithFullIds(
+  facts: ApprovedProfileFactForTailoring[] | ProfileFact[]
+): string {
+  if (facts.length === 0) {
+    return "No approved profile facts are available.";
+  }
+
+  return facts
+    .map(
+      (fact) =>
+        `fact_id: ${fact.fact_id}\nfact_type: ${fact.fact_type}\nfact_text: ${fact.fact_text}`
+    )
+    .join("\n\n---\n\n");
+}
+
+export function resolveFactIdFromShortTag(
+  facts: ApprovedProfileFactForTailoring[],
+  shortOrFull: string
+): string | null {
+  const trimmed = shortOrFull.trim();
+  for (const f of facts) {
+    if (f.fact_id === trimmed || shortFactId(f.fact_id) === trimmed.slice(0, 8)) {
+      return f.fact_id;
+    }
+  }
+  return null;
+}
+
 export function approvedFactIds(facts: ApprovedProfileFactForTailoring[] | ProfileFact[]): string[] {
   return facts.map((fact) => fact.fact_id);
 }

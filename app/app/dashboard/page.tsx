@@ -102,6 +102,24 @@ function DashboardContent() {
             </div>
           </div>
 
+          {/* Onboarding */}
+          <div className="mb-8">
+            <Link
+              href="/dashboard/onboarding"
+              className="block bg-gradient-to-r from-violet-600/25 to-fuchsia-600/25 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-violet-500/30 hover:border-violet-400/50 transition-all"
+            >
+              <div className="flex justify-between items-center gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-white">Activation checklist</h2>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Career memory → your path → first job fit (optional guided path)
+                  </p>
+                </div>
+                <span className="text-violet-300 text-sm font-semibold shrink-0">Open →</span>
+              </div>
+            </Link>
+          </div>
+
           {/* Profile Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Your Profile</h2>
