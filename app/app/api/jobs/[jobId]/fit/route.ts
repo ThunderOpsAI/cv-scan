@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
+import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { formatApprovedFactsForPrompt } from "@/lib/profile/facts";
 import { analyzeJobFit } from "@/lib/fit/analyze";
@@ -14,7 +15,7 @@ const UUID_RE =
 const CREDIT_COST = 1;
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   props: { params: Promise<{ jobId: string }> }
 ) {
   const params = await props.params;
@@ -66,6 +67,7 @@ export async function POST(
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Job fit: ${job.title} @ ${job.company}`,
+      p_reference_id: debitReferenceFromRequest(req, `fit:${params.jobId}`),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

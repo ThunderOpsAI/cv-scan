@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
+import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { generateCoverLetter as generateGroundedCoverLetter } from "@/lib/ats/tailor";
 import { approvedFactIds } from "@/lib/profile/facts";
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
       p_user_id: userId,
       p_amount: CREDIT_COST,
       p_description: "Generated cover letter",
+      p_reference_id: debitReferenceFromRequest(req, "gen-cover-letter"),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

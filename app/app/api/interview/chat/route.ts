@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { gemini } from '@/lib/gemini';
 import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
+import { getPlanTierForUser, planMeetsMinimum } from '@/lib/billing/plan-tier';
 
 const CREDIT_COST = 1;
 
@@ -42,6 +44,19 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient();
+
+    const planTier = await getPlanTierForUser(supabase, session.user.id);
+    if (!planMeetsMinimum(planTier, 'starter')) {
+      return NextResponse.json(
+        {
+          error:
+            'Interview prep chat requires a Starter subscription or higher. Credits alone do not unlock this flow.',
+          code: 'PLAN_REQUIRED',
+          min_plan: 'starter',
+        },
+        { status: 403 }
+      );
+    }
 
     const { data: user, error: userError } = await supabase
       .from('users')
@@ -95,6 +110,7 @@ Based on the above, write your next response as the Interviewer. Remember to giv
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Mock interview reply: ${role} at ${company}`,
+      p_reference_id: debitReferenceFromRequest(req, 'interview'),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

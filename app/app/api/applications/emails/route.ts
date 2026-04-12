@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { generateEmail } from '@/lib/applications/email-generator';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { GenerateEmailRequest, GenerateEmailResponse } from '@/types/applications';
 
 const CREDIT_COST = 1;
@@ -90,6 +91,10 @@ export async function POST(req: NextRequest) {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Email generation: ${body.email_type}`,
+      p_reference_id: debitReferenceFromRequest(
+        req,
+        `app-email:${body.application_id}:${body.email_type}`
+      ),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

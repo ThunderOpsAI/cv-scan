@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { tailorResumeToJob, generateCoverLetter } from '@/lib/ats/tailor';
 import { detectCulturalWarnings } from '@/lib/ats/cultural-analysis';
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Job pack: ${body.job_title} at ${body.company}`,
+      p_reference_id: debitReferenceFromRequest(req, 'job-pack'),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { SendMessageRequest } from '@/types/intelligence';
 import { buildCopilotContext, buildSystemPrompt } from '@/lib/copilot/utils';
 
@@ -131,6 +132,7 @@ export async function POST(req: NextRequest) {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: 'Copilot chat message',
+      p_reference_id: debitReferenceFromRequest(req, `copilot:${conversationId}`),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

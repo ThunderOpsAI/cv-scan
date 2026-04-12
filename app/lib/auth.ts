@@ -12,12 +12,14 @@ import {
   sessionTokenCookieName,
   useSecureCookies,
 } from "@/lib/auth/env";
+import { normalizePlanTier } from "@/lib/billing/plan-tier";
 
 export { isAuthConfigured } from "@/lib/auth/env";
 
 type UserCreditsRow = {
   id: string;
   credits: number;
+  plan_tier?: string | null;
 };
 
 type ConsentFields = ReturnType<typeof buildConsentFields>;
@@ -138,13 +140,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.credits = 0;
+        session.user.planTier = "free";
       }
 
       if (session.user && hasSupabaseServerEnv) {
         const tokenUserId = typeof token.sub === "string" ? token.sub : "";
         session.user.id = tokenUserId;
         const supabase = createClient();
-        const userQuery = supabase.from("users").select("id, credits");
+        const userQuery = supabase.from("users").select("id, credits, plan_tier");
         const { data: dbUser } = (tokenUserId
           ? (await userQuery.eq("id", tokenUserId).single())
           : token.email
@@ -153,7 +156,20 @@ export const authOptions: NextAuthOptions = {
 
         if (dbUser) {
           session.user.id = dbUser.id;
-          session.user.credits = dbUser.credits;
+          let credits = dbUser.credits;
+          try {
+            const balRes = await (supabase.rpc as any)("get_credit_balance", { p_user_id: dbUser.id });
+            if (!balRes.error && balRes.data != null) {
+              const n = typeof balRes.data === "number" ? balRes.data : Number(balRes.data);
+              if (!Number.isNaN(n)) {
+                credits = n;
+              }
+            }
+          } catch {
+            /* older DB without get_credit_balance */
+          }
+          session.user.credits = credits;
+          session.user.planTier = normalizePlanTier(dbUser.plan_tier);
         }
       }
       return session;

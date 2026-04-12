@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { FitAnalysisRecord, JobRecord } from "@/types/fit";
+import { CREDIT_COSTS } from "@/lib/billing/credit-costs";
 
 function verdictStyles(verdict: string) {
   switch (verdict) {
@@ -206,7 +207,8 @@ function JobFitContent() {
           <h1 className="text-4xl font-bold text-white mt-2">Job fit</h1>
           <p className="text-gray-300 mt-3 max-w-3xl">
             Paste a job description and get an apply / stretch / skip verdict grounded only in your approved
-            profile facts. Each run uses {1} credit.
+            profile facts. Each run uses {CREDIT_COSTS.jobFit} credit
+            {CREDIT_COSTS.jobFit === 1 ? "" : "s"} (you have {session.user.credits}).
           </p>
         </header>
 

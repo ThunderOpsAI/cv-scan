@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import type { JobRecord } from "@/types/fit";
 import type { TailoredBulletItem, TailoredBulletsEvidence } from "@/types/generated-assets";
 import { stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
+import { CREDIT_COSTS } from "@/lib/billing/credit-costs";
 
 function downloadText(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -289,10 +290,18 @@ function TailorInner() {
           </div>
         )}
 
-        <header>
+        <header className="space-y-3">
           <h1 className="text-3xl font-bold text-white">Tailor application</h1>
           <p className="text-gray-400 mt-1">
             {job.title} · {job.company}
+          </p>
+          <p className="text-sm text-amber-100/90 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3">
+            This page charges credits per generation: bullets {CREDIT_COSTS.tailoredBullets}, cover letter{" "}
+            {CREDIT_COSTS.coverLetter}, follow-up {CREDIT_COSTS.followUp}. You have{" "}
+            <span className="font-semibold text-white">{session.user.credits}</span> credits.{" "}
+            <Link href="/buy-credits" className="underline text-amber-200 hover:text-amber-100">
+              Buy credits
+            </Link>
           </p>
         </header>
 

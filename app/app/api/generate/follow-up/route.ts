@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
+import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { generateFollowUpDraft } from "@/lib/generation/follow-up-draft";
 
 const CREDIT_COST = 1;
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Follow-up draft: ${jobTitle}`,
+      p_reference_id: debitReferenceFromRequest(req, "follow-up"),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

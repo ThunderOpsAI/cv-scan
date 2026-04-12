@@ -25,12 +25,20 @@ CREATE TABLE IF NOT EXISTS users (
     )
   ),
   onboarding_completed_at TIMESTAMPTZ,
+  plan_tier TEXT NOT NULL DEFAULT 'free' CHECK (
+    plan_tier IN ('free', 'starter', 'pro', 'enterprise')
+  ),
+  stripe_subscription_id TEXT,
+  stripe_subscription_status TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_subscription_id_unique
+  ON users(stripe_subscription_id)
+  WHERE stripe_subscription_id IS NOT NULL;
 
 -- ============================================
 -- CREDIT TRANSACTIONS TABLE
@@ -49,6 +57,29 @@ CREATE TABLE IF NOT EXISTS credit_transactions (
 CREATE INDEX IF NOT EXISTS idx_credit_transactions_user_id ON credit_transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_credit_transactions_created_at ON credit_transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_credit_transactions_type ON credit_transactions(type);
+
+-- ============================================
+-- CREDIT LEDGER (append-only; Build Spec 1.3 / Phase 3)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS credit_ledger (
+  event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  event_type TEXT NOT NULL CHECK (event_type IN ('purchase', 'debit', 'refund', 'adjustment')),
+  amount INTEGER NOT NULL,
+  balance_after INTEGER NOT NULL,
+  reference_id TEXT,
+  description TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_credit_ledger_reference_id_unique
+  ON credit_ledger(reference_id)
+  WHERE reference_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_credit_ledger_user_created
+  ON credit_ledger(user_id, created_at DESC);
 
 -- ============================================
 -- GENERATIONS TABLE
@@ -173,6 +204,48 @@ DROP TRIGGER IF EXISTS update_profile_facts_updated_at ON profile_facts;
 CREATE TRIGGER update_profile_facts_updated_at BEFORE UPDATE ON profile_facts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Sync users.credits from ledger after each ledger insert (compat for session reads)
+CREATE OR REPLACE FUNCTION credit_ledger_sync_user_credits()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_sum INTEGER;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0)::INT INTO v_sum FROM credit_ledger WHERE user_id = NEW.user_id;
+  UPDATE users SET credits = v_sum, updated_at = NOW() WHERE id = NEW.user_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_credit_ledger_sync_user_credits ON credit_ledger;
+CREATE TRIGGER tr_credit_ledger_sync_user_credits
+  AFTER INSERT ON credit_ledger
+  FOR EACH ROW EXECUTE FUNCTION credit_ledger_sync_user_credits();
+
+-- Initial ledger row for new accounts (matches default signup credits on users row)
+CREATE OR REPLACE FUNCTION users_init_credit_ledger()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO credit_ledger (user_id, event_type, amount, balance_after, reference_id, description)
+  VALUES (
+    NEW.id,
+    'adjustment',
+    NEW.credits,
+    NEW.credits,
+    'signup:initial:' || NEW.id::text,
+    'Initial credits on signup'
+  );
+  RETURN NEW;
+EXCEPTION
+  WHEN unique_violation THEN
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_users_init_credit_ledger ON users;
+CREATE TRIGGER tr_users_init_credit_ledger
+  AFTER INSERT ON users
+  FOR EACH ROW EXECUTE FUNCTION users_init_credit_ledger();
+
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
@@ -180,6 +253,7 @@ CREATE TRIGGER update_profile_facts_updated_at BEFORE UPDATE ON profile_facts
 -- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credit_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE credit_ledger ENABLE ROW LEVEL SECURITY;
 ALTER TABLE generations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profile_facts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resume_versions ENABLE ROW LEVEL SECURITY;
@@ -200,6 +274,10 @@ CREATE POLICY "Users can update own data"
 -- Users can view their own transactions
 CREATE POLICY "Users can view own transactions"
   ON credit_transactions FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own credit ledger"
+  ON credit_ledger FOR SELECT
   USING (auth.uid() = user_id);
 
 -- Users can view their own generations
@@ -290,12 +368,23 @@ CREATE POLICY "Users can delete own generated assets"
 -- FUNCTIONS
 -- ============================================
 
--- Function to atomically deduct credits and log transaction
--- This prevents race conditions when multiple requests happen simultaneously
+-- Ledger balance (sum of signed amounts)
+CREATE OR REPLACE FUNCTION get_credit_balance(p_user_id UUID)
+RETURNS INTEGER
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(SUM(amount), 0)::INT FROM credit_ledger WHERE user_id = p_user_id;
+$$;
+
+-- Debit credits: ledger row + legacy credit_transactions; optional idempotent reference_id
 CREATE OR REPLACE FUNCTION deduct_credits(
   p_user_id UUID,
   p_amount INTEGER,
-  p_description TEXT
+  p_description TEXT,
+  p_reference_id TEXT DEFAULT NULL
 )
 RETURNS TABLE (
   success BOOLEAN,
@@ -303,75 +392,138 @@ RETURNS TABLE (
   error_message TEXT
 ) AS $$
 DECLARE
-  v_current_credits INTEGER;
-  v_new_credits INTEGER;
+  v_ref TEXT;
+  v_bal INTEGER;
+  v_new INTEGER;
+  v_repeat_bal INTEGER;
 BEGIN
-  -- Lock the user row to prevent concurrent modifications
-  SELECT credits INTO v_current_credits
-  FROM users
-  WHERE id = p_user_id
-  FOR UPDATE;
-
-  -- Check if user has enough credits
-  IF v_current_credits < p_amount THEN
-    RETURN QUERY SELECT FALSE, v_current_credits, 'Insufficient credits'::TEXT;
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RETURN QUERY SELECT FALSE, 0, 'Invalid amount'::TEXT;
     RETURN;
   END IF;
 
-  -- Deduct credits
-  v_new_credits := v_current_credits - p_amount;
+  v_ref := NULLIF(TRIM(COALESCE(p_reference_id, '')), '');
+  IF v_ref IS NULL THEN
+    v_ref := 'debit:ephemeral:' || gen_random_uuid()::text;
+  END IF;
 
-  UPDATE users
-  SET credits = v_new_credits,
-      updated_at = NOW()
-  WHERE id = p_user_id;
-
-  -- Log the transaction
-  INSERT INTO credit_transactions (user_id, amount, type, description)
-  VALUES (p_user_id, -p_amount, 'usage', p_description);
-
-  -- Return success
-  RETURN QUERY SELECT TRUE, v_new_credits, NULL::TEXT;
-END;
-$$ LANGUAGE plpgsql;
-
--- Function to add credits (for purchases/bonuses)
-CREATE OR REPLACE FUNCTION add_credits(
-  p_user_id UUID,
-  p_amount INTEGER,
-  p_type TEXT,
-  p_description TEXT,
-  p_metadata JSONB DEFAULT NULL
-)
-RETURNS TABLE (
-  success BOOLEAN,
-  new_credits INTEGER,
-  error_message TEXT
-) AS $$
-DECLARE
-  v_new_credits INTEGER;
-BEGIN
-  -- Update user credits
-  UPDATE users
-  SET credits = credits + p_amount,
-      updated_at = NOW()
-  WHERE id = p_user_id
-  RETURNING credits INTO v_new_credits;
-
-  -- Check if update succeeded
+  PERFORM 1 FROM users WHERE id = p_user_id FOR UPDATE;
   IF NOT FOUND THEN
     RETURN QUERY SELECT FALSE, 0, 'User not found'::TEXT;
     RETURN;
   END IF;
 
-  -- Log the transaction
+  SELECT cl.balance_after INTO v_repeat_bal
+  FROM credit_ledger cl
+  WHERE cl.reference_id = v_ref AND cl.user_id = p_user_id AND cl.event_type = 'debit'
+  LIMIT 1;
+
+  IF FOUND THEN
+    SELECT COALESCE(SUM(amount), 0)::INT INTO v_bal FROM credit_ledger WHERE user_id = p_user_id;
+    RETURN QUERY SELECT TRUE, v_bal, NULL::TEXT;
+    RETURN;
+  END IF;
+
+  SELECT COALESCE(SUM(amount), 0)::INT INTO v_bal FROM credit_ledger WHERE user_id = p_user_id;
+
+  IF v_bal < p_amount THEN
+    RETURN QUERY SELECT FALSE, v_bal, 'Insufficient credits'::TEXT;
+    RETURN;
+  END IF;
+
+  v_new := v_bal - p_amount;
+
+  INSERT INTO credit_ledger (user_id, event_type, amount, balance_after, reference_id, description)
+  VALUES (p_user_id, 'debit', -p_amount, v_new, v_ref, p_description);
+
+  INSERT INTO credit_transactions (user_id, amount, type, description)
+  VALUES (p_user_id, -p_amount, 'usage', p_description);
+
+  RETURN QUERY SELECT TRUE, v_new, NULL::TEXT;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Add credits (purchases / bonuses): idempotent when p_reference_id repeats
+CREATE OR REPLACE FUNCTION add_credits(
+  p_user_id UUID,
+  p_amount INTEGER,
+  p_type TEXT,
+  p_description TEXT,
+  p_metadata JSONB DEFAULT NULL,
+  p_reference_id TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+  success BOOLEAN,
+  new_credits INTEGER,
+  error_message TEXT
+) AS $$
+DECLARE
+  v_ref TEXT;
+  v_bal INTEGER;
+  v_new INTEGER;
+  v_event TEXT;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RETURN QUERY SELECT FALSE, 0, 'Invalid amount'::TEXT;
+    RETURN;
+  END IF;
+
+  v_ref := NULLIF(TRIM(COALESCE(p_reference_id, '')), '');
+  IF v_ref IS NULL THEN
+    v_ref := 'credit:ephemeral:' || gen_random_uuid()::text;
+  END IF;
+
+  PERFORM 1 FROM users WHERE id = p_user_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN QUERY SELECT FALSE, 0, 'User not found'::TEXT;
+    RETURN;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM credit_ledger cl WHERE cl.reference_id = v_ref AND cl.user_id = p_user_id) THEN
+    SELECT COALESCE(SUM(amount), 0)::INT INTO v_bal FROM credit_ledger WHERE user_id = p_user_id;
+    RETURN QUERY SELECT TRUE, v_bal, NULL::TEXT;
+    RETURN;
+  END IF;
+
+  IF p_type = 'purchase' THEN
+    v_event := 'purchase';
+  ELSE
+    v_event := 'adjustment';
+  END IF;
+
+  SELECT COALESCE(SUM(amount), 0)::INT INTO v_bal FROM credit_ledger WHERE user_id = p_user_id;
+  v_new := v_bal + p_amount;
+
+  INSERT INTO credit_ledger (user_id, event_type, amount, balance_after, reference_id, description, metadata)
+  VALUES (p_user_id, v_event, p_amount, v_new, v_ref, p_description, COALESCE(p_metadata, '{}'::jsonb));
+
   INSERT INTO credit_transactions (user_id, amount, type, description, metadata)
   VALUES (p_user_id, p_amount, p_type, p_description, p_metadata);
 
-  -- Return success
-  RETURN QUERY SELECT TRUE, v_new_credits, NULL::TEXT;
+  RETURN QUERY SELECT TRUE, v_new, NULL::TEXT;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Phase 3.3 — subscription columns on existing databases (no-op when already present)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_tier TEXT DEFAULT 'free';
+UPDATE users SET plan_tier = 'free' WHERE plan_tier IS NULL;
+ALTER TABLE users ALTER COLUMN plan_tier SET DEFAULT 'free';
+ALTER TABLE users ALTER COLUMN plan_tier SET NOT NULL;
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_plan_tier_check;
+ALTER TABLE users ADD CONSTRAINT users_plan_tier_check CHECK (plan_tier IN ('free', 'starter', 'pro', 'enterprise'));
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_status TEXT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_subscription_id_unique
+  ON users(stripe_subscription_id)
+  WHERE stripe_subscription_id IS NOT NULL;
+
+-- Backfill: one adjustment row per user who has no ledger rows yet (idempotent)
+INSERT INTO credit_ledger (user_id, event_type, amount, balance_after, reference_id, description)
+SELECT u.id, 'adjustment', u.credits, u.credits, 'legacy:users_credits:' || u.id::text, 'Migrated balance from users.credits'
+FROM users u
+WHERE NOT EXISTS (SELECT 1 FROM credit_ledger cl WHERE cl.user_id = u.id);
 
 -- ============================================
 -- SEED DATA (for development)

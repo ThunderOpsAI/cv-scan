@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -13,7 +14,7 @@ const UUID_RE =
 const CREDIT_COST = 2;
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   props: { params: Promise<{ jobId: string }> }
 ) {
   const params = await props.params;
@@ -72,6 +73,7 @@ export async function POST(
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Cover letter: ${job.title} @ ${job.company}`,
+      p_reference_id: debitReferenceFromRequest(req, `tailor-cover:${params.jobId}`),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

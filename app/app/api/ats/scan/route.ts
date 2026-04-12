@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { loadProfileForTailoring } from '@/lib/ats/profile-loader';
 import { ATSScanRequest, ATSScanResponse } from '@/types/job-packs';
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest) {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: 'ATS scan',
+        p_reference_id: debitReferenceFromRequest(req, 'ats-scan'),
       });
 
       if (deductError || !deductResult?.[0]?.success) {

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { MineMetricsRequest, SubmitMetricsAnswersRequest } from '@/types/profile';
 
 const CREDIT_COST = 1;
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     if ('context' in body) {
       return await generateQuestions(body as MineMetricsRequest, session.user.id, supabase);
     } else if ('answers' in body) {
-      return await enhanceBullet(body as SubmitMetricsAnswersRequest, session.user.id, supabase);
+      return await enhanceBullet(body as SubmitMetricsAnswersRequest, session.user.id, supabase, req);
     } else {
       return NextResponse.json(
         { error: 'Invalid request body' },
@@ -100,7 +101,8 @@ Return ONLY the questions, one per line, without numbering.`;
 async function enhanceBullet(
   body: SubmitMetricsAnswersRequest,
   userId: string,
-  supabase: any
+  supabase: any,
+  req: NextRequest
 ) {
   const { bullet_id, answers } = body;
 
@@ -169,6 +171,7 @@ Return ONLY the enhanced bullet point, nothing else.`;
     p_user_id: userId,
     p_amount: CREDIT_COST,
     p_description: 'Metric mining enhancement',
+    p_reference_id: debitReferenceFromRequest(req, `mine-metrics:${bullet_id}`),
   });
 
   if (deductError || !deductResult?.[0]?.success) {

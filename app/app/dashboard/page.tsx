@@ -17,13 +17,20 @@ function DashboardContent() {
     }
 
     const paymentStatus = searchParams.get("payment");
+    const subscriptionStatus = searchParams.get("subscription");
     if (paymentStatus === "success") {
       setMessage({ text: "Payment successful! Your credits are being added to your account.", type: "success" });
-      // Clear the URL param after showing the message
       const newUrl = window.location.pathname;
-      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
     } else if (paymentStatus === "cancelled") {
       setMessage({ text: "Payment was cancelled.", type: "error" });
+    } else if (subscriptionStatus === "success") {
+      setMessage({
+        text: "Subscription updated. Your plan may take a moment to refresh — sign out and back in if needed.",
+        type: "success",
+      });
+      const newUrl = window.location.pathname;
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
     }
   }, [status, router, searchParams]);
 
@@ -75,6 +82,15 @@ function DashboardContent() {
       {/* Dashboard Content */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto">
+          {session.user.credits < 5 && (
+            <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-100 text-sm">
+              Low balance: you have {session.user.credits} credit{session.user.credits === 1 ? "" : "s"}.{" "}
+              <Link href="/buy-credits" className="font-semibold text-amber-200 underline hover:text-white">
+                Add credits
+              </Link>{" "}
+              before running paid generations.
+            </div>
+          )}
           {/* Header with Welcome and Account Info */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
             <div>

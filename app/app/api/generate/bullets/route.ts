@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { gemini } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
+import { deductCredits } from "@/lib/supabase/credits";
+import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { approvedFactIds, formatApprovedFactsForPrompt } from "@/lib/profile/facts";
 
@@ -91,15 +93,12 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
       );
     }
 
-    // Deduct credit using Supabase function
-    const { data: deductResult, error: deductError } = await (supabase.rpc as any)(
-      "deduct_credit",
-      {
-        p_user_id: session.user.id,
-        p_amount: CREDIT_COST,
-        p_description: "Generated resume bullets",
-      }
-    );
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: "Generated resume bullets",
+      p_reference_id: debitReferenceFromRequest(req, "gen-bullets"),
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);

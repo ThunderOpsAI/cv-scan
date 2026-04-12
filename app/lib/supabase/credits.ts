@@ -6,11 +6,18 @@ export type CreditRpcResult = {
   error_message?: string | null;
 };
 
+export type DeductCreditsArgs = {
+  p_user_id: string;
+  p_amount: number;
+  p_description: string;
+  /** Idempotency key: same reference must not double-charge (see credit_ledger.reference_id). */
+  p_reference_id?: string | null;
+};
+
 export async function deductCredits(
   supabase: SupabaseClient<any>,
-  args: { p_user_id: string; p_amount: number; p_description: string }
+  args: DeductCreditsArgs
 ): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  // Aliased version
   return await _deductCredits(supabase, args);
 }
 
@@ -18,10 +25,18 @@ export const deductCredit = deductCredits;
 
 async function _deductCredits(
   supabase: SupabaseClient<any>,
-  args: { p_user_id: string; p_amount: number; p_description: string }
+  args: DeductCreditsArgs
 ): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  // Use the standard rpc method
-  const res = await supabase.rpc("deduct_credits", args);
+  const rpcArgs: Record<string, unknown> = {
+    p_user_id: args.p_user_id,
+    p_amount: args.p_amount,
+    p_description: args.p_description,
+  };
+  if (args.p_reference_id != null && args.p_reference_id !== "") {
+    rpcArgs.p_reference_id = args.p_reference_id;
+  }
+
+  const res = await supabase.rpc("deduct_credits", rpcArgs as never);
 
   // If successful or the error is not "function not found", return the result
   if (!res.error) return res as any;
@@ -46,9 +61,12 @@ async function _deductCredits(
       )
     );
 
-  // Fallback to singular "deduct_credit" if "deduct_credits" doesn't exist (backwards compatibility)
   if (isFunctionNotFound) {
-    return await supabase.rpc("deduct_credit", args) as any;
+    return await supabase.rpc("deduct_credit", {
+      p_user_id: args.p_user_id,
+      p_amount: args.p_amount,
+      p_description: args.p_description,
+    } as never) as any;
   }
 
   return res as any;
