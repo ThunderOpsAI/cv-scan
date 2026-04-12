@@ -158,6 +158,79 @@ export type Database = {
           created_at?: string;
         };
       };
+      jobs: {
+        Row: {
+          job_id: string;
+          user_id: string;
+          title: string;
+          company: string;
+          url: string | null;
+          raw_description: string;
+          source: "manual" | "captured" | "api";
+          created_at: string;
+        };
+        Insert: {
+          job_id?: string;
+          user_id: string;
+          title: string;
+          company: string;
+          url?: string | null;
+          raw_description: string;
+          source: "manual" | "captured" | "api";
+          created_at?: string;
+        };
+        Update: {
+          job_id?: string;
+          user_id?: string;
+          title?: string;
+          company?: string;
+          url?: string | null;
+          raw_description?: string;
+          source?: "manual" | "captured" | "api";
+          created_at?: string;
+        };
+      };
+      fit_analyses: {
+        Row: {
+          analysis_id: string;
+          user_id: string;
+          job_id: string;
+          verdict: "apply" | "stretch" | "skip";
+          signals_json: {
+            strengths_matched: string[];
+            must_have_gaps: string[];
+            stretch_areas: string[];
+          };
+          rationale: string;
+          created_at: string;
+        };
+        Insert: {
+          analysis_id?: string;
+          user_id: string;
+          job_id: string;
+          verdict: "apply" | "stretch" | "skip";
+          signals_json: {
+            strengths_matched: string[];
+            must_have_gaps: string[];
+            stretch_areas: string[];
+          };
+          rationale: string;
+          created_at?: string;
+        };
+        Update: {
+          analysis_id?: string;
+          user_id?: string;
+          job_id?: string;
+          verdict?: "apply" | "stretch" | "skip";
+          signals_json?: {
+            strengths_matched: string[];
+            must_have_gaps: string[];
+            stretch_areas: string[];
+          };
+          rationale?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

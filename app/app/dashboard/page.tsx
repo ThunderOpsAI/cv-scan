@@ -126,7 +126,21 @@ function DashboardContent() {
           {/* Job Applications */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Job Applications</h2>
-            <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <Link
+                href="/dashboard/job-fit"
+                className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-cyan-500/30 hover:border-cyan-400/50 transition-all group"
+              >
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                  Job fit
+                </h3>
+                <p className="text-gray-400 mb-3">
+                  Apply, stretch, or skip — grounded in your approved profile facts
+                </p>
+                <div className="text-cyan-400 text-sm">1 credit per analysis</div>
+              </Link>
+
               <Link
                 href="/dashboard/scanner"
                 className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"

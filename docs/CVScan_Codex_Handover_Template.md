@@ -120,17 +120,15 @@ If a file is missing, continue with the available files and state what was missi
 ## 6. Current session state (UPDATE THIS EVERY SESSION)
 
 ### Current phase
-- Foundation — Phase 1
-- Phase 1.1 Authentication is complete locally.
-- Build Spec Phase 1.2 P0 — Career profile and memory schema is complete locally.
-- Build Spec Phase 1.2 P1 — Profile editing (manual add / edit / delete / pause) is complete locally.
-- Check in with product owner before Phase 1.2 P2 (profile completeness) or Phase 1.3 (credit ledger).
+- Foundation — Phase 1 complete locally (auth, career memory, profile facts management).
+- Activation — Phase 2 in progress: **Phase 2.1 P0** (jobs + fit analyses + job fit UI + APIs) implemented locally; SQL not applied to live Supabase.
+- Outstanding Phase 2 scope: 2.1 P1 fit history polish, 2.2 tailored generation + `generated_assets`, 2.3 export, 2.4 onboarding — see Build Spec.
 
 ### Branch worked on
 - `codex/nextauth-setup`
 
 ### Latest commit
-- Not committed. Product owner asked to keep everything local (no commit/push in this session).
+- Branch `codex/nextauth-setup`: Phase 1 work committed locally; Phase 2.1 job-fit slice committed after implementation (no push unless product owner approves).
 
 ### Test result
 - Passed: `npx tsc --noEmit`
@@ -188,6 +186,10 @@ If a file is missing, continue with the available files and state what was missi
 - `DELETE /api/profile/facts/[id]` removes a fact with user scope.
 - `/dashboard/profile/facts`: manual add form (POST with `source: manual`), full list with edit (inline), pause/resume generation (`is_approved`), and delete; sidebar shows “Active in generation” count.
 - Local SQL (`app/database/phase-1-career-memory.sql` and `app/database/schema.sql`): `profile_facts` **UPDATE** RLS `WITH CHECK` relaxed from `(is_approved = TRUE)` to user id only so policies match toggling approval when Supabase auth is used against RLS. Re-apply or alter the policy on any environment that already ran the older version.
+- Phase 2.1 P0 (Activation) — **jobs** and **fit_analyses** tables in `app/database/phase-2-activation.sql` + `schema.sql`; types in `app/types/fit.ts` and `lib/supabase/types.ts`.
+- APIs: `GET/POST /api/jobs`, `GET /api/jobs/[jobId]`, `POST /api/jobs/[jobId]/fit` (1 credit, approved facts required, Gemini), `GET /api/jobs/[jobId]/analyses`.
+- UI: `/dashboard/job-fit` with verdict styling (apply / stretch / skip), signals columns, links to job pack (prefill `jd`, `title`, `company`) and scanner; dashboard card under Job Applications.
+- `app/lib/fit/analyze.ts`: grounded fit prompt (no invented credentials).
 
 ### What was not completed / carry forward
 - Supabase SQL was not run against a live database in this session; SQL files were updated only.
@@ -195,6 +197,8 @@ If a file is missing, continue with the available files and state what was missi
 - Runtime still uses the Supabase service-role server client, so route-level ownership checks are the local enforcement layer while RLS policies are documented in SQL. Live RLS behavior still needs verification after applying SQL to Supabase.
 - Resume upload is implemented as browser text extraction via `File.text()` plus paste support. True PDF/DOCX parsing is not implemented yet.
 - Phase 1.2 P2 profile completeness updates for approved facts are not built yet.
+- Phase 2.1 SQL (`jobs`, `fit_analyses`) not applied to live Supabase; routes will fail at insert/select until tables exist.
+- Phase 2.2+ (evidence-tagged tailoring, `generated_assets`, export, onboarding) not started.
 - Full repo lint cleanup remains separate work because failures are broad and pre-existing.
 - Do not commit/push or apply live Supabase SQL until product owner asks.
 - Next product work should proceed only after product owner confirmation.
@@ -237,9 +241,8 @@ If a file is missing, continue with the available files and state what was missi
 - Playwright: `webServer` in `playwright.config.ts` so `CI=1 npx playwright test` self-starts the dev server.
 
 ### Recommended next (product owner to confirm)
-- **Option A:** Phase 1.2 P2 — profile completeness indicator from approved facts.
-- **Option B:** Phase 1.3 — credit ledger (Build Spec) after P2 stopping point is agreed.
-- **Option C:** Apply `app/database/phase-1-career-memory.sql` to the intended Supabase project and verify import + fact flows under RLS (explicit approval only).
+- Apply local SQL to Supabase when ready: `phase-1-career-memory.sql`, then `phase-2-activation.sql` (or merged `schema.sql` sections), and verify RLS.
+- Continue Phase 2: `generated_assets` + evidence-tagged tailoring (2.2), export (2.3), onboarding (2.4); Phase 1.3 credit ledger remains a foundation dependency for production-grade debits.
 
 ### Constraints
 - Follow `docs/CVScan_Build_Spec.md` over conflicting handover notes.

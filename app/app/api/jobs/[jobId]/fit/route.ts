@@ -1,0 +1,131 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { deductCredits } from "@/lib/supabase/credits";
+import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
+import { formatApprovedFactsForPrompt } from "@/lib/profile/facts";
+import { analyzeJobFit } from "@/lib/fit/analyze";
+import type { FitAnalysisRecord, FitSignals, FitVerdict } from "@/types/fit";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const CREDIT_COST = 1;
+
+export async function POST(
+  _req: NextRequest,
+  props: { params: Promise<{ jobId: string }> }
+) {
+  const params = await props.params;
+
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!UUID_RE.test(params.jobId)) {
+      return NextResponse.json({ error: "Invalid job id" }, { status: 400 });
+    }
+
+    const supabase = createClient();
+
+    const { data: job, error: jobError } = await (supabase as any)
+      .from("jobs")
+      .select("*")
+      .eq("job_id", params.jobId)
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+
+    if (jobError) {
+      console.error("Load job for fit error:", jobError);
+      return NextResponse.json({ error: "Failed to load job" }, { status: 500 });
+    }
+
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    const { data: userRow } = await (supabase as any)
+      .from("users")
+      .select("credits")
+      .eq("id", session.user.id)
+      .single();
+
+    const credits = userRow?.credits ?? 0;
+    if (credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: "Insufficient credits. Please purchase more credits to run a job fit analysis." },
+        { status: 402 }
+      );
+    }
+
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Job fit: ${job.title} @ ${job.company}`,
+    });
+
+    if (deductError || !deductResult?.[0]?.success) {
+      return NextResponse.json(
+        { error: deductResult?.[0]?.error_message || "Failed to deduct credits" },
+        { status: 500 }
+      );
+    }
+
+    const profile = await loadProfileForTailoring(session.user.id, supabase);
+
+    if (!profile) {
+      return NextResponse.json(
+        {
+          error:
+            "Add and approve profile facts in Career Memory before running a job fit analysis.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const approvedFactsBlock = formatApprovedFactsForPrompt(profile.approved_facts);
+
+    const { verdict, signals, rationale } = await analyzeJobFit({
+      jobTitle: job.title,
+      company: job.company,
+      jobDescription: job.raw_description,
+      approvedFactsBlock,
+    });
+
+    const { data: row, error: insertError } = await (supabase as any)
+      .from("fit_analyses")
+      .insert({
+        user_id: session.user.id,
+        job_id: job.job_id,
+        verdict: verdict as FitVerdict,
+        signals_json: signals as FitSignals,
+        rationale,
+      })
+      .select("*")
+      .single();
+
+    if (insertError) {
+      console.error("Save fit analysis error:", insertError);
+      return NextResponse.json({ error: "Failed to save fit analysis" }, { status: 500 });
+    }
+
+    const analysis = row as FitAnalysisRecord;
+
+    return NextResponse.json({
+      analysis,
+      job,
+      credits_charged: CREDIT_COST,
+      new_credits: deductResult[0].new_credits,
+    });
+  } catch (error) {
+    console.error("Job fit analysis error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to run job fit analysis" },
+      { status: 500 }
+    );
+  }
+}
