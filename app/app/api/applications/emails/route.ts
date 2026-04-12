@@ -58,13 +58,24 @@ export async function POST(req: NextRequest) {
 
     // Get stage if provided
     let stage = null;
+    let stageId: string | null = null;
     if (body.stage_id) {
       const { data: stageData } = await (supabase
         .from('application_stages')
         .select as any)('*')
         .eq('id', body.stage_id)
+        .eq('application_id', application.id)
         .single();
+
+      if (!stageData) {
+        return NextResponse.json(
+          { error: 'Stage not found' },
+          { status: 404 }
+        );
+      }
+
       stage = stageData;
+      stageId = stageData.id;
     }
 
     // Generate email
@@ -93,8 +104,8 @@ export async function POST(req: NextRequest) {
       .from('generated_emails')
       .insert as any)({
         user_id: session.user.id,
-        application_id: body.application_id,
-        stage_id: body.stage_id,
+        application_id: application.id,
+        stage_id: stageId,
         email_type: body.email_type,
         subject: emailContent.subject,
         content: emailContent.content,

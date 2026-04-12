@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (!profile) {
       return NextResponse.json(
-        { error: 'Please complete your profile before creating a job pack' },
+        { error: 'Please import your resume and approve profile facts before creating a job pack' },
         { status: 400 }
       );
     }

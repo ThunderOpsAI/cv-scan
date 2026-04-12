@@ -22,6 +22,30 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient();
+    let jobPackId = body.job_pack_id;
+
+    if (jobPackId) {
+      const { data: ownedJobPack, error: jobPackError } = await (supabase
+        .from('job_packs')
+        .select as any)('id')
+        .eq('id', jobPackId)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (jobPackError) {
+        console.error('Failed to verify job pack ownership:', jobPackError);
+        return NextResponse.json(
+          { error: 'Failed to verify job pack' },
+          { status: 500 }
+        );
+      }
+
+      if (!ownedJobPack) {
+        return NextResponse.json({ error: 'Job pack not found' }, { status: 404 });
+      }
+
+      jobPackId = ownedJobPack.id;
+    }
 
     const { data: application, error } = await (supabase
       .from('applications')
@@ -38,7 +62,7 @@ export async function POST(req: NextRequest) {
         priority: body.priority || 'medium',
         applied_at: body.applied_at,
         notes: body.notes,
-        job_pack_id: body.job_pack_id,
+        job_pack_id: jobPackId,
       })
       .select()
       .single();

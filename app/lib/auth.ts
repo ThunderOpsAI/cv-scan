@@ -1,22 +1,52 @@
-import { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
+import { buildConsentFields } from "@/lib/auth/consent";
+import {
+  hasEmailAuthEnv,
+  hasGoogleAuthEnv,
+  hasSupabaseServerEnv,
+  nextAuthSecret,
+  sessionTokenCookieName,
+  useSecureCookies,
+} from "@/lib/auth/env";
 
-export const authOptions: NextAuthOptions = {
-  // Custom adapter using public schema (no next_auth schema needed)
-  adapter: CustomSupabaseAdapter() as any,
-  providers: [
+export { isAuthConfigured } from "@/lib/auth/env";
+
+type UserCreditsRow = {
+  id: string;
+  credits: number;
+};
+
+type ConsentFields = ReturnType<typeof buildConsentFields>;
+
+type UserConsentUpdate = (values: ConsentFields) => {
+  eq(column: "id", value: string): PromiseLike<{ error: unknown | null }>;
+};
+
+const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;
+
+const providers: NextAuthOptions["providers"] = [];
+
+if (hasGoogleAuthEnv) {
+  providers.push(
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       allowDangerousEmailAccountLinking: true,
-    }),
+    })
+  );
+}
+
+if (hasEmailAuthEnv) {
+  providers.push(
     EmailProvider({
       server: {}, // Not used — sendVerificationRequest overrides
       from: process.env.EMAIL_FROM || "noreply@example.com",
-      sendVerificationRequest: async ({ identifier, url, provider }) => {
+      sendVerificationRequest: async ({ identifier, url }) => {
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -35,9 +65,16 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Failed to send verification email");
         }
       },
-    }),
-  ],
-  secret: process.env.NEXTAUTH_SECRET,
+    })
+  );
+}
+
+export const authOptions: NextAuthOptions = {
+  // Custom adapter using public schema (no next_auth schema needed)
+  adapter: hasSupabaseServerEnv ? CustomSupabaseAdapter() : undefined,
+  providers,
+  secret: nextAuthSecret,
+  useSecureCookies,
 
   pages: {
     signIn: "/auth/signin",
@@ -46,13 +83,49 @@ export const authOptions: NextAuthOptions = {
 
   session: {
     strategy: "jwt",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    updateAge: SESSION_UPDATE_AGE_SECONDS,
+  },
+
+  jwt: {
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  },
+
+  cookies: {
+    sessionToken: {
+      name: sessionTokenCookieName,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
   },
 
   callbacks: {
     // The adapter creates users in public.users.
     // No manual sync needed anymore.
-    async signIn({ user }) {
-      return !!user.email;
+    async signIn({ user, email }) {
+      if (!user.email) {
+        return false;
+      }
+
+      const isEmailVerificationRequest =
+        typeof email === "object" && !!email?.verificationRequest;
+
+      if (user.id && hasSupabaseServerEnv && !isEmailVerificationRequest) {
+        const supabase = createClient();
+        const updateConsent = supabase.from("users").update as unknown as UserConsentUpdate;
+        const { error } = await updateConsent(buildConsentFields()).eq("id", user.id);
+
+        if (error) {
+          console.error("Failed to record auth consent:", error);
+          return false;
+        }
+      }
+
+      return true;
     },
 
     async jwt({ token, user }) {
@@ -63,18 +136,24 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      if (session.user && token.email) {
-        session.user.id = token.sub || "";
+      if (session.user) {
+        session.user.credits = 0;
+      }
+
+      if (session.user && hasSupabaseServerEnv) {
+        const tokenUserId = typeof token.sub === "string" ? token.sub : "";
+        session.user.id = tokenUserId;
         const supabase = createClient();
-        const { data: dbUser } = await supabase
-          .from("users")
-          .select("id, credits")
-          .eq("email", token.email as string)
-          .single();
+        const userQuery = supabase.from("users").select("id, credits");
+        const { data: dbUser } = (tokenUserId
+          ? (await userQuery.eq("id", tokenUserId).single())
+          : token.email
+            ? (await userQuery.eq("email", token.email as string).single())
+            : { data: null }) as { data: UserCreditsRow | null };
 
         if (dbUser) {
-          session.user.id = (dbUser as any).id;
-          session.user.credits = (dbUser as any).credits;
+          session.user.id = dbUser.id;
+          session.user.credits = dbUser.credits;
         }
       }
       return session;

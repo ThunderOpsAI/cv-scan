@@ -34,7 +34,7 @@ export async function GET(
     const { data: messages, error } = await (supabase
       .from('messages')
       .select as any)('*')
-      .eq('conversation_id', params.id)
+      .eq('conversation_id', conversation.id)
       .order('created_at', { ascending: true });
 
     if (error) {

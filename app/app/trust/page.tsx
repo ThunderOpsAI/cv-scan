@@ -14,10 +14,10 @@ export default function TrustPage() {
           <span className="text-blue-400">CV</span>Scan
         </Link>
         <Link
-          href="/dashboard"
+          href="/"
           className="text-gray-300 hover:text-white transition-colors"
         >
-          Back to Dashboard
+          Back to Home
         </Link>
       </nav>
 

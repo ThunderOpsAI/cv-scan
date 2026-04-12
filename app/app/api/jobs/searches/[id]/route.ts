@@ -17,11 +17,16 @@ export async function PUT(
     }
 
     const body: UpdateSavedSearchRequest = await req.json();
+    const updateData: UpdateSavedSearchRequest = {
+      name: body.name,
+      query_params: body.query_params,
+      frequency: body.frequency,
+    };
     const supabase = createClient();
 
     const { data: search, error } = await (supabase
       .from('saved_searches')
-      .update as any)(body)
+      .update as any)(updateData)
       .eq('id', params.id)
       .eq('user_id', session.user.id)
       .select()

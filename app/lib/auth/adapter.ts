@@ -4,31 +4,97 @@
  * Uses the existing createClient() from @/lib/supabase/server
  * which connects to the `public` schema with the service role key.
  *
- * We cast the supabase client to `any` throughout because the
- * Database type doesn't include accounts/sessions/verification_tokens.
- * These tables exist at runtime after running the SQL migration.
+ * The generated Database type doesn't include accounts/sessions/
+ * verification_tokens yet. This adapter keeps narrow local row types for
+ * the NextAuth-owned tables created by the SQL migration.
  *
  * NOTE: Postgres columns in `accounts` and `sessions` seem to be lowercase
  * (userid, provideraccountid, sessiontoken) based on error logs,
  * while `users` table has mixed case (emailVerified) based on diagnostic.
  * We enforce lowercase for accounts/sessions to match Postgres behavior.
  */
-import type { Adapter, AdapterUser, AdapterSession, VerificationToken } from "next-auth/adapters";
+import type { Adapter, AdapterAccount, AdapterUser, AdapterSession, VerificationToken } from "next-auth/adapters";
 import { createClient } from "@/lib/supabase/server";
+import { buildConsentFields } from "@/lib/auth/consent";
+
+type SupabaseError = {
+    message: string;
+};
+
+type SupabaseResult<T> = {
+    data: T;
+    error: SupabaseError | null;
+};
+
+type SupabaseMaybeResult<T> = {
+    data: T | null;
+    error: SupabaseError | null;
+};
+
+type AuthQueryBuilder<T> = {
+    insert(values: unknown): AuthQueryBuilder<T>;
+    update(values: unknown): AuthQueryBuilder<T>;
+    delete(): AuthQueryBuilder<T>;
+    select(columns?: string): AuthQueryBuilder<T>;
+    eq(column: string, value: unknown): AuthQueryBuilder<T>;
+    match(values: Record<string, unknown>): AuthQueryBuilder<T>;
+    single(): Promise<SupabaseResult<T>>;
+    maybeSingle(): Promise<SupabaseMaybeResult<T>>;
+};
+
+type AuthSupabaseClient = {
+    from<T>(table: string): AuthQueryBuilder<T>;
+};
+
+type AuthUserRow = {
+    id: string;
+    email: string;
+    name: string | null;
+    image: string | null;
+    emailVerified: string | Date | null;
+    terms_accepted_at?: string | Date | null;
+    privacy_accepted_at?: string | Date | null;
+    consent_version?: string | null;
+};
+
+type AccountUserIdRow = {
+    userId: string;
+};
+
+type AuthSessionRow = {
+    sessionToken?: string;
+    sessiontoken?: string;
+    userId?: string;
+    userid?: string;
+    expires: string | Date;
+};
+
+type AuthVerificationTokenRow = {
+    identifier: string;
+    token: string;
+    expires: string | Date;
+};
+
+function logAdapterDebug(message: string) {
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Adapter] ${message}`);
+    }
+}
 
 export function CustomSupabaseAdapter(): Adapter {
-    const supabase = createClient() as any;
+    const supabase = createClient() as unknown as AuthSupabaseClient;
 
     return {
-        async createUser(user: any) {
-            console.log("[Adapter] createUser:", user.email);
+        async createUser(user: Omit<AdapterUser, "id">) {
+            logAdapterDebug("createUser");
             const { data, error } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .insert({
                     email: user.email,
                     name: user.name ?? null,
                     image: user.image ?? null,
                     emailVerified: user.emailVerified?.toISOString() ?? null,
+                    ...buildConsentFields(),
                 })
                 .select()
                 .single();
@@ -43,7 +109,7 @@ export function CustomSupabaseAdapter(): Adapter {
         async getUser(id: string) {
             // console.log("[Adapter] getUser:", id);
             const { data, error } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .select()
                 .eq("id", id)
                 .maybeSingle();
@@ -54,27 +120,27 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async getUserByEmail(email: string) {
-            console.log("[Adapter] getUserByEmail:", email);
+            logAdapterDebug("getUserByEmail");
             const { data, error } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .select()
                 .eq("email", email)
                 .maybeSingle();
 
             if (error) throw error;
             if (!data) {
-                console.log("[Adapter] getUserByEmail: Not found");
+                logAdapterDebug("getUserByEmail: not found");
                 return null;
             }
             return formatUser(data);
         },
 
         async getUserByAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
-            console.log("[Adapter] getUserByAccount:", provider, providerAccountId);
+            logAdapterDebug(`getUserByAccount:${provider}`);
 
             // Try lowercase column names for accounts table
             const { data: account, error: accErr } = await supabase
-                .from("accounts")
+                .from<AccountUserIdRow>("accounts")
                 .select("userId:userid") // Maps userid -> userId
                 .match({ provider, provideraccountid: providerAccountId })
                 .maybeSingle();
@@ -84,12 +150,12 @@ export function CustomSupabaseAdapter(): Adapter {
                 throw accErr;
             }
             if (!account) {
-                console.log("[Adapter] getUserByAccount: Account not found");
+                logAdapterDebug("getUserByAccount: account not found");
                 return null;
             }
 
             const { data: user, error: userErr } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .select()
                 .eq("id", account.userId) // account.userId is populated from alias above
                 .maybeSingle();
@@ -99,10 +165,10 @@ export function CustomSupabaseAdapter(): Adapter {
             return formatUser(user);
         },
 
-        async updateUser(user: any) {
-            console.log("[Adapter] updateUser:", user.id);
+        async updateUser(user: Partial<AdapterUser> & Pick<AdapterUser, "id">) {
+            logAdapterDebug("updateUser");
             const { data, error } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .update({
                     name: user.name ?? undefined,
                     email: user.email ?? undefined,
@@ -121,25 +187,33 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async deleteUser(userId: string) {
-            await supabase.from("users").delete().eq("id", userId);
+            await supabase.from<AuthUserRow>("users").delete().eq("id", userId);
         },
 
-        async linkAccount(account: any) {
-            console.log("[Adapter] linkAccount:", account.provider, account.userId);
+        async linkAccount(account: AdapterAccount) {
+            logAdapterDebug(`linkAccount:${account.provider}`);
+            const sessionState =
+                "session_state" in account && typeof account.session_state === "string"
+                    ? account.session_state
+                    : null;
 
-            const { error } = await supabase.from("accounts").insert({
-                userid: account.userId,
-                type: account.type,
-                provider: account.provider,
-                provideraccountid: account.providerAccountId,
-                refresh_token: account.refresh_token ?? null,
-                access_token: account.access_token ?? null,
-                expires_at: account.expires_at ?? null,
-                token_type: account.token_type ?? null,
-                scope: account.scope ?? null,
-                id_token: account.id_token ?? null,
-                session_state: (account.session_state as string) ?? null,
-            });
+            const { error } = await supabase
+                .from<unknown>("accounts")
+                .insert({
+                    userid: account.userId,
+                    type: account.type,
+                    provider: account.provider,
+                    provideraccountid: account.providerAccountId,
+                    refresh_token: account.refresh_token ?? null,
+                    access_token: account.access_token ?? null,
+                    expires_at: account.expires_at ?? null,
+                    token_type: account.token_type ?? null,
+                    scope: account.scope ?? null,
+                    id_token: account.id_token ?? null,
+                    session_state: sessionState,
+                })
+                .select("id")
+                .maybeSingle();
 
             if (error) {
                 console.error("[Adapter] linkAccount error:", error);
@@ -149,14 +223,14 @@ export function CustomSupabaseAdapter(): Adapter {
 
         async unlinkAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
             await supabase
-                .from("accounts")
+                .from<unknown>("accounts")
                 .delete()
                 .match({ provider, provideraccountid: providerAccountId });
         },
 
         async createSession({ sessionToken, userId, expires }: { sessionToken: string; userId: string; expires: Date }) {
             const { data, error } = await supabase
-                .from("sessions")
+                .from<AuthSessionRow>("sessions")
                 .insert({
                     sessiontoken: sessionToken,
                     userid: userId,
@@ -171,7 +245,7 @@ export function CustomSupabaseAdapter(): Adapter {
 
         async getSessionAndUser(sessionToken: string) {
             const { data: session, error: sessErr } = await supabase
-                .from("sessions")
+                .from<AuthSessionRow>("sessions")
                 .select("sessionToken:sessiontoken, userId:userid, expires")
                 .eq("sessiontoken", sessionToken)
                 .maybeSingle();
@@ -180,7 +254,7 @@ export function CustomSupabaseAdapter(): Adapter {
             if (!session) return null;
 
             const { data: user, error: userErr } = await supabase
-                .from("users")
+                .from<AuthUserRow>("users")
                 .select()
                 .eq("id", session.userId)
                 .maybeSingle();
@@ -194,9 +268,9 @@ export function CustomSupabaseAdapter(): Adapter {
             };
         },
 
-        async updateSession(session: any) {
+        async updateSession(session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) {
             const { data, error } = await supabase
-                .from("sessions")
+                .from<AuthSessionRow>("sessions")
                 .update({
                     expires: session.expires?.toISOString(),
                 })
@@ -209,12 +283,12 @@ export function CustomSupabaseAdapter(): Adapter {
         },
 
         async deleteSession(sessionToken: string) {
-            await supabase.from("sessions").delete().eq("sessiontoken", sessionToken);
+            await supabase.from<AuthSessionRow>("sessions").delete().eq("sessiontoken", sessionToken);
         },
 
-        async createVerificationToken(token: { identifier: string; token: string; expires: Date }) {
+        async createVerificationToken(token: VerificationToken) {
             const { data, error } = await supabase
-                .from("verification_tokens")
+                .from<AuthVerificationTokenRow>("verification_tokens")
                 .insert({
                     identifier: token.identifier,
                     token: token.token,
@@ -234,7 +308,7 @@ export function CustomSupabaseAdapter(): Adapter {
 
         async useVerificationToken({ identifier, token }: { identifier: string; token: string }) {
             const { data, error } = await supabase
-                .from("verification_tokens")
+                .from<AuthVerificationTokenRow>("verification_tokens")
                 .delete()
                 .match({ identifier, token })
                 .select()
@@ -253,7 +327,7 @@ export function CustomSupabaseAdapter(): Adapter {
 }
 
 // Helper to format DB row -> AdapterUser
-function formatUser(data: any): AdapterUser {
+function formatUser(data: AuthUserRow): AdapterUser {
     return {
         id: data.id,
         email: data.email,
@@ -264,10 +338,17 @@ function formatUser(data: any): AdapterUser {
 }
 
 // Helper to format DB row -> AdapterSession
-function formatSession(data: any): AdapterSession {
+function formatSession(data: AuthSessionRow): AdapterSession {
+    const sessionToken = data.sessionToken ?? data.sessiontoken;
+    const userId = data.userId ?? data.userid;
+
+    if (!sessionToken || !userId) {
+        throw new Error("Malformed NextAuth session row");
+    }
+
     return {
-        sessionToken: data.sessionToken ?? data.sessiontoken, // Handle both cases just in case
-        userId: data.userId ?? data.userid,
+        sessionToken,
+        userId,
         expires: new Date(data.expires),
     };
 }

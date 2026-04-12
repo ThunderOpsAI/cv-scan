@@ -20,5 +20,9 @@ app/node_modules/
 # Build caches
 *.tsbuildinfo
 
+# Playwright
+app/test-results/
+**/playwright-report/
+
 # Personal / local
 Important Info DO NOT COMMIT for my eyes only/

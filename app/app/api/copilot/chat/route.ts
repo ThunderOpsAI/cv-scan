@@ -43,7 +43,29 @@ export async function POST(req: NextRequest) {
 
     let conversationId = body.conversation_id;
 
-    if (!conversationId) {
+    if (conversationId) {
+      const { data: existingConversation, error: existingConversationError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (existingConversationError) {
+        console.error('Failed to verify conversation ownership:', existingConversationError);
+        return NextResponse.json(
+          { error: 'Failed to verify conversation' },
+          { status: 500 }
+        );
+      }
+
+      if (!existingConversation) {
+        return NextResponse.json(
+          { error: 'Conversation not found' },
+          { status: 404 }
+        );
+      }
+    } else {
       const title = body.content.slice(0, 50) + (body.content.length > 50 ? '...' : '');
       const { data: newConversation, error: convError } = await supabase
         .from('conversations')
@@ -138,7 +160,8 @@ export async function POST(req: NextRequest) {
       .update({
         last_message_at: new Date().toISOString(),
       } as any)
-      .eq('id', conversationId);
+      .eq('id', conversationId)
+      .eq('user_id', session.user.id);
 
     return NextResponse.json({
       conversation_id: conversationId,

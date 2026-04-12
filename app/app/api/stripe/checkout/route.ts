@@ -3,10 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20" as any,
-});
-
 // Credit packages
 const CREDIT_PACKAGES = {
   starter: {
@@ -31,9 +27,16 @@ const CREDIT_PACKAGES = {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-12-15.clover",
+    });
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id || !session.user.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXTAUTH_URL}/dashboard?payment=success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/buy-credits?payment=cancelled`,
       metadata: {
-        userId: session.user.id!,
+        userId: session.user.id,
         credits: pkg.credits.toString(),
         packageType,
       },

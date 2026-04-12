@@ -365,6 +365,15 @@ export default function ProfilePage() {
           {/* Quick Links */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             <Link
+              href="/dashboard/profile/facts"
+              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+            >
+              <div className="text-xs font-semibold uppercase tracking-wide text-blue-300 mb-3">Approved facts</div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Career Memory</h3>
+              <p className="text-gray-400 text-sm">Import your resume and approve facts before generation uses them</p>
+            </Link>
+
+            <Link
               href="/dashboard/profile/experience"
               className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
             >

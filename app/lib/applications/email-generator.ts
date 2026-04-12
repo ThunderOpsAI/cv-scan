@@ -1,9 +1,6 @@
 // Email Generator - Generates thank you and follow-up emails
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { EmailType, Application, ApplicationStage, StructuredNotes } from '@/types/applications';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const flashModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+import { gemini } from '@/lib/gemini';
 
 interface EmailContext {
   application: Application;
@@ -16,6 +13,7 @@ export async function generateEmail(
   emailType: EmailType,
   context: EmailContext
 ): Promise<{ subject: string; content: string }> {
+  const flashModel = gemini.getGenerativeModel();
   const { application, stage, recipientName, additionalContext } = context;
   
   let prompt = '';

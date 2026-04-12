@@ -16,7 +16,7 @@ export interface Message {
   conversation_id: string;
   role: MessageRole;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -154,7 +154,7 @@ export interface CreateSavedSearchRequest {
   frequency?: SearchFrequency;
 }
 
-export interface UpdateSavedSearchRequest extends Partial<CreateSavedSearchRequest> {}
+export type UpdateSavedSearchRequest = Partial<CreateSavedSearchRequest>;
 
 export interface UpdateJobStatusRequest {
   status: JobStatus;
@@ -195,6 +195,10 @@ export interface CopilotContext {
   profile?: {
     full_name: string;
     headline?: string;
+    approved_facts?: Array<{
+      fact_type: string;
+      fact_text: string;
+    }>;
     experiences?: Array<{
       company: string;
       title: string;

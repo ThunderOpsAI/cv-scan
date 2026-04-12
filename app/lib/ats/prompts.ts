@@ -1,5 +1,6 @@
 
-import { ProfileForTailoring, StarStoryForTailoring, SmartGoalForTailoring } from '@/types/job-packs';
+import { ProfileForTailoring } from '@/types/job-packs';
+import { formatApprovedFactsForPrompt } from '@/lib/profile/facts';
 
 export function buildCoverLetterPrompt(
     profile: ProfileForTailoring,
@@ -7,20 +8,7 @@ export function buildCoverLetterPrompt(
     company: string,
     jd: string
 ): string {
-    const experiencesText = profile.experiences
-        .slice(0, 3)
-        .map(exp => `${exp.title} at ${exp.company}`)
-        .join(', ');
-
-    const starStoriesText = profile.star_stories
-        .map(s => `STAR Story (${s.title}):\nSituation: ${s.situation}\nTask: ${s.task}\nAction: ${s.action}\nResult: ${s.result}`)
-        .join('\n\n');
-
-    const smartGoalsText = profile.smart_goals
-        .map(g => `Career Goal: ${g.goal}`)
-        .join('\n');
-
-    const skillsText = profile.skills.map(s => s.name).join(', ');
+    const approvedFactsText = formatApprovedFactsForPrompt(profile.approved_facts);
 
     return `
     You are an expert career coach writing a high-impact cover letter for ${profile.full_name}.
@@ -28,26 +16,25 @@ export function buildCoverLetterPrompt(
     Target Role: ${jobTitle}
     Target Company: ${company}
     
-    CANDIDATE PROFILE:
-    Current Role: ${profile.headline || 'N/A'}
-    Top Experience: ${experiencesText}
-    Key Skills: ${skillsText}
-    
-    ACHIEVEMENTS (Use these to prove value):
-    ${starStoriesText || 'No specific stories provided - strictly use experience bullets'}
-    
-    CAREER AMBITIONS:
-    ${smartGoalsText || 'N/A'}
+    APPROVED PROFILE FACTS:
+    ${approvedFactsText}
 
     JOB DESCRIPTION:
     ${jd}
+
+    GROUNDING RULES:
+    - Use only the approved profile facts listed above as evidence for candidate claims.
+    - Do not add or imply achievements, skills, dates, metrics, responsibilities, titles, education, certifications, or credentials that are not in approved facts.
+    - Do not estimate numbers or dates.
+    - If a job requirement is not supported by approved facts, do not pretend the candidate has it.
+    - Include compact evidence tags like [fact:12345678] beside specific claims where they fit naturally.
 
     INSTRUCTIONS:
     Write a compelling, non-generic cover letter that follows this structure:
     
     1.  **The Hook**: Open with a strong statement connecting the candidate's background to the company's mission or specific challenges mentioned in the JD. Avoid "I am writing to apply for...".
-    2.  **The Story (The "Meat")**: Select the ONE most relevant STAR story (or experience if no stories) and weave it into a narrative. Show, don't just tell. connect the "Result" directly to how it solves the company's problem.
-    3.  **The Culture Fit**: Briefly mention why this specific company appeals (referencing values or goals from JD), connecting it to the candidate's career ambitions if relevant.
+    2.  **The Story (The "Meat")**: Select the most relevant approved facts and weave them into a narrative. Show, don't just tell.
+    3.  **The Culture Fit**: Briefly mention why this specific company appeals based on the JD, without inventing personal history.
     4.  **The Close**: confident call to action.
 
     TONE: Professional, confident, authentic. Avoid buzzwords like "passionate", "motivated" unless backed by evidence.
@@ -61,22 +48,7 @@ export function buildResumeTailoringPrompt(
     profile: ProfileForTailoring,
     jd: string
 ): string {
-    // We format the resume components here to save token space in the main logic if needed,
-    // but for now we'll rely on the caller to pass the structured profile and we output the text.
-    // Actually, the main logic builds the text representation. Let's assume we pass the profile data structures directly.
-
-    const experiencesText = profile.experiences
-        .map(exp => {
-            const bullets = exp.bullets.map(b => `- ${b}`).join('\n');
-            return `Position: ${exp.title} at ${exp.company}\nBullets:\n${bullets}`;
-        })
-        .join('\n\n');
-
-    // ... (skills etc are passed in the logic, we can just take the raw text or the structured object)
-    // Let's refine the input to match what `tailorResumeToJob` expects/uses.
-    // The original function built the text. Let's rebuild it here or accept it.
-    // To keep it simple and clean, let's accept the pre-formatted sections or the raw profile.
-    // Let's accept the raw profile and formatting helper.
+    const approvedFactsText = formatApprovedFactsForPrompt(profile.approved_facts);
 
     return `
     You are an expert resume writer. Tailor the following resume to the Job Description provided.
@@ -84,29 +56,24 @@ export function buildResumeTailoringPrompt(
     JOB DESCRIPTION:
     ${jd}
 
-    CANDIDATE PROFILE:
+    CANDIDATE CONTACT FIELDS:
     Name: ${profile.full_name}
     Headline: ${profile.headline}
     Summary: ${profile.summary}
     
-    EXPERIENCE:
-    ${experiencesText}
-    
-    SKILLS:
-    ${profile.skills.map(s => s.name).join(', ')}
-
-    STAR STORIES (Context for achievements):
-    ${profile.star_stories.map(s => `[${s.title}]: ${s.result}`).join('\n')}
+    APPROVED PROFILE FACTS:
+    ${approvedFactsText}
 
     INSTRUCTIONS:
-    1.  **Summary**: Rewrite the summary to be laser-focused on the JD's keywords and role requirements.
+    1.  **Summary**: Rewrite the summary to be focused on the JD only when approved facts support the claims.
     2.  **Experience**:
-        -   Reorder bullet points to prioritize those most relevant to the JD.
-        -   Rewrite specific bullet points to use keywords from the JD, BUT ONLY IF the underlying experience supports it.
-        -   Use the STAR stories provided to enhance bullet points with concrete results if they match the role.
-        -   **CRITICAL RULE**: Do NOT invent new jobs, companies, or dates. You can only reframe existing experience.
-        -   **CRITICAL RULE**: Do NOT add skills the candidate doesn't have.
-    3.  **Skills**: Reorder the skills list to put the most relevant ones first.
+        -   Reframe approved work, achievement, and metric facts for the JD.
+        -   Use JD keywords only when the approved facts support them.
+        -   Include compact evidence tags like [fact:12345678] beside rewritten bullets.
+        -   **CRITICAL RULE**: Do NOT invent jobs, companies, dates, achievements, metrics, responsibilities, titles, skills, education, certifications, or credentials.
+        -   **CRITICAL RULE**: Do NOT estimate missing numbers or dates.
+    3.  **Skills**: Include only skills present in approved facts.
+    4.  **Gaps**: If important JD requirements are unsupported by approved facts, list them under a short GAP NOTES section instead of inventing experience.
 
     OUTPUT FORMAT:
     Return the complete tailored resume text. Use a clean, plain-text format with clear section headers (SUMMARY, EXPERIENCE, EDUCATION, SKILLS).

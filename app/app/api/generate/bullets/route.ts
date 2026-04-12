@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { gemini } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
+import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
+import { approvedFactIds, formatApprovedFactsForPrompt } from "@/lib/profile/facts";
 
 const CREDIT_COST = 1;
 
@@ -39,18 +41,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate resume bullets using Gemini
-    const prompt = `You are an expert resume writer. Transform the following job duty into 3-5 professional, ATS-optimized resume bullet points.
+    const profile = await loadProfileForTailoring(session.user.id, supabase);
 
-Job Duty: ${jobDuty}
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Import your resume and approve profile facts before generating bullets." },
+        { status: 400 }
+      );
+    }
+
+    const approvedFactsText = formatApprovedFactsForPrompt(profile.approved_facts);
+
+    // Generate resume bullets using Gemini, grounded only in approved facts.
+    const prompt = `You are an expert resume writer. Create 3-5 professional, ATS-optimized resume bullet points grounded only in approved profile facts.
+
+Approved profile facts:
+${approvedFactsText}
+
+Target focus from the user:
+${jobDuty}
 
 Requirements:
 - Start each bullet with a strong action verb
-- Include quantifiable metrics when possible (estimate if not provided)
+- Include quantifiable metrics only when the exact metric appears in approved facts
 - Use concise, impactful language
 - Optimize for Applicant Tracking Systems (ATS)
 - Focus on accomplishments and impact, not just responsibilities
 - Keep each bullet to 1-2 lines maximum
+- Do not invent or imply achievements, skills, dates, metrics, responsibilities, titles, companies, education, certifications, or credentials
+- Do not treat the target focus as evidence unless it matches an approved fact
+- Add a compact evidence tag like [fact:12345678] to each bullet
 
 Return ONLY the bullet points, one per line, without any numbering or bullet symbols. Each line should be a complete sentence.`;
 
@@ -61,8 +81,8 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     // Parse bullets (split by newlines, filter empty)
     const bullets = text
       .split("\n")
-      .map((b) => b.trim())
-      .filter((b) => b.length > 0 && !b.match(/^[\d\.\-\*•]/)); // Remove numbering/bullets
+      .map((b) => b.replace(/^[\s\d.\-*•]+/, "").trim())
+      .filter((b) => b.length > 0);
 
     if (bullets.length === 0) {
       return NextResponse.json(
@@ -95,7 +115,10 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
       .insert as any)({
         user_id: session.user.id,
         type: "bullets",
-        input: { job_duty: jobDuty },
+        input: {
+          target_focus: jobDuty,
+          approved_fact_ids: approvedFactIds(profile.approved_facts),
+        },
         output: bullets.join("\n"),
         credits_used: CREDIT_COST,
       });

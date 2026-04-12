@@ -1,44 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { gemini } from "@/lib/gemini";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
+import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
+import { generateCoverLetter as generateGroundedCoverLetter } from "@/lib/ats/tailor";
+import { approvedFactIds } from "@/lib/profile/facts";
 
 const CREDIT_COST = 2;
 
+type CoverLetterRequest = {
+  resume?: unknown;
+  jobDescription?: unknown;
+  jobTitle?: unknown;
+  company?: unknown;
+};
+
+type SaveCoverLetterRequest = CoverLetterRequest & {
+  coverLetter?: unknown;
+};
+
+type GenerationInsert = {
+  user_id: string;
+  type: "cover_letter";
+  input: {
+    job_description: string;
+    approved_fact_ids: string[];
+  };
+  output: string;
+  credits_used: number;
+};
+
+type InsertGeneration = (values: GenerationInsert) => PromiseLike<{ error: unknown | null }>;
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const session = await getServerSession(authOptions);
 
-    const token = await getToken({ req: req as any });
-    const email = (token as any)?.email as string | undefined;
-
-    let userId: string | undefined;
-    if (email) {
-      const { data: dbUser } = await (supabase
-        .from("users")
-        .select as any)("id")
-        .eq("email", email)
-        .single();
-      userId = dbUser?.id;
-    }
-
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { resume, jobDescription } = await req.json();
+    const supabase = createClient();
+    const userId = session.user.id;
 
-    if (!resume || typeof resume !== "string" || resume.trim().length < 50) {
-      return NextResponse.json(
-        { error: "Please provide detailed resume information (at least 50 characters)" },
-        { status: 400 }
-      );
-    }
+    const { jobDescription, jobTitle, company } = (await req.json()) as CoverLetterRequest;
 
     if (!jobDescription || typeof jobDescription !== "string" || jobDescription.trim().length < 50) {
       return NextResponse.json(
         { error: "Please provide a detailed job description (at least 50 characters)" },
+        { status: 400 }
+      );
+    }
+
+    const profile = await loadProfileForTailoring(userId, supabase);
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Import your resume and approve profile facts before generating a cover letter." },
         { status: 400 }
       );
     }
@@ -57,32 +80,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate cover letter using Gemini
-    const prompt = `You are an expert career counselor and professional writer. Create a compelling, personalized cover letter based on the candidate's resume and the job description.
-
-CANDIDATE RESUME/BACKGROUND:
-${resume}
-
-JOB DESCRIPTION:
-${jobDescription}
-
-Requirements for the cover letter:
-- Write in a professional, enthusiastic tone
-- Start with a strong opening paragraph that captures attention
-- Highlight 2-3 key qualifications that match the job requirements
-- Show genuine interest in the company and role
-- Demonstrate how the candidate's experience solves the employer's needs
-- End with a confident call to action
-- Keep it concise (3-4 paragraphs, under 400 words)
-- Use proper business letter format
-- DO NOT include placeholder text like "[Your Name]" or "[Date]" - write a complete letter body only
-- Focus on specific achievements and skills from the resume that align with job requirements
-
-Write the cover letter body now:`;
-
-    const result = await gemini.generateContent(prompt);
-    const response = result.response;
-    const coverLetter = response.text().trim();
+    const coverLetter = await generateGroundedCoverLetter(
+      profile,
+      typeof jobTitle === "string" && jobTitle.trim() ? jobTitle.trim() : "the target role",
+      typeof company === "string" && company.trim() ? company.trim() : "the target company",
+      jobDescription
+    );
 
     if (coverLetter.length < 100) {
       return NextResponse.json(
@@ -92,7 +95,7 @@ Write the cover letter body now:`;
     }
 
     // Deduct credits using Supabase function
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: userId,
       p_amount: CREDIT_COST,
       p_description: "Generated cover letter",
@@ -109,35 +112,27 @@ Write the cover letter body now:`;
     return NextResponse.json({
       coverLetter,
       creditsRemaining: deductResult[0].new_credits,
+      approvedFactIds: approvedFactIds(profile.approved_facts),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generate cover letter error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate cover letter" },
+      { error: getErrorMessage(error, "Failed to generate cover letter") },
       { status: 500 }
     );
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const supabase = createClient();
-    const token = await getToken({ req: req as any });
-    const email = (token as any)?.email as string | undefined;
+    const session = await getServerSession(authOptions);
 
-    let userId: string | undefined;
-    if (email) {
-      const { data: dbUser } = await (supabase
-        .from("users")
-        .select as any)("id")
-        .eq("email", email)
-        .single();
-      userId = dbUser?.id;
-    }
-
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const supabase = createClient();
+    const userId = session.user.id;
 
     const { data: generations, error } = await supabase
       .from("generations")
@@ -153,7 +148,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ generations });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Fetch generations error:", error);
     return NextResponse.json(
       { error: "Failed to fetch saved items" },
@@ -164,43 +159,48 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const supabase = createClient();
-    const token = await getToken({ req: req as any });
-    const email = (token as any)?.email as string | undefined;
+    const session = await getServerSession(authOptions);
 
-    let userId: string | undefined;
-    if (email) {
-      const { data: dbUser } = await (supabase
-        .from("users")
-        .select as any)("id")
-        .eq("email", email)
-        .single();
-      userId = dbUser?.id;
-    }
-
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { coverLetter, resume, jobDescription } = await req.json();
+    const supabase = createClient();
+    const userId = session.user.id;
 
-    if (!coverLetter || !resume || !jobDescription) {
+    const { coverLetter, jobDescription } = (await req.json()) as SaveCoverLetterRequest;
+
+    if (
+      typeof coverLetter !== "string" ||
+      typeof jobDescription !== "string"
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    const profile = await loadProfileForTailoring(userId, supabase);
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Approved profile facts are required before saving generated career content." },
+        { status: 400 }
+      );
+    }
+
     // Save to database
-    const { error: insertError } = await supabase
-      .from("generations")
-      .insert({
-        user_id: userId,
-        type: "cover_letter",
-        input: { resume, job_description: jobDescription } as any,
-        output: coverLetter,
-        credits_used: 0, // No credits used for saving (already deducted during generation)
-      } as any);
+    const insertGeneration = supabase.from("generations").insert as unknown as InsertGeneration;
+    const { error: insertError } = await insertGeneration({
+      user_id: userId,
+      type: "cover_letter",
+      input: {
+        job_description: jobDescription,
+        approved_fact_ids: approvedFactIds(profile.approved_facts),
+      },
+      output: coverLetter,
+      credits_used: 0, // No credits used for saving (already deducted during generation)
+    });
 
     if (insertError) {
       console.error("Failed to save cover letter:", insertError);
@@ -211,7 +211,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Save cover letter error:", error);
     return NextResponse.json(
       { error: "Failed to save cover letter" },
@@ -222,23 +222,14 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const supabase = createClient();
-    const token = await getToken({ req: req as any });
-    const email = (token as any)?.email as string | undefined;
+    const session = await getServerSession(authOptions);
 
-    let userId: string | undefined;
-    if (email) {
-      const { data: dbUser } = await (supabase
-        .from("users")
-        .select as any)("id")
-        .eq("email", email)
-        .single();
-      userId = dbUser?.id;
-    }
-
-    if (!userId) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const supabase = createClient();
+    const userId = session.user.id;
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -263,7 +254,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Delete cover letter error:", error);
     return NextResponse.json(
       { error: "Failed to delete cover letter" },

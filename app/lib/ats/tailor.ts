@@ -1,15 +1,13 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ProfileForTailoring } from '@/types/job-packs';
 import { buildOriginalResume } from './profile-loader';
 import { buildCoverLetterPrompt, buildResumeTailoringPrompt } from './prompts';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const proModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+import { gemini } from '@/lib/gemini';
 
 export async function tailorResumeToJob(
   profile: ProfileForTailoring,
   jd: string
 ): Promise<string> {
+  const proModel = gemini.getGenerativeModel();
   // Use the advanced prompt builder
   const prompt = buildResumeTailoringPrompt(profile, jd);
 
@@ -31,6 +29,7 @@ export async function generateCoverLetter(
   company: string,
   jd: string
 ): Promise<string> {
+  const proModel = gemini.getGenerativeModel();
   // Use the advanced prompt builder with STAR stories context
   const prompt = buildCoverLetterPrompt(profile, jobTitle, company, jd);
 
@@ -40,6 +39,6 @@ export async function generateCoverLetter(
     return coverLetter.trim();
   } catch (error) {
     console.error('Cover letter generation error:', error);
-    return `Dear Hiring Manager,\n\nI am writing to express my interest in the ${jobTitle} position at ${company}.\n\nWith my background and skills, I am confident I would be a valuable addition to your team.\n\nThank you for considering my application.\n\nSincerely,\n${profile.full_name}`;
+    return `Dear Hiring Manager,\n\nI am interested in the ${jobTitle} position at ${company}. I have included my approved career facts for review and would welcome the opportunity to discuss the role further.\n\nThank you for considering my application.\n\nSincerely,\n${profile.full_name}`;
   }
 }

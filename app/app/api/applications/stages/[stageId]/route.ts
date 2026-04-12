@@ -22,8 +22,9 @@ export async function GET(
     // Get stage with application ownership check
     const { data: stage, error } = await (supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(user_id)')
+      .select as any)('*, applications!inner(id, user_id)')
       .eq('id', stageId)
+      .eq('applications.user_id', session.user.id)
       .single();
 
     if (error || !stage || stage.applications.user_id !== session.user.id) {
@@ -60,12 +61,23 @@ export async function PUT(
     const { stageId } = await params;
     const body: UpdateStageRequest = await req.json();
     const supabase = createClient();
+    const updateData: UpdateStageRequest = {
+      stage_type: body.stage_type,
+      stage_name: body.stage_name,
+      scheduled_at: body.scheduled_at,
+      completed_at: body.completed_at,
+      interviewers: body.interviewers,
+      raw_notes: body.raw_notes,
+      outcome: body.outcome,
+      feedback: body.feedback,
+    };
 
     // Verify ownership
     const { data: existing } = await (supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(user_id)')
+      .select as any)('*, applications!inner(id, user_id)')
       .eq('id', stageId)
+      .eq('applications.user_id', session.user.id)
       .single();
 
     if (!existing || existing.applications.user_id !== session.user.id) {
@@ -77,18 +89,19 @@ export async function PUT(
 
     // If raw_notes provided and changed, structure them
     let ai_structured = existing.ai_structured;
-    if (body.raw_notes && body.raw_notes !== existing.raw_notes) {
-      ai_structured = await structureInterviewNotes(body.raw_notes);
+    if (updateData.raw_notes && updateData.raw_notes !== existing.raw_notes) {
+      ai_structured = await structureInterviewNotes(updateData.raw_notes);
     }
 
     const { data: stage, error } = await (supabase
       .from('application_stages')
       .update as any)({
-        ...body,
+        ...updateData,
         ai_structured,
         updated_at: new Date().toISOString(),
       })
       .eq('id', stageId)
+      .eq('application_id', existing.application_id)
       .select()
       .single();
 
@@ -127,8 +140,9 @@ export async function DELETE(
     // Verify ownership before delete
     const { data: existing } = await (supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(user_id)')
+      .select as any)('*, applications!inner(id, user_id)')
       .eq('id', stageId)
+      .eq('applications.user_id', session.user.id)
       .single();
 
     if (!existing || existing.applications.user_id !== session.user.id) {
@@ -141,7 +155,8 @@ export async function DELETE(
     const { error } = await (supabase
       .from('application_stages')
       .delete as any)()
-      .eq('id', stageId);
+      .eq('id', stageId)
+      .eq('application_id', existing.application_id);
 
     if (error) {
       console.error('Failed to delete stage:', error);

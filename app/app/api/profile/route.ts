@@ -63,7 +63,14 @@ export async function PUT(req: NextRequest) {
 
     if (existingProfile) {
       const updateData: UpdateProfileRequest = {
-        ...body,
+        full_name: body.full_name,
+        headline: body.headline,
+        summary: body.summary,
+        phone: body.phone,
+        location: body.location,
+        linkedin_url: body.linkedin_url,
+        portfolio_url: body.portfolio_url,
+        github_url: body.github_url,
       };
 
       const result = await (supabase

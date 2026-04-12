@@ -6,6 +6,7 @@ import { searchJobs, formatAdzunaJob } from '@/lib/jobs/adzuna';
 import { searchRemoteOk, formatRemoteOkJob } from '@/lib/jobs/remoteok';
 import { searchJSearch, formatJSearchJob } from '@/lib/jobs/jsearch';
 import { calculateMatchScore } from '@/lib/jobs/matcher';
+import { loadProfileForTailoring } from '@/lib/ats/profile-loader';
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,11 +26,7 @@ export async function GET(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
-      .from('profiles')
-      .select as any)('*, experiences(*), skills(*), education(*)')
-      .eq('user_id', session.user.id)
-      .single();
+    const profile = await loadProfileForTailoring(session.user.id, supabase);
 
     // Fetch from all providers in parallel
     const [adzunaRes, remoteOkRes, jsearchRes] = await Promise.allSettled([
@@ -74,9 +71,9 @@ export async function GET(req: NextRequest) {
           location: formattedJob.location,
         },
         {
-          experiences: profile?.experiences,
-          skills: profile?.skills,
-          education: profile?.education,
+          experiences: profile?.experiences || [],
+          skills: profile?.skills || [],
+          education: profile?.education || [],
         }
       );
 

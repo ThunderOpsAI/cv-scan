@@ -103,27 +103,33 @@ export default function GenerateBullets() {
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">Generate Resume Bullets</h1>
             <p className="text-gray-400">
-              Transform your job duties into ATS-optimized, professional resume bullet points
+              Create ATS-optimized resume bullets from approved career facts
             </p>
             <div className="mt-2 text-blue-400 text-sm">Cost: 1 credit per generation</div>
+            <p className="mt-2 text-gray-400 text-sm">
+              Need to add facts first?{" "}
+              <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">
+                Open Career Memory
+              </Link>
+            </p>
           </div>
 
           {/* Input Form */}
           <form onSubmit={handleGenerate} className="mb-8">
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
               <label htmlFor="jobDuty" className="block text-white font-semibold mb-3">
-                What did you do in your role?
+                What should these bullets focus on?
               </label>
               <textarea
                 id="jobDuty"
                 value={jobDuty}
                 onChange={(e) => setJobDuty(e.target.value)}
-                placeholder="Example: Managed social media accounts for company, posted content daily, grew follower count"
+                placeholder="Example: Focus on product analytics, stakeholder leadership, or customer support impact"
                 className="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[120px]"
                 disabled={loading}
               />
               <p className="text-gray-400 text-sm mt-2">
-                Describe your responsibility, accomplishments, or daily tasks
+                This guides the generation, but only approved facts can be used as evidence.
               </p>
 
               {error && (
@@ -147,9 +153,8 @@ export default function GenerateBullets() {
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
               <h2 className="text-2xl font-bold text-white mb-4">Your Resume Bullets</h2>
               <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
-                <span className="text-blue-400 text-xl">🤖</span>
                 <p className="text-blue-200 text-sm leading-relaxed">
-                  <strong>AI-Generated Drafts:</strong> Please review and edit these bullet points to ensure they perfectly match your actual experience before using them in applications.
+                  <strong>AI-generated drafts:</strong> These bullets are grounded in approved career facts. Review every claim before using them in applications.
                 </p>
               </div>
               <p className="text-gray-400 mb-6">
@@ -197,12 +202,12 @@ export default function GenerateBullets() {
 
           {/* Tips */}
           <div className="mt-8 bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white font-semibold mb-3">💡 Tips for Best Results:</h3>
+            <h3 className="text-white font-semibold mb-3">Tips for best results:</h3>
             <ul className="space-y-2 text-gray-300 text-sm">
-              <li>• Be specific about your responsibilities and accomplishments</li>
-              <li>• Include metrics or numbers when possible (e.g., "increased by 30%")</li>
-              <li>• Mention tools, technologies, or methodologies you used</li>
-              <li>• Focus on impact and results, not just tasks</li>
+              <li>- Approve accurate resume facts in Career Memory first</li>
+              <li>- Add exact metrics before asking for metric-heavy bullets</li>
+              <li>- Mention the role or theme you want the approved facts tailored toward</li>
+              <li>- Reject or edit any draft that does not match your real experience</li>
             </ul>
           </div>
         </div>

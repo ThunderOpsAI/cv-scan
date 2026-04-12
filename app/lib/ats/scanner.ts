@@ -1,33 +1,27 @@
 // ATS Scanner - Analyzes job description against user profile
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ATSAnalysisResult, ProfileForTailoring } from '@/types/job-packs';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const flashModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+import { gemini } from '@/lib/gemini';
+import { formatApprovedFactsForPrompt } from '@/lib/profile/facts';
 
 export async function analyzeJobDescription(
   jd: string,
   profile: ProfileForTailoring
 ): Promise<ATSAnalysisResult> {
-  const skillsList = profile.skills.map(s => s.name).join(', ');
-  const experiencesList = profile.experiences
-    .map(e => `${e.title} at ${e.company} (${e.bullets.join('; ')})`)
-    .join('\n');
-  const educationList = profile.education
-    .map(e => `${e.degree} in ${e.field_of_study || 'N/A'} from ${e.institution}`)
-    .join('\n');
+  const flashModel = gemini.getGenerativeModel();
+  const approvedFactsText = formatApprovedFactsForPrompt(profile.approved_facts);
 
-  const prompt = `Analyze this job description for ATS compatibility with the candidate's profile.
+  const prompt = `Analyze this job description for ATS compatibility with the candidate's approved profile facts.
 
 Job Description:
 ${jd}
 
-Candidate Profile:
-- Skills: ${skillsList || 'None listed'}
-- Experience:
-${experiencesList || 'None listed'}
-- Education:
-${educationList || 'None listed'}
+Approved Profile Facts:
+${approvedFactsText}
+
+Grounding rules:
+- Treat the approved facts as the only source of candidate truth.
+- Do not infer or invent skills, achievements, metrics, dates, responsibilities, education, certifications, or credentials.
+- Mark JD requirements as missing when they are not supported by approved facts.
 
 Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
@@ -46,10 +40,10 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 }
 
 Analyze carefully:
-1. Match skills mentioned in JD against candidate skills
-2. Check experience relevance to job requirements
-3. Evaluate education fit
-4. Provide actionable recommendations to improve match`;
+1. Match skills mentioned in JD only against approved facts
+2. Check experience relevance only against approved facts
+3. Evaluate education fit only against approved facts
+4. Provide actionable recommendations that ask the user to add or approve missing facts instead of inventing them`;
 
   try {
     const result = await flashModel.generateContent(prompt);

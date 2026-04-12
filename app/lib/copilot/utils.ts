@@ -9,20 +9,25 @@ export async function buildCopilotContext(
 
   const { data: profile } = await (supabase
     .from('profiles')
-    .select as any)('*, experiences(*), skills(*)')
+    .select as any)('full_name, headline')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
-  if (profile) {
+  const { data: approvedFacts } = await (supabase
+    .from('profile_facts')
+    .select as any)('fact_type, fact_text')
+    .eq('user_id', userId)
+    .eq('is_approved', true)
+    .order('created_at', { ascending: true });
+
+  if (profile || approvedFacts?.length) {
     context.profile = {
-      full_name: profile.full_name,
-      headline: profile.headline,
-      experiences: profile.experiences?.map((exp: any) => ({
-        company: exp.company,
-        title: exp.title,
-        years: calculateYears(exp.start_date, exp.end_date),
-      })),
-      skills: profile.skills?.map((skill: any) => skill.name),
+      full_name: profile?.full_name || 'Candidate',
+      headline: profile?.headline,
+      approved_facts: approvedFacts || [],
+      skills: approvedFacts
+        ?.filter((fact: any) => fact.fact_type === 'skill')
+        .map((fact: any) => fact.fact_text),
     };
   }
 
@@ -31,6 +36,7 @@ export async function buildCopilotContext(
       .from('discovered_jobs')
       .select as any)('*')
       .eq('id', contextHints.job_id)
+      .eq('user_id', userId)
       .single();
 
     if (job) {
@@ -56,10 +62,10 @@ export function buildSystemPrompt(context: CopilotContext): string {
     if (context.profile.headline) {
       parts.push(`- Current Role: ${context.profile.headline}`);
     }
-    if (context.profile.experiences && context.profile.experiences.length > 0) {
-      parts.push('\nRecent Experience:');
-      context.profile.experiences.slice(0, 3).forEach((exp) => {
-        parts.push(`- ${exp.title} at ${exp.company} (${exp.years} years)`);
+    if (context.profile.approved_facts && context.profile.approved_facts.length > 0) {
+      parts.push('\nApproved Career Facts:');
+      context.profile.approved_facts.slice(0, 20).forEach((fact) => {
+        parts.push(`- (${fact.fact_type}) ${fact.fact_text}`);
       });
     }
     if (context.profile.skills && context.profile.skills.length > 0) {
@@ -74,13 +80,7 @@ export function buildSystemPrompt(context: CopilotContext): string {
   }
 
   parts.push('\nProvide helpful, actionable advice. Be concise and professional.');
+  parts.push('Use approved career facts as the only source for candidate-specific claims. If a fact is missing, ask the user to add or approve it instead of inventing it.');
 
   return parts.join('\n');
-}
-
-function calculateYears(startDate: string, endDate?: string): number {
-  const start = new Date(startDate);
-  const end = endDate ? new Date(endDate) : new Date();
-  const years = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365);
-  return Math.round(years * 10) / 10;
 }
