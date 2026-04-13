@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 
 export type CreditRpcResult = {
   success: boolean;
@@ -18,7 +19,34 @@ export async function deductCredits(
   supabase: SupabaseClient<any>,
   args: DeductCreditsArgs
 ): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  return await _deductCredits(supabase, args);
+  const result = await _deductCredits(supabase, args);
+  const rpcResult = result.data?.[0];
+
+  if (!result.error && rpcResult?.success) {
+    await emitAnalyticsEvent({
+      eventName: "credit_spent",
+      userId: args.p_user_id,
+      supabase,
+      properties: {
+        amount: args.p_amount,
+        balance_after: rpcResult.new_credits,
+        has_reference_id: Boolean(args.p_reference_id),
+      },
+    });
+  } else {
+    await logCriticalError({
+      workflow: "credit_debit",
+      userId: args.p_user_id,
+      supabase,
+      error: result.error ?? rpcResult?.error_message ?? "Unknown credit debit failure",
+      properties: {
+        amount: args.p_amount,
+        has_reference_id: Boolean(args.p_reference_id),
+      },
+    });
+  }
+
+  return result;
 }
 
 export const deductCredit = deductCredits;

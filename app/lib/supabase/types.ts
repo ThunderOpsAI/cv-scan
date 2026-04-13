@@ -9,6 +9,9 @@ export type Database = {
           image: string | null;
           credits: number;
           stripe_customer_id: string | null;
+          plan_tier: "free" | "starter" | "pro" | "enterprise";
+          stripe_subscription_id: string | null;
+          stripe_subscription_status: string | null;
           terms_accepted_at: string | null;
           privacy_accepted_at: string | null;
           consent_version: string | null;
@@ -30,6 +33,9 @@ export type Database = {
           image?: string | null;
           credits?: number;
           stripe_customer_id?: string | null;
+          plan_tier?: "free" | "starter" | "pro" | "enterprise";
+          stripe_subscription_id?: string | null;
+          stripe_subscription_status?: string | null;
           terms_accepted_at?: string | null;
           privacy_accepted_at?: string | null;
           consent_version?: string | null;
@@ -51,6 +57,9 @@ export type Database = {
           image?: string | null;
           credits?: number;
           stripe_customer_id?: string | null;
+          plan_tier?: "free" | "starter" | "pro" | "enterprise";
+          stripe_subscription_id?: string | null;
+          stripe_subscription_status?: string | null;
           terms_accepted_at?: string | null;
           privacy_accepted_at?: string | null;
           consent_version?: string | null;
@@ -121,6 +130,62 @@ export type Database = {
           input?: unknown;
           output?: string;
           credits_used?: number;
+          created_at?: string;
+        };
+      };
+      analytics_events: {
+        Row: {
+          event_id: string;
+          user_id: string | null;
+          event_name:
+            | "user_signed_up"
+            | "resume_imported"
+            | "facts_reviewed"
+            | "job_fit_run"
+            | "tailoring_run"
+            | "cover_letter_run"
+            | "application_saved"
+            | "interview_prep_run"
+            | "credit_purchased"
+            | "credit_spent"
+            | "critical_error";
+          properties_json: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: {
+          event_id?: string;
+          user_id?: string | null;
+          event_name:
+            | "user_signed_up"
+            | "resume_imported"
+            | "facts_reviewed"
+            | "job_fit_run"
+            | "tailoring_run"
+            | "cover_letter_run"
+            | "application_saved"
+            | "interview_prep_run"
+            | "credit_purchased"
+            | "credit_spent"
+            | "critical_error";
+          properties_json?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: {
+          event_id?: string;
+          user_id?: string | null;
+          event_name?:
+            | "user_signed_up"
+            | "resume_imported"
+            | "facts_reviewed"
+            | "job_fit_run"
+            | "tailoring_run"
+            | "cover_letter_run"
+            | "application_saved"
+            | "interview_prep_run"
+            | "credit_purchased"
+            | "credit_spent"
+            | "critical_error";
+          properties_json?: Record<string, unknown>;
           created_at?: string;
         };
       };

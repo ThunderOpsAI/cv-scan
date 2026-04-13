@@ -1,22 +1,8 @@
-import { withAuth } from "next-auth/middleware";
-import { nextAuthSecret, sessionTokenCookieName } from "@/lib/auth/env";
+// Auth middleware disabled for beta branch (no authentication required)
+// All routes are now public.
 
-export default withAuth({
-  pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-  },
-  secret: nextAuthSecret,
-  cookies: {
-    sessionToken: {
-      name: sessionTokenCookieName,
-    },
-  },
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-});
-
-export const config = {
-  matcher: ["/dashboard/:path*", "/buy-credits", "/generate/:path*"],
-};
+// Export a no-op proxy function for Next.js build compatibility
+export default function proxy() {
+	// No middleware logic in beta
+	return Response.next ? Response.next() : undefined;
+}

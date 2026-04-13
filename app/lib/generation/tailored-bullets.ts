@@ -3,6 +3,7 @@ import type { ProfileForTailoring } from "@/types/job-packs";
 import { formatApprovedFactsWithFullIds, shortFactId } from "@/lib/profile/facts";
 import type { TailoredBulletsEvidence } from "@/types/generated-assets";
 import { filterFactsForBullets } from "@/types/generated-assets";
+import { resolveApprovedFactId } from "@/lib/generation/grounding";
 
 function parseJson(text: string): unknown {
   let cleaned = text.trim();
@@ -69,16 +70,22 @@ Return ONLY valid JSON:
   const ungroundable = parsed.ungroundable_notes;
 
   const items: TailoredBulletsEvidence["items"] = [];
+  const notes: string[] = [];
   if (Array.isArray(itemsRaw)) {
     for (const row of itemsRaw) {
       if (!row || typeof row !== "object") continue;
       const o = row as Record<string, unknown>;
-      const factId = typeof o.fact_id === "string" ? o.fact_id : "";
+      const rawFactId = typeof o.fact_id === "string" ? o.fact_id : "";
+      const factId = resolveApprovedFactId(profile.approved_facts, rawFactId);
       const original = typeof o.original === "string" ? o.original : "";
       const tailored = typeof o.tailored === "string" ? o.tailored : "";
       const grounded = o.grounded === true;
       const note = typeof o.note === "string" ? o.note : undefined;
-      if (!factId || !tailored.trim()) continue;
+      if (!factId) {
+        notes.push("A generated bullet was dropped because it cited a fact outside your approved profile.");
+        continue;
+      }
+      if (!tailored.trim()) continue;
       items.push({
         fact_id: factId,
         original: original || "(from approved fact)",
@@ -89,7 +96,6 @@ Return ONLY valid JSON:
     }
   }
 
-  const notes: string[] = [];
   if (Array.isArray(ungroundable)) {
     for (const n of ungroundable) {
       if (typeof n === "string" && n.trim()) notes.push(n.trim());

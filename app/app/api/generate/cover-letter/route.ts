@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { generateCoverLetter as generateGroundedCoverLetter } from "@/lib/ats/tailor";
 import { approvedFactIds } from "@/lib/profile/facts";
+import { extractCoverLetterEvidence } from "@/lib/generation/cover-letter-evidence";
+import { groundingErrorMessage } from "@/lib/generation/grounding";
 
 const CREDIT_COST = 2;
 
@@ -95,6 +98,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
+
+    if (evidence.has_ungrounded_claims) {
+      return NextResponse.json(
+        {
+          error: groundingErrorMessage("cover_letter"),
+          evidence,
+        },
+        { status: 422 }
+      );
+    }
+
     // Deduct credits using Supabase function
     const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: userId,
@@ -111,13 +126,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    await emitAnalyticsEvent({
+      eventName: "cover_letter_run",
+      userId,
+      supabase,
+      properties: {
+        approved_fact_count: profile.approved_facts.length,
+        credits_charged: CREDIT_COST,
+      },
+    });
+
     return NextResponse.json({
       coverLetter,
+      evidence,
       creditsRemaining: deductResult[0].new_credits,
       approvedFactIds: approvedFactIds(profile.approved_facts),
     });
   } catch (error: unknown) {
     console.error("Generate cover letter error:", error);
+    await logCriticalError({
+      workflow: "cover_letter_run",
+      error,
+    });
     return NextResponse.json(
       { error: getErrorMessage(error, "Failed to generate cover letter") },
       { status: 500 }
@@ -191,6 +221,15 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    const evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
+
+    if (evidence.has_ungrounded_claims) {
+      return NextResponse.json(
+        { error: groundingErrorMessage("cover_letter"), evidence },
+        { status: 422 }
+      );
+    }
+
     // Save to database
     const insertGeneration = supabase.from("generations").insert as unknown as InsertGeneration;
     const { error: insertError } = await insertGeneration({
@@ -206,6 +245,12 @@ export async function PUT(req: NextRequest) {
 
     if (insertError) {
       console.error("Failed to save cover letter:", insertError);
+      await logCriticalError({
+        workflow: "cover_letter_save",
+        userId,
+        supabase,
+        error: insertError,
+      });
       return NextResponse.json(
         { error: "Failed to save cover letter" },
         { status: 500 }

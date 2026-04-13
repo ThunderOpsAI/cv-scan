@@ -1,6 +1,7 @@
-import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
+// Auth API disabled for beta branch (no authentication)
+export function GET() {
+	return new Response('Authentication is disabled in beta', { status: 404 });
+}
+export function POST() {
+	return new Response('Authentication is disabled in beta', { status: 404 });
+}

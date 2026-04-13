@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { emitAnalyticsEvent, logCriticalError } from '@/lib/analytics/server';
 import { gemini } from '@/lib/gemini';
 import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
@@ -66,6 +67,12 @@ export async function POST(req: NextRequest) {
 
     if (userError || !user) {
       console.error('Failed to load user credits for interview chat:', userError);
+      await logCriticalError({
+        workflow: 'interview_credit_load',
+        userId: session.user.id,
+        supabase,
+        error: userError ?? 'Missing user credit row',
+      });
       return NextResponse.json(
         { error: 'Unable to verify your credit balance. Please try again.' },
         { status: 500 }
@@ -128,12 +135,27 @@ Based on the above, write your next response as the Interviewer. Remember to giv
       );
     }
 
+    await emitAnalyticsEvent({
+      eventName: 'interview_prep_run',
+      userId: session.user.id,
+      supabase,
+      properties: {
+        message_count: sanitizedMessages.length,
+        plan_tier: planTier,
+        credits_charged: CREDIT_COST,
+      },
+    });
+
     return NextResponse.json({ 
       response: aiResponse,
       creditsRemaining: deductResult[0].new_credits,
     });
   } catch (error: any) {
     console.error('Interview Chat error:', error);
+    await logCriticalError({
+      workflow: 'interview_prep_run',
+      error,
+    });
     return NextResponse.json(
       { error: error.message || 'Failed to generate response' },
       { status: 500 }

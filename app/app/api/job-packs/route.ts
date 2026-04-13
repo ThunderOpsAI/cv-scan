@@ -8,6 +8,11 @@ import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { tailorResumeToJob, generateCoverLetter } from '@/lib/ats/tailor';
 import { detectCulturalWarnings } from '@/lib/ats/cultural-analysis';
 import { loadProfileForTailoring } from '@/lib/ats/profile-loader';
+import { extractCoverLetterEvidence } from '@/lib/generation/cover-letter-evidence';
+import {
+  findUngroundedCandidateClaimLines,
+  groundingErrorMessage,
+} from '@/lib/generation/grounding';
 import { CreateJobPackRequest, JobPackResponse, JobPackListResponse } from '@/types/job-packs';
 
 const CREDIT_COST = 5;
@@ -62,6 +67,28 @@ export async function POST(req: NextRequest) {
       generateCoverLetter(profile, body.job_title, body.company, body.job_description),
       detectCulturalWarnings(body.job_description),
     ]);
+
+    const ungroundedResumeLines = findUngroundedCandidateClaimLines(
+      tailoredResume,
+      profile.approved_facts
+    );
+    const coverEvidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
+
+    if (ungroundedResumeLines.length > 0 || coverEvidence.has_ungrounded_claims) {
+      return NextResponse.json(
+        {
+          error:
+            ungroundedResumeLines.length > 0
+              ? groundingErrorMessage('resume')
+              : groundingErrorMessage('cover_letter'),
+          grounding: {
+            ungrounded_resume_line_count: ungroundedResumeLines.length,
+            cover_letter_missing_grounding: coverEvidence.missing_grounding_notes,
+          },
+        },
+        { status: 422 }
+      );
+    }
 
     // Deduct credits
     const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {

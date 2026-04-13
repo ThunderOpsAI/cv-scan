@@ -27,7 +27,8 @@ export function buildCoverLetterPrompt(
     - Do not add or imply achievements, skills, dates, metrics, responsibilities, titles, education, certifications, or credentials that are not in approved facts.
     - Do not estimate numbers or dates.
     - If a job requirement is not supported by approved facts, do not pretend the candidate has it.
-    - Include compact evidence tags like [fact:12345678] beside specific claims where they fit naturally.
+    - Include compact evidence tags like [fact:12345678] beside every candidate-specific claim.
+    - Put unsupported job requirements in a short "Gap notes:" line instead of turning them into candidate strengths.
 
     INSTRUCTIONS:
     Write a compelling, non-generic cover letter that follows this structure:
@@ -65,7 +66,7 @@ export function buildResumeTailoringPrompt(
     ${approvedFactsText}
 
     INSTRUCTIONS:
-    1.  **Summary**: Rewrite the summary to be focused on the JD only when approved facts support the claims.
+    1.  **Summary**: Rewrite the summary to be focused on the JD only when approved facts support the claims. Add compact evidence tags like [fact:12345678] beside candidate claims.
     2.  **Experience**:
         -   Reframe approved work, achievement, and metric facts for the JD.
         -   Use JD keywords only when the approved facts support them.

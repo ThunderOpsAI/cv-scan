@@ -197,6 +197,12 @@ export default async function Home() {
             <Link href={pricingHref} className="text-gray-400 hover:text-white transition-colors">
               Pricing
             </Link>
+            <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+              Terms
+            </Link>
             <a href="mailto:support@cv-scan.com" className="text-gray-400 hover:text-white transition-colors">
               Support
             </a>

@@ -18,9 +18,17 @@ export async function GET(
 
     const { id, format: rawFormat } = await params;
     const format = rawFormat.toLowerCase();
+    const reviewed = req.nextUrl.searchParams.get('reviewed') === '1';
 
     if (format !== 'pdf' && format !== 'docx') {
       return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
+    }
+
+    if (!reviewed) {
+      return NextResponse.json(
+        { error: 'Review the AI-generated job pack content before export.' },
+        { status: 400 }
+      );
     }
 
     const supabase = createClient();
@@ -93,7 +101,7 @@ export async function GET(
       const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       
       let page = pdfDoc.addPage();
-      const { width, height } = page.getSize();
+      const { height } = page.getSize();
       let y = height - 50;
 
       const drawText = (text: string, font: any, size: number, options: any = {}) => {

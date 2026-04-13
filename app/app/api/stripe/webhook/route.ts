@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendPaymentReceiptEmail } from "@/lib/email/resend";
 import {
@@ -43,10 +44,32 @@ async function creditPurchaseFromStripe(params: {
 
   if (rpcError || !rpcResult?.[0]?.success) {
     console.error("Failed to add credits in database:", rpcError || rpcResult?.[0]?.error_message);
+    await logCriticalError({
+      workflow: "stripe_credit_purchase",
+      userId,
+      supabase,
+      error: rpcError ?? rpcResult?.[0]?.error_message ?? "Unknown credit purchase failure",
+      properties: {
+        credits,
+        package_type: packageType,
+        amount_total: amountTotal,
+      },
+    });
     return false;
   }
 
   console.log(`Credits applied for ${userId} ref=${referenceId} (+${credits})`);
+  await emitAnalyticsEvent({
+    eventName: "credit_purchased",
+    userId,
+    supabase,
+    properties: {
+      credits,
+      package_type: packageType,
+      amount_total: amountTotal,
+      stripe_session_id: stripeSessionId,
+    },
+  });
 
   if (process.env.RESEND_API_KEY && customerEmail) {
     const { data: user } = await (supabase.from("users").select as any)("name").eq("id", userId).single();
@@ -99,6 +122,16 @@ async function persistSubscriptionState(params: {
   const { error } = await (supabase.from("users").update as any)(patch).eq("id", userId);
   if (error) {
     console.error("Failed to update user subscription state:", error);
+    await logCriticalError({
+      workflow: "stripe_subscription_state_update",
+      userId,
+      supabase,
+      error,
+      properties: {
+        status,
+        plan_tier: keepsAccess ? tierWhenActive : "free",
+      },
+    });
     return false;
   }
   return true;
@@ -153,6 +186,15 @@ async function handleCheckoutSessionCompleted(
 
   if (!userId || Number.isNaN(credits) || credits <= 0) {
     console.error("Missing or invalid credit metadata in payment checkout session:", session.id);
+    await logCriticalError({
+      workflow: "stripe_credit_metadata",
+      error: "Missing or invalid credit metadata in payment checkout session",
+      properties: {
+        has_user_id: Boolean(userId),
+        credits,
+        package_type: packageType,
+      },
+    });
     return { ok: false, errorStatus: 400 };
   }
 
@@ -217,6 +259,15 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription): Promise<void
 
   if (error) {
     console.error("subscription.deleted user update failed:", error);
+    await logCriticalError({
+      workflow: "stripe_subscription_deleted",
+      supabase,
+      error,
+      properties: {
+        subscription_id: sub.id,
+        status: sub.status,
+      },
+    });
   }
 }
 
@@ -235,6 +286,10 @@ export async function POST(req: NextRequest) {
 
   if (!webhookSecret) {
     console.error("STRIPE_WEBHOOK_SECRET is not configured");
+    await logCriticalError({
+      workflow: "stripe_webhook_config",
+      error: "STRIPE_WEBHOOK_SECRET is not configured",
+    });
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
   }
 

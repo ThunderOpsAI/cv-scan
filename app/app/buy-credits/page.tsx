@@ -1,62 +1,25 @@
-"use client";
-
-import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
-
-const CREDIT_PACKAGES = [
-  {
-    id: "starter",
-    name: "Starter Pack",
-    credits: 50,
-    price: 8.99,
-    description: "Enough credits to try several applications",
-    features: ["50 credits", "No expiration", "Instant delivery"],
-    popular: false,
-  },
-  {
-    id: "sprint",
-    name: "Application Sprint",
-    credits: 200,
-    price: 29.99,
-    description: "Best value for a steady search cadence",
-    features: ["200 credits", "No expiration", "Instant delivery", "Best value"],
-    popular: true,
-  },
-  {
-    id: "career",
-    name: "Career Switch Pack",
-    credits: 500,
-    price: 69.99,
-    description: "Higher-volume tailoring and prep",
-    features: ["500 credits", "No expiration", "Instant delivery"],
-    popular: false,
-  },
-];
-
-type LedgerEntry = {
-  event_id: string;
-  event_type: string;
-  amount: number;
-  balance_after: number;
-  description: string | null;
-  created_at: string;
-};
-
-function BuyCreditsContent() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [subLoading, setSubLoading] = useState<string | null>(null);
-  const [purchases, setPurchases] = useState<LedgerEntry[]>([]);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    }
-  }, [status, router]);
+// Buy credits page disabled for beta branch (no payments/credits in beta)
+export default function BuyCreditsPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Payments Disabled</h1>
+        <p className="mb-3">Purchasing credits is not available in the public beta. All features are open and free to use.</p>
+      </div>
+    </div>
+  );
+}
+// Buy credits page disabled for beta branch (no payments/credits in beta)
+export default function BuyCreditsPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Payments Disabled</h1>
+        <p className="mb-3">Purchasing credits is not available in the public beta. All features are open and free to use.</p>
+      </div>
+    </div>
+  );
+}
 
   useEffect(() => {
     const payment = searchParams.get("payment");
@@ -151,34 +114,17 @@ function BuyCreditsContent() {
     }
   };
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
-
-  const paymentSuccess = searchParams.get("payment") === "success";
-
+// Buy credits page disabled for beta branch (no payments/credits in beta)
+export default function BuyCreditsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
-        </Link>
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="text-white text-sm">
-            <span className="text-gray-400">Plan:</span>{" "}
-            <span className="font-semibold text-indigo-300">{session.user.planTier}</span>
-          </div>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Payments Disabled</h1>
+        <p className="mb-3">Purchasing credits is not available in the public beta. All features are open and free to use.</p>
+      </div>
+    </div>
+  );
+}
             <span className="font-bold text-blue-400">{session.user.credits}</span>
           </div>
           <Link

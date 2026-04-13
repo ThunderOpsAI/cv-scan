@@ -94,13 +94,13 @@ export default function ExperiencePage() {
     }
   };
 
-  const handleAddBullet = async (experienceId: string) => {
+  const handleAddBullet = async (experienceId: string, manual = true) => {
     if (!bulletContent.trim()) return;
     try {
       const res = await fetch("/api/profile/bullets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ experience_id: experienceId, content: bulletContent }),
+        body: JSON.stringify({ experience_id: experienceId, content: bulletContent, manual }),
       });
       if (res.ok) {
         setBulletContent("");
@@ -393,10 +393,10 @@ export default function ExperiencePage() {
                           className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
                         />
                         <button
-                          onClick={() => handleAddBullet(exp.id)}
+                          onClick={() => handleAddBullet(exp.id, true)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
                         >
-                          Add
+                          Add (Manual)
                         </button>
                         <button
                           onClick={() => {
@@ -416,8 +416,11 @@ export default function ExperiencePage() {
                           <span className="text-blue-400 mt-1">•</span>
                           <div className="flex-1">
                             <p className="text-gray-300">{bullet.content}</p>
+                            {bullet.manual && (
+                              <span className="text-xs text-yellow-400 block mt-1">manually added — not from your verified profile</span>
+                            )}
                             {bullet.mined_metrics && (
-                              <span className="text-xs text-green-400">✓ Enhanced with metrics</span>
+                              <span className="text-xs text-green-400 block mt-1">✓ Enhanced with metrics</span>
                             )}
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 flex gap-2">

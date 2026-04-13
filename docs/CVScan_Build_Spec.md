@@ -175,9 +175,30 @@ This is the highest-leverage foundation investment. Every generation, fit scan, 
 
 ---
 
-## Trust — Phase 4
+
+## Trust — Phase 4 (Code-Complete)
 
 **Goal:** Users trust the output. Grounded generation is enforced, disclosures are in place, AI usage is understandable, and the legal surface is complete.
+
+**Status:** All Trust 4.1–4.3 requirements are implemented and verified as of April 2026. See handover for details and checklist.
+---
+
+## Beta/Test Mode (April 2026)
+
+**Purpose:**
+Prepare a public/QA beta with authentication and payments stripped/disabled for open testing.
+
+**Branch:** `beta/no-auth-payments` (from `codex/nextauth-setup`)
+
+**Key changes:**
+- All authentication and payments logic is removed/disabled
+- All features are open (no credit gating)
+- UI updated to reflect beta mode (banner, no sign-in/out, no pricing/buy-credits)
+- Privacy/terms updated for beta
+- See handover for full plan and checklist
+
+**How to merge fixes:**
+All bugfixes and improvements in beta should be merged back to `codex/nextauth-setup` before release.
 
 ### 4.1 Grounded generation enforcement
 

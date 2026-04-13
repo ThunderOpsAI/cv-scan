@@ -1,63 +1,24 @@
-import Link from "next/link";
-
-export const metadata = {
-  title: "Pricing | CVScan",
-  description: "Simple, transparent pay-as-you-go pricing for CVScan. No subscriptions.",
-};
-
+// Pricing page disabled for beta branch (no payments/credits in beta)
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
-        </Link>
-        <div className="flex gap-4 items-center">
-          <Link href="/auth/signin" className="text-gray-300 hover:text-white transition-colors">
-            Sign In
-          </Link>
-          <Link
-            href="/auth/signin"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
-          >
-            Get Started
-          </Link>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-          Simple, Transparent Pricing
-        </h1>
-        <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-          No subscriptions. No hidden fees. Pay only for what you use when you need it.
-        </p>
-
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {/* Starter Pack */}
-          <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 flex flex-col items-center">
-            <h3 className="text-2xl font-bold text-white mb-2">Starter Pack</h3>
-            <p className="text-gray-400 mb-6 text-center">Perfect for trying out the platform</p>
-            <div className="text-4xl font-bold text-white mb-2">$2.99</div>
-            <div className="text-blue-400 font-semibold mb-8">20 Credits</div>
-            <ul className="space-y-4 text-gray-300 mb-8 w-full text-left">
-              <li className="flex items-center">
-                <span className="text-green-400 mr-2">✓</span> ~4-5 Job Applications
-              </li>
-              <li className="flex items-center">
-                <span className="text-green-400 mr-2">✓</span> Full ATS Scanning
-              </li>
-              <li className="flex items-center">
-                <span className="text-green-400 mr-2">✓</span> Cover Letter Generation
-              </li>
-            </ul>
-            <Link
-              href="/auth/signin"
-              className="w-full mt-auto bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-semibold transition-all"
-            >
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Pricing Disabled</h1>
+        <p className="mb-3">All features are free and open in the public beta. No payments or credits required.</p>
+      </div>
+    </div>
+  );
+}
+export default function PricingPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4">Pricing Disabled</h1>
+        <p className="mb-3">All features are free and open in the public beta. No payments or credits required.</p>
+      </div>
+    </div>
+  );
+}
               Get Starter Pack
             </Link>
           </div>

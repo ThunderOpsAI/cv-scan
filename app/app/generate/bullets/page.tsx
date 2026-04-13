@@ -11,6 +11,7 @@ export default function GenerateBullets() {
   const [jobDuty, setJobDuty] = useState("");
   const [loading, setLoading] = useState(false);
   const [bullets, setBullets] = useState<string[]>([]);
+  const [ungroundableNotes, setUngroundableNotes] = useState<string[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function GenerateBullets() {
     setLoading(true);
     setError("");
     setBullets([]);
+    setUngroundableNotes([]);
 
     try {
       const res = await fetch("/api/generate/bullets", {
@@ -50,6 +52,7 @@ export default function GenerateBullets() {
       }
 
       setBullets(data.bullets);
+      setUngroundableNotes(Array.isArray(data.ungroundableNotes) ? data.ungroundableNotes : []);
 
       // Update session to reflect new credit count
       router.refresh();
@@ -154,9 +157,20 @@ export default function GenerateBullets() {
               <h2 className="text-2xl font-bold text-white mb-4">Your Resume Bullets</h2>
               <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
                 <p className="text-blue-200 text-sm leading-relaxed">
-                  <strong>AI-generated drafts:</strong> These bullets are grounded in approved career facts. Review every claim before using them in applications.
+                  <strong>AI-generated drafts:</strong> These bullets cite approved Career Memory facts.
+                  Keep the evidence tag visible while reviewing, then verify every claim before using it.
                 </p>
               </div>
+              {ungroundableNotes.length > 0 && (
+                <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                  <p className="text-amber-100 text-sm font-semibold">Unsupported requests were withheld</p>
+                  <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
+                    {ungroundableNotes.map((note, index) => (
+                      <li key={index}>{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <p className="text-gray-400 mb-6">
                 Click any bullet point to copy it to your clipboard
               </p>
@@ -192,6 +206,7 @@ export default function GenerateBullets() {
                 onClick={() => {
                   setJobDuty("");
                   setBullets([]);
+                  setUngroundableNotes([]);
                 }}
                 className="mt-6 w-full bg-white/10 hover:bg-white/20 text-white py-3 px-6 rounded-xl font-semibold transition-all border border-white/20"
               >

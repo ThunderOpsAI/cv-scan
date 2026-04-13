@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
@@ -42,6 +43,13 @@ export async function POST(
 
     if (jobError) {
       console.error("Load job for fit error:", jobError);
+      await logCriticalError({
+        workflow: "job_fit_load_job",
+        userId: session.user.id,
+        supabase,
+        error: jobError,
+        properties: { job_id: params.jobId },
+      });
       return NextResponse.json({ error: "Failed to load job" }, { status: 500 });
     }
 
@@ -112,10 +120,31 @@ export async function POST(
 
     if (insertError) {
       console.error("Save fit analysis error:", insertError);
+      await logCriticalError({
+        workflow: "job_fit_save_analysis",
+        userId: session.user.id,
+        supabase,
+        error: insertError,
+        properties: { job_id: job.job_id, verdict },
+      });
       return NextResponse.json({ error: "Failed to save fit analysis" }, { status: 500 });
     }
 
     const analysis = row as FitAnalysisRecord;
+
+    await emitAnalyticsEvent({
+      eventName: "job_fit_run",
+      userId: session.user.id,
+      supabase,
+      properties: {
+        job_id: job.job_id,
+        verdict,
+        strengths_count: signals.strengths_matched.length,
+        gaps_count: signals.must_have_gaps.length,
+        stretch_count: signals.stretch_areas.length,
+        credits_charged: CREDIT_COST,
+      },
+    });
 
     return NextResponse.json({
       analysis,
@@ -125,6 +154,10 @@ export async function POST(
     });
   } catch (error) {
     console.error("Job fit analysis error:", error);
+    await logCriticalError({
+      workflow: "job_fit_run",
+      error,
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to run job fit analysis" },
       { status: 500 }

@@ -15,6 +15,7 @@
  */
 import type { Adapter, AdapterAccount, AdapterUser, AdapterSession, VerificationToken } from "next-auth/adapters";
 import { createClient } from "@/lib/supabase/server";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { buildConsentFields } from "@/lib/auth/consent";
 
 type SupabaseError = {
@@ -101,8 +102,18 @@ export function CustomSupabaseAdapter(): Adapter {
 
             if (error) {
                 console.error("[Adapter] createUser error:", error);
+                await logCriticalError({
+                    workflow: "auth_create_user",
+                    error,
+                    properties: { provider: "nextauth" },
+                });
                 throw error;
             }
+            await emitAnalyticsEvent({
+                eventName: "user_signed_up",
+                userId: data.id,
+                properties: { provider: "nextauth" },
+            });
             return formatUser(data);
         },
 

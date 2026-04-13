@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
@@ -9,6 +10,7 @@ import {
   generateTailoredBulletsForJob,
   summarizeEvidenceForStorage,
 } from "@/lib/generation/tailored-bullets";
+import { groundingErrorMessage } from "@/lib/generation/grounding";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -42,6 +44,13 @@ export async function POST(
       .maybeSingle();
 
     if (jobError) {
+      await logCriticalError({
+        workflow: "tailored_bullets_load_job",
+        userId: session.user.id,
+        supabase,
+        error: jobError,
+        properties: { job_id: params.jobId },
+      });
       return NextResponse.json({ error: "Failed to load job" }, { status: 500 });
     }
 
@@ -71,6 +80,24 @@ export async function POST(
       );
     }
 
+    const evidence = await generateTailoredBulletsForJob(
+      profile,
+      job.raw_description,
+      job.title,
+      job.company
+    );
+
+    if (evidence.items.filter((item) => item.grounded).length === 0) {
+      return NextResponse.json(
+        {
+          error: groundingErrorMessage("bullets"),
+          evidence,
+          evidence_json: summarizeEvidenceForStorage(evidence),
+        },
+        { status: 422 }
+      );
+    }
+
     const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
@@ -85,14 +112,21 @@ export async function POST(
       );
     }
 
-    const evidence = await generateTailoredBulletsForJob(
-      profile,
-      job.raw_description,
-      job.title,
-      job.company
-    );
-
     const evidenceRecord = summarizeEvidenceForStorage(evidence);
+
+    await emitAnalyticsEvent({
+      eventName: "tailoring_run",
+      userId: session.user.id,
+      supabase,
+      properties: {
+        type: "job_tailored_bullets",
+        job_id: job.job_id,
+        bullet_count: evidence.items.length,
+        ungroundable_count: evidence.ungroundable_notes.length,
+        approved_fact_count: profile.approved_facts.length,
+        credits_charged: CREDIT_COST,
+      },
+    });
 
     return NextResponse.json({
       evidence,
@@ -102,6 +136,10 @@ export async function POST(
     });
   } catch (error) {
     console.error("Generate tailored bullets error:", error);
+    await logCriticalError({
+      workflow: "tailored_bullets_generate",
+      error,
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to generate bullets" },
       { status: 500 }

@@ -3,9 +3,29 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { GeneratedAssetType } from "@/types/generated-assets";
+import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
+import { extractCoverLetterEvidence } from "@/lib/generation/cover-letter-evidence";
+import { groundingErrorMessage, validateEvidenceTags } from "@/lib/generation/grounding";
 
 function isAssetType(v: unknown): v is GeneratedAssetType {
   return v === "tailored_bullets" || v === "cover_letter" || v === "follow_up";
+}
+
+function bulletLinesHaveEvidence(
+  content: string,
+  facts: NonNullable<Awaited<ReturnType<typeof loadProfileForTailoring>>>["approved_facts"]
+) {
+  const lines = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return false;
+
+  return lines.every((line) => {
+    const validation = validateEvidenceTags(line, facts);
+    return validation.validFactIds.length > 0 && validation.invalidTags.length === 0;
+  });
 }
 
 export async function GET(req: NextRequest) {
@@ -71,8 +91,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabase = createClient();
+
     if (job_id) {
-      const supabase = createClient();
       const { data: job } = await (supabase as any)
         .from("jobs")
         .select("job_id")
@@ -85,7 +106,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const supabase = createClient();
+    if (asset_type === "tailored_bullets" || asset_type === "cover_letter") {
+      const profile = await loadProfileForTailoring(session.user.id, supabase);
+
+      if (!profile) {
+        return NextResponse.json({ error: groundingErrorMessage("asset") }, { status: 400 });
+      }
+
+      if (
+        asset_type === "tailored_bullets" &&
+        !bulletLinesHaveEvidence(content, profile.approved_facts)
+      ) {
+        return NextResponse.json({ error: groundingErrorMessage("bullets") }, { status: 422 });
+      }
+
+      if (asset_type === "cover_letter") {
+        const evidence = extractCoverLetterEvidence(content, profile.approved_facts);
+        if (evidence.has_ungrounded_claims) {
+          return NextResponse.json(
+            { error: groundingErrorMessage("cover_letter"), evidence_json: evidence },
+            { status: 422 }
+          );
+        }
+      }
+    }
 
     const { data: row, error } = await (supabase as any)
       .from("generated_assets")

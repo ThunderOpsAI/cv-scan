@@ -18,6 +18,14 @@ cv-scan/
 └── README.md
 ```
 
+## Public Beta Mode
+
+**This branch is running in public beta mode.**
+
+- No authentication or login is required.
+- All features are open and free to use.
+- Payments and credits are disabled.
+
 ## Running The App
 
 The application itself lives in [`app/`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/app).

@@ -32,6 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans">
+        {/* Beta Banner */}
+        <div className="w-full bg-yellow-400 text-black text-center py-2 font-semibold text-sm z-50 sticky top-0 shadow-md">
+          Beta – No authentication or payments required. All features are open and free during public beta.
+        </div>
         <Providers>{children}</Providers>
       </body>
     </html>

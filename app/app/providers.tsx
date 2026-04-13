@@ -1,8 +1,7 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
-
+// SessionProvider removed for beta branch (no authentication)
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return <>{children}</>;
 }
 
