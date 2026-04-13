@@ -111,12 +111,12 @@ export default function CopilotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <nav className="container mx-auto flex flex-none items-center justify-between gap-4 px-4 py-4 sm:py-6">
         <Link href="/dashboard" className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
@@ -127,11 +127,11 @@ export default function CopilotPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-6 h-[calc(100vh-12rem)]">
+      <main className="container mx-auto flex min-h-0 flex-1 px-4 pb-4 pt-2 sm:pb-6 md:py-8">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl">
+          <div className="grid min-h-0 w-full grid-rows-[auto_minmax(0,1fr)] gap-4 md:grid-cols-4 md:grid-rows-1 md:gap-6">
             {/* Sidebar */}
-            <div className="md:col-span-1 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 overflow-y-auto">
+            <div className="max-h-44 overflow-y-auto rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-lg md:col-span-1 md:max-h-none">
               <button
                 onClick={startNewConversation}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4"
@@ -160,9 +160,9 @@ export default function CopilotPage() {
             </div>
 
             {/* Chat Area */}
-            <div className="md:col-span-3 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col">
+            <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg md:col-span-3">
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
                 {messages.length === 0 && !currentConversation && (
                   <div className="flex items-center justify-center h-full text-center">
                     <div>
@@ -198,13 +198,13 @@ export default function CopilotPage() {
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[90%] rounded-lg px-4 py-2 sm:max-w-[80%] ${
                         msg.role === "user"
                           ? "bg-blue-600 text-white"
                           : "bg-white/20 text-gray-100"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      <div className="whitespace-pre-wrap break-words">{msg.content}</div>
                       <div className="text-xs mt-1 opacity-70">
                         {new Date(msg.created_at).toLocaleTimeString()}
                       </div>
@@ -226,7 +226,7 @@ export default function CopilotPage() {
               </div>
 
               {/* Input */}
-              <form onSubmit={sendMessage} className="p-4 border-t border-white/20">
+              <form onSubmit={sendMessage} className="flex-none border-t border-white/20 p-4">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -234,12 +234,12 @@ export default function CopilotPage() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me anything..."
                     disabled={sending}
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    className="min-w-0 flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || sending}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
                   >
                     Send
                   </button>
@@ -251,7 +251,7 @@ export default function CopilotPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
