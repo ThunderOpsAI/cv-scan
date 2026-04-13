@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, isAuthConfigured } from "@/lib/auth";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = isAuthConfigured()
+    ? await getServerSession(authOptions)
+    : null;
+  const pricingHref = session ? "/buy-credits" : "/pricing";
+  const accountHref = session ? "/dashboard" : "/auth/signin";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -14,26 +18,17 @@ export default async function Home() {
         </div>
         <div className="w-full sm:w-auto flex gap-4 items-center justify-between sm:justify-start">
           <Link
-            href="/buy-credits"
+            href={pricingHref}
             className="text-gray-300 hover:text-white transition-colors"
           >
             Pricing
           </Link>
-          {session ? (
-            <Link
-              href="/dashboard"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg shadow-blue-500/20"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/auth/signin"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
-            >
-              Sign In
-            </Link>
-          )}
+          <Link
+            href={accountHref}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg shadow-blue-500/20"
+          >
+            {session ? "Dashboard" : "Sign In"}
+          </Link>
         </div>
       </nav>
 
@@ -144,7 +139,7 @@ export default async function Home() {
             { name: "Pro Pack", credits: 100, price: "$7.99", desc: "Most credits" },
           ].map((plan) => (
             <Link
-              href="/buy-credits"
+              href={pricingHref}
               key={plan.name}
               className={`block relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
                 }`}
@@ -163,7 +158,7 @@ export default async function Home() {
         </div>
         <div className="text-center mt-8">
           <Link
-            href="/buy-credits"
+            href={pricingHref}
             className="text-blue-400 hover:text-blue-300 transition-colors"
           >
             View all packages →
@@ -196,10 +191,10 @@ export default async function Home() {
             © 2026 CVScan. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
-              Dashboard
+            <Link href={accountHref} className="text-gray-400 hover:text-white transition-colors">
+              {session ? "Dashboard" : "Sign In"}
             </Link>
-            <Link href="/buy-credits" className="text-gray-400 hover:text-white transition-colors">
+            <Link href={pricingHref} className="text-gray-400 hover:text-white transition-colors">
               Pricing
             </Link>
             <a href="mailto:support@cv-scan.com" className="text-gray-400 hover:text-white transition-colors">

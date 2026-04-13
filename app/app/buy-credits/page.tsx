@@ -9,37 +9,48 @@ const CREDIT_PACKAGES = [
   {
     id: "starter",
     name: "Starter Pack",
-    credits: 20,
-    price: 2.99,
-    description: "Perfect for trying out the service",
-    features: ["20 credits", "No expiration", "Instant delivery"],
+    credits: 50,
+    price: 8.99,
+    description: "Enough credits to try several applications",
+    features: ["50 credits", "No expiration", "Instant delivery"],
     popular: false,
   },
   {
-    id: "popular",
-    name: "Popular Pack",
-    credits: 50,
-    price: 4.99,
-    description: "Best value for regular users",
-    features: ["50 credits", "No expiration", "Instant delivery", "Best value"],
+    id: "sprint",
+    name: "Application Sprint",
+    credits: 200,
+    price: 29.99,
+    description: "Best value for a steady search cadence",
+    features: ["200 credits", "No expiration", "Instant delivery", "Best value"],
     popular: true,
   },
   {
-    id: "pro",
-    name: "Pro Pack",
-    credits: 100,
-    price: 7.99,
-    description: "For power users and professionals",
-    features: ["100 credits", "No expiration", "Instant delivery", "Most credits"],
+    id: "career",
+    name: "Career Switch Pack",
+    credits: 500,
+    price: 69.99,
+    description: "Higher-volume tailoring and prep",
+    features: ["500 credits", "No expiration", "Instant delivery"],
     popular: false,
   },
 ];
+
+type LedgerEntry = {
+  event_id: string;
+  event_type: string;
+  amount: number;
+  balance_after: number;
+  description: string | null;
+  created_at: string;
+};
 
 function BuyCreditsContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
+  const [subLoading, setSubLoading] = useState<string | null>(null);
+  const [purchases, setPurchases] = useState<LedgerEntry[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -50,12 +61,67 @@ function BuyCreditsContent() {
   useEffect(() => {
     const payment = searchParams.get("payment");
     if (payment === "success") {
-      // Show success message
       setTimeout(() => {
         router.push("/dashboard");
       }, 3000);
     }
   }, [searchParams, router]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    (async () => {
+      try {
+        const res = await fetch("/api/credits/ledger?type=purchase&limit=20");
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.entries)) {
+          setPurchases(data.entries);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+  }, [status]);
+
+  const handleSubscribe = async (planTier: "starter" | "pro" | "enterprise") => {
+    setSubLoading(planTier);
+    try {
+      const res = await fetch("/api/stripe/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_tier: planTier }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to start subscription checkout");
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Subscribe error:", error);
+      alert(error instanceof Error ? error.message : "Failed to subscribe");
+      setSubLoading(null);
+    }
+  };
+
+  const openBillingPortal = async () => {
+    setSubLoading("portal");
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Could not open billing portal");
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      alert(error instanceof Error ? error.message : "Portal unavailable");
+    } finally {
+      setSubLoading(null);
+    }
+  };
 
   const handlePurchase = async (packageType: string) => {
     setLoading(packageType);
@@ -106,7 +172,11 @@ function BuyCreditsContent() {
         <Link href="/dashboard" className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="text-white text-sm">
+            <span className="text-gray-400">Plan:</span>{" "}
+            <span className="font-semibold text-indigo-300">{session.user.planTier}</span>
+          </div>
           <div className="text-white">
             <span className="text-gray-400">Credits:</span>{" "}
             <span className="font-bold text-blue-400">{session.user.credits}</span>
@@ -135,11 +205,51 @@ function BuyCreditsContent() {
             </div>
           )}
 
+          {searchParams.get("subscription") === "cancelled" && (
+            <div className="bg-yellow-600 text-white p-4 rounded-xl mb-8 text-center">
+              Subscription checkout cancelled.
+            </div>
+          )}
+
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-white mb-4">Get More Credits</h1>
+            <h1 className="text-4xl font-bold text-white mb-4">Credits &amp; plans</h1>
             <p className="text-gray-300 text-lg">
-              Choose a package that fits your needs. Credits never expire.
+              Buy credit packs for pay-as-you-go use, or subscribe for tier features (e.g. interview prep).
             </p>
+          </div>
+
+          <div className="mb-14 rounded-2xl border border-indigo-500/40 bg-indigo-950/40 p-8">
+            <h2 className="text-2xl font-bold text-white mb-2">Subscriptions (Stripe)</h2>
+            <p className="text-gray-400 text-sm mb-6 max-w-2xl">
+              Create recurring products/prices in Stripe and set{" "}
+              <code className="text-gray-300">STRIPE_PRICE_STARTER</code>,{" "}
+              <code className="text-gray-300">STRIPE_PRICE_PRO</code>, and optionally{" "}
+              <code className="text-gray-300">STRIPE_PRICE_ENTERPRISE</code> in your environment. Webhook must include{" "}
+              <code className="text-gray-300">checkout.session.completed</code>,{" "}
+              <code className="text-gray-300">customer.subscription.updated</code>, and{" "}
+              <code className="text-gray-300">customer.subscription.deleted</code>.
+            </p>
+            <div className="flex flex-wrap gap-3 mb-4">
+              {(["starter", "pro", "enterprise"] as const).map((tier) => (
+                <button
+                  key={tier}
+                  type="button"
+                  disabled={subLoading !== null}
+                  onClick={() => handleSubscribe(tier)}
+                  className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-5 py-2.5 text-white font-semibold capitalize"
+                >
+                  {subLoading === tier ? "Redirecting…" : `Subscribe — ${tier}`}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled={subLoading !== null}
+              onClick={openBillingPortal}
+              className="text-sm text-indigo-200 underline hover:text-white disabled:opacity-50"
+            >
+              {subLoading === "portal" ? "Opening…" : "Manage billing in Stripe portal"}
+            </button>
           </div>
 
           {/* Pricing Cards */}
@@ -206,6 +316,28 @@ function BuyCreditsContent() {
             ))}
           </div>
 
+          {purchases.length > 0 && (
+            <div className="mt-16 bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+              <h2 className="text-2xl font-bold text-white mb-4">Recent purchases</h2>
+              <ul className="space-y-3 text-gray-300 text-sm">
+                {purchases.map((p) => (
+                  <li
+                    key={p.event_id}
+                    className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-white/10 pb-3"
+                  >
+                    <span>{p.description || "Credit purchase"}</span>
+                    <span className="text-emerald-300 font-medium">
+                      +{p.amount} credits
+                      <span className="text-gray-500 font-normal ml-2">
+                        {new Date(p.created_at).toLocaleString()}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* FAQ Section */}
           <div className="mt-16 bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
             <h2 className="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
@@ -219,7 +351,8 @@ function BuyCreditsContent() {
               <div>
                 <h3 className="text-white font-semibold mb-2">How many credits do I need?</h3>
                 <p className="text-gray-400">
-                  Resume bullet points cost 1 credit each. Cover letters cost 2 credits each.
+                  Typical costs: job fit 1 credit, tailored bullets 1, tailored cover letter 2, job pack 5. The full map
+                  lives in <code className="text-gray-300">docs/CVScan_Credit_Costs.md</code> in the repository.
                 </p>
               </div>
               <div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getOwnedExperienceId } from '@/lib/supabase/user-scope';
 import { CreateBulletRequest } from '@/types/profile';
 
 export async function GET(req: NextRequest) {
@@ -23,11 +24,20 @@ export async function GET(req: NextRequest) {
     }
 
     const supabase = createClient();
+    const ownedExperienceId = await getOwnedExperienceId(
+      supabase,
+      session.user.id,
+      experienceId
+    );
+
+    if (!ownedExperienceId) {
+      return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
+    }
 
     const { data: bullets, error } = await (supabase
       .from('bullets')
       .select as any)('*')
-      .eq('experience_id', experienceId)
+      .eq('experience_id', ownedExperienceId)
       .order('sort_order', { ascending: true });
 
     if (error) {
@@ -66,11 +76,20 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient();
+    const ownedExperienceId = await getOwnedExperienceId(
+      supabase,
+      session.user.id,
+      body.experience_id
+    );
+
+    if (!ownedExperienceId) {
+      return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
+    }
 
     const { data: maxSort } = await (supabase
       .from('bullets')
       .select as any)('sort_order')
-      .eq('experience_id', body.experience_id)
+      .eq('experience_id', ownedExperienceId)
       .order('sort_order', { ascending: false })
       .limit(1)
       .single();
@@ -80,7 +99,7 @@ export async function POST(req: NextRequest) {
     const { data: bullet, error } = await (supabase
       .from('bullets')
       .insert as any)({
-      experience_id: body.experience_id,
+      experience_id: ownedExperienceId,
       content: body.content,
       sort_order: nextSortOrder,
     })

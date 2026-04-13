@@ -1,11 +1,9 @@
 // Notes Structurer - Processes raw interview notes into structured data
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { StructuredNotes } from '@/types/applications';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const flashModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+import { gemini } from '@/lib/gemini';
 
 export async function structureInterviewNotes(rawNotes: string): Promise<StructuredNotes> {
+  const flashModel = gemini.getGenerativeModel();
   const prompt = `Process these raw interview notes into structured data.
 
 Raw Notes:

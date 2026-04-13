@@ -24,10 +24,17 @@ function NewJobPackContent() {
   }, [status, router]);
 
   useEffect(() => {
-    // Pre-fill job description if passed from scanner
     const jd = searchParams.get("jd");
+    const t = searchParams.get("title");
+    const c = searchParams.get("company");
     if (jd) {
       setJobDescription(decodeURIComponent(jd));
+    }
+    if (t) {
+      setJobTitle(decodeURIComponent(t));
+    }
+    if (c) {
+      setCompany(decodeURIComponent(c));
     }
   }, [searchParams]);
 

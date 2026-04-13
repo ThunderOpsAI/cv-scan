@@ -37,14 +37,15 @@ export async function GET(
     const { data: stages } = await (supabase
       .from('application_stages')
       .select as any)('*')
-      .eq('application_id', id)
+      .eq('application_id', application.id)
       .order('sort_order', { ascending: true });
 
     // Get generated emails
     const { data: emails } = await (supabase
       .from('generated_emails')
       .select as any)('*')
-      .eq('application_id', id)
+      .eq('application_id', application.id)
+      .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
     return NextResponse.json({
@@ -91,13 +92,57 @@ export async function PUT(
       );
     }
 
+    let jobPackId = body.job_pack_id;
+
+    if (jobPackId) {
+      const { data: ownedJobPack, error: jobPackError } = await (supabase
+        .from('job_packs')
+        .select as any)('id')
+        .eq('id', jobPackId)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (jobPackError) {
+        console.error('Failed to verify job pack ownership:', jobPackError);
+        return NextResponse.json(
+          { error: 'Failed to verify job pack' },
+          { status: 500 }
+        );
+      }
+
+      if (!ownedJobPack) {
+        return NextResponse.json({ error: 'Job pack not found' }, { status: 404 });
+      }
+
+      jobPackId = ownedJobPack.id;
+    }
+
+    const updateData: UpdateApplicationRequest = {
+      company: body.company,
+      title: body.title,
+      url: body.url,
+      job_description: body.job_description,
+      location: body.location,
+      salary_range: body.salary_range,
+      source: body.source,
+      status: body.status,
+      priority: body.priority,
+      applied_at: body.applied_at,
+      notes: body.notes,
+      job_pack_id: jobPackId,
+      is_archived: body.is_archived,
+      ats_score: body.ats_score,
+      cultural_score: body.cultural_score,
+    };
+
     const { data: application, error } = await (supabase
       .from('applications')
       .update as any)({
-        ...body,
+        ...updateData,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
+      .eq('user_id', session.user.id)
       .select()
       .single();
 

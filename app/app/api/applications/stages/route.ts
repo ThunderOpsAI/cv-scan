@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { CreateStageRequest, UpdateStageRequest } from '@/types/applications';
+import { CreateStageRequest } from '@/types/applications';
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', body.application_id)
+      .eq('user_id', session.user.id)
       .in('status', ['saved', 'applied', 'screening']);
 
     return NextResponse.json({ stage });

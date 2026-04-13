@@ -38,6 +38,7 @@ export async function GET(
       .from('ats_scans')
       .select as any)('*')
       .eq('job_pack_id', id)
+      .eq('user_id', session.user.id)
       .single();
 
     return NextResponse.json({
@@ -67,6 +68,13 @@ export async function PUT(
     const { id } = await params;
     const body: UpdateJobPackRequest = await req.json();
     const supabase = createClient();
+    const updateData: UpdateJobPackRequest = {
+      job_title: body.job_title,
+      company: body.company,
+      job_description: body.job_description,
+      resume_version: body.resume_version,
+      cover_letter: body.cover_letter,
+    };
 
     // Check ownership
     const { data: existing } = await (supabase
@@ -87,10 +95,11 @@ export async function PUT(
     const { data: jobPack, error } = await (supabase
       .from('job_packs')
       .update as any)({
-        ...body,
+        ...updateData,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
+      .eq('user_id', session.user.id)
       .select()
       .single();
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getOwnedProfileId } from '@/lib/supabase/user-scope';
 import { UpdateStarStoryRequest } from '@/types/profile';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -14,29 +15,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const body: UpdateStarStoryRequest = await req.json();
         const supabase = createClient();
-
-        // Verify ownership
-        const { data: story } = await supabase
-            .from('star_stories')
-            .select('profile_id')
-            .eq('id', id)
-            .single() as { data: { profile_id: string } | null };
-
-        if (!story) {
+        const profileId = await getOwnedProfileId(supabase, session.user.id);
+        if (!profileId) {
             return NextResponse.json({ error: 'Story not found' }, { status: 404 });
         }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .eq('id', story.profile_id)
-            .single() as { data: { id: string } | null };
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-        }
-
 
         const { data: updatedStory, error } = await (supabase
             .from('star_stories') as any)
@@ -49,10 +31,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 tags: body.tags,
             })
             .eq('id', id)
+            .eq('profile_id', profileId)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+        if (!updatedStory) {
+            return NextResponse.json({ error: 'Story not found' }, { status: 404 });
+        }
 
         return NextResponse.json({ story: updatedStory });
     } catch (error: any) {
@@ -73,36 +59,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
         const { id } = await params;
         const supabase = createClient();
-
-        // Verify ownership indirectly via RLS or explicit check
-        // Explicit check is safer if RLS policy relies on complex joins
-        const { data: story } = await supabase
-            .from('star_stories')
-            .select('profile_id')
-            .eq('id', id)
-            .single() as { data: { profile_id: string } | null };
-
-        if (!story) {
+        const profileId = await getOwnedProfileId(supabase, session.user.id);
+        if (!profileId) {
             return NextResponse.json({ error: 'Story not found' }, { status: 404 });
         }
 
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .eq('id', story.profile_id)
-            .single() as { data: { id: string } | null };
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-        }
-
-        const { error } = await supabase
+        const { data: deletedStory, error } = await supabase
             .from('star_stories')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('profile_id', profileId)
+            .select('id')
+            .maybeSingle();
 
         if (error) throw error;
+        if (!deletedStory) {
+            return NextResponse.json({ error: 'Story not found' }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

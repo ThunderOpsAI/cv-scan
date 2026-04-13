@@ -8,7 +8,6 @@ import Link from "next/link";
 export default function GenerateCoverLetter() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
@@ -25,8 +24,8 @@ export default function GenerateCoverLetter() {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!resume.trim() || !jobDescription.trim()) {
-      setError("Please provide both your resume and the job description");
+    if (!jobDescription.trim()) {
+      setError("Please provide the job description");
       return;
     }
 
@@ -43,7 +42,7 @@ export default function GenerateCoverLetter() {
       const res = await fetch("/api/generate/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume, jobDescription }),
+        body: JSON.stringify({ jobDescription }),
       });
 
       const data = await res.json();
@@ -74,7 +73,7 @@ export default function GenerateCoverLetter() {
       const res = await fetch("/api/generate/cover-letter", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ coverLetter, resume, jobDescription }),
+        body: JSON.stringify({ coverLetter, jobDescription }),
       });
 
       const data = await res.json();
@@ -153,30 +152,21 @@ export default function GenerateCoverLetter() {
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">Generate Cover Letter</h1>
             <p className="text-gray-400">
-              Create a personalized, professional cover letter tailored to the job
+              Create a professional cover letter using only approved career facts
             </p>
             <div className="mt-2 text-blue-400 text-sm">Cost: 2 credits per generation</div>
+            <p className="mt-2 text-gray-400 text-sm">
+              Need to add facts first?{" "}
+              <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">
+                Open Career Memory
+              </Link>
+            </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {/* Input Form */}
               <form onSubmit={handleGenerate} className="mb-8 space-y-6">
-                {/* Resume Input */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <label htmlFor="resume" className="block text-white font-semibold mb-3">
-                    Your Resume Summary or Key Highlights
-                  </label>
-                  <textarea
-                    id="resume"
-                    value={resume}
-                    onChange={(e) => setResume(e.target.value)}
-                    placeholder="Paste your resume highlights, skills, and experience here..."
-                    className="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[150px]"
-                    disabled={loading}
-                  />
-                </div>
-
                 {/* Job Description Input */}
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                   <label htmlFor="jobDescription" className="block text-white font-semibold mb-3">
@@ -200,7 +190,7 @@ export default function GenerateCoverLetter() {
 
                 <button
                   type="submit"
-                  disabled={loading || !resume.trim() || !jobDescription.trim()}
+                  disabled={loading || !jobDescription.trim()}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Generating..." : "Generate Cover Letter"}
@@ -211,9 +201,8 @@ export default function GenerateCoverLetter() {
               {coverLetter && (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
                   <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
-                    <span className="text-blue-400 text-xl">🤖</span>
                     <p className="text-blue-200 text-sm leading-relaxed">
-                      <strong>AI-Generated Draft:</strong> Please review and edit this cover letter to ensure it perfectly matches your actual experience before using it in applications.
+                      <strong>AI-generated draft:</strong> This draft is grounded in approved career facts. Review every claim before using it in an application.
                     </p>
                   </div>
                   <div className="flex justify-between items-center mb-4">
@@ -264,7 +253,6 @@ export default function GenerateCoverLetter() {
                         className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-blue-500/50 cursor-pointer transition-all"
                         onClick={() => {
                           setCoverLetter(item.output);
-                          setResume(item.input.resume || "");
                           setJobDescription(item.input.job_description || "");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}

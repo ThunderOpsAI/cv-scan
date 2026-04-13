@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getOwnedProfileId } from '@/lib/supabase/user-scope';
 import { UpdateSmartGoalRequest } from '@/types/profile';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -14,29 +15,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const body: UpdateSmartGoalRequest = await req.json();
         const supabase = createClient();
-
-        // Verify ownership
-        const { data: goal } = await supabase
-            .from('smart_goals')
-            .select('profile_id')
-            .eq('id', id)
-            .single() as { data: { profile_id: string } | null };
-
-        if (!goal) {
+        const profileId = await getOwnedProfileId(supabase, session.user.id);
+        if (!profileId) {
             return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
         }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .eq('id', goal.profile_id)
-            .single() as { data: { id: string } | null };
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-        }
-
 
         const { data: updatedGoal, error } = await (supabase
             .from('smart_goals') as any)
@@ -50,10 +32,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 status: body.status,
             })
             .eq('id', id)
+            .eq('profile_id', profileId)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+        if (!updatedGoal) {
+            return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+        }
 
         return NextResponse.json({ goal: updatedGoal });
     } catch (error: any) {
@@ -74,35 +60,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
         const { id } = await params;
         const supabase = createClient();
-
-        // Verify ownership indirectly
-        const { data: goal } = await supabase
-            .from('smart_goals')
-            .select('profile_id')
-            .eq('id', id)
-            .single() as { data: { profile_id: string } | null };
-
-        if (!goal) {
+        const profileId = await getOwnedProfileId(supabase, session.user.id);
+        if (!profileId) {
             return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
         }
 
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .eq('id', goal.profile_id)
-            .single() as { data: { id: string } | null };
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-        }
-
-        const { error } = await supabase
+        const { data: deletedGoal, error } = await supabase
             .from('smart_goals')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('profile_id', profileId)
+            .select('id')
+            .maybeSingle();
 
         if (error) throw error;
+        if (!deletedGoal) {
+            return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

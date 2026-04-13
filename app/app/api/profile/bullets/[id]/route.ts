@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { UpdateBulletRequest } from '@/types/profile';
 
 export async function PUT(
@@ -17,14 +18,24 @@ export async function PUT(
     }
 
     const body: UpdateBulletRequest = await req.json();
+    const updateData: UpdateBulletRequest = {
+      content: body.content,
+      mined_metrics: body.mined_metrics,
+    };
     const supabase = createClient();
+    const ownedBullet = await getOwnedBullet(supabase, session.user.id, params.id);
+
+    if (!ownedBullet) {
+      return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
+    }
 
     const { data: bullet, error } = await (supabase
       .from('bullets')
-      .update as any)(body)
+      .update as any)(updateData)
       .eq('id', params.id)
+      .eq('experience_id', ownedBullet.experience_id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Update bullet error:', error);
@@ -32,6 +43,10 @@ export async function PUT(
         { error: 'Failed to update bullet' },
         { status: 500 }
       );
+    }
+
+    if (!bullet) {
+      return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
     }
 
     return NextResponse.json({ bullet });
@@ -57,11 +72,19 @@ export async function DELETE(
     }
 
     const supabase = createClient();
+    const ownedBullet = await getOwnedBullet(supabase, session.user.id, params.id);
 
-    const { error } = await (supabase
+    if (!ownedBullet) {
+      return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
+    }
+
+    const { data: deletedBullet, error } = await (supabase
       .from('bullets')
       .delete as any)()
-      .eq('id', params.id);
+      .eq('id', params.id)
+      .eq('experience_id', ownedBullet.experience_id)
+      .select('id')
+      .maybeSingle();
 
     if (error) {
       console.error('Delete bullet error:', error);
@@ -69,6 +92,10 @@ export async function DELETE(
         { error: 'Failed to delete bullet' },
         { status: 500 }
       );
+    }
+
+    if (!deletedBullet) {
+      return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

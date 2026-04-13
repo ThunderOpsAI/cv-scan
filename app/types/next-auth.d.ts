@@ -1,4 +1,5 @@
 import "next-auth";
+import type { PlanTier } from "@/lib/billing/plan-tier";
 
 declare module "next-auth" {
   interface Session {
@@ -8,6 +9,7 @@ declare module "next-auth" {
       name?: string | null;
       image?: string | null;
       credits: number;
+      planTier: PlanTier;
     };
   }
 
@@ -17,5 +19,6 @@ declare module "next-auth" {
     name?: string | null;
     image?: string | null;
     credits?: number;
+    planTier?: PlanTier;
   }
 }

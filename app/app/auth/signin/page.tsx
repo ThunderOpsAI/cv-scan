@@ -1,14 +1,96 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { getProviders, signIn, type ClientSafeProvider } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const authErrorMessages: Record<string, string> = {
+  Configuration: "Sign-in is not configured correctly. Please try again later.",
+  AccessDenied: "Access was denied. Use the same email or provider you signed up with.",
+  Verification: "That sign-in link has expired or has already been used. Request a fresh link.",
+  OAuthSignin: "Google sign-in could not start. Please try again.",
+  OAuthCallback: "Google did not finish signing you in. Please try again.",
+  OAuthCreateAccount: "We could not create an account from Google. Please try email sign-in.",
+  EmailCreateAccount: "We could not create an account from that email link. Request a fresh link.",
+  EmailSignin: "We could not send the sign-in email. Please try again.",
+  OAuthAccountNotLinked: "This email is already linked to another sign-in method.",
+  SessionRequired: "Your session expired. Please sign in again to continue.",
+  Callback: "The sign-in flow could not be completed. Please try again.",
+  Default: "Sign-in failed. Please try again.",
+};
+
+function getAuthErrorMessage(error: string | null) {
+  if (!error) return "";
+  return authErrorMessages[error] || authErrorMessages.Default;
+}
+
+function normalizeCallbackUrl(value: string | null) {
+  if (!value) return "/dashboard";
+
+  try {
+    const callbackUrl = new URL(value, window.location.origin);
+    if (callbackUrl.origin !== window.location.origin) {
+      return "/dashboard";
+    }
+
+    return `${callbackUrl.pathname}${callbackUrl.search}${callbackUrl.hash}`;
+  } catch {
+    return "/dashboard";
+  }
+}
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [callbackUrl, setCallbackUrl] = useState("/dashboard");
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
+  const [providersLoaded, setProvidersLoaded] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const searchParams = new URLSearchParams(window.location.search);
+    const rawCallbackUrl = searchParams.get("callbackUrl");
+    const rawError = searchParams.get("error");
+    const isVerifyRequest = searchParams.get("verifyRequest") === "true";
+
+    setCallbackUrl(normalizeCallbackUrl(rawCallbackUrl));
+    setError(getAuthErrorMessage(rawError));
+
+    if (isVerifyRequest) {
+      setStatusMessage("Check your email for a secure sign-in link.");
+    } else if (rawCallbackUrl && !rawError) {
+      setStatusMessage("Sign in to continue. Your previous session may have expired.");
+    }
+
+    getProviders()
+      .then((availableProviders) => {
+        if (isMounted) {
+          setProviders(availableProviders);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProviders(null);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setProvidersLoaded(true);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const emailProviderAvailable = !!providers?.email;
+  const googleProviderAvailable = !!providers?.google;
+  const authUnavailable =
+    providersLoaded && !emailProviderAvailable && !googleProviderAvailable;
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,17 +98,26 @@ export default function SignIn() {
       setError("Please agree to the Terms and Privacy Policy to continue.");
       return;
     }
+    if (!providersLoaded) {
+      setError("Sign-in options are still loading. Please try again in a moment.");
+      return;
+    }
+    if (!emailProviderAvailable) {
+      setError("Email sign-in is temporarily unavailable.");
+      return;
+    }
     setError("");
+    setStatusMessage("");
     setLoading(true);
 
     try {
       await signIn("email", {
         email,
-        callbackUrl: "/dashboard",
+        callbackUrl,
         redirect: true
       });
-    } catch (error) {
-      console.error("Sign in error:", error);
+    } catch {
+      setError("Unable to start email sign-in. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -45,6 +136,17 @@ export default function SignIn() {
         </div>
 
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+          {authUnavailable && (
+            <div className="mb-6 rounded-xl border border-yellow-400/30 bg-yellow-400/10 p-4 text-sm text-yellow-100">
+              Sign-in is not configured yet. Add the Google and email provider environment variables before accepting users.
+            </div>
+          )}
+          {statusMessage && (
+            <div className="mb-6 rounded-xl border border-green-400/30 bg-green-400/10 p-4 text-sm text-green-100">
+              {statusMessage}
+            </div>
+          )}
+
           <form onSubmit={handleEmailSignIn} className="mb-6">
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-300 text-sm font-bold mb-2">
@@ -75,7 +177,7 @@ export default function SignIn() {
                 />
               </div>
               <label htmlFor="consent" className="text-xs text-gray-400">
-                I agree to the <Link href="/trust" className="text-blue-400 hover:underline">Terms & Trust Policy</Link> and consent to the processing of my candidate data.
+                I agree to the <Link href="/terms" className="text-blue-400 hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-blue-400 hover:underline">Privacy Policy</Link>, and consent to the processing of my candidate data.
               </label>
             </div>
 
@@ -109,7 +211,17 @@ export default function SignIn() {
                 setError("Please agree to the Terms and Privacy Policy to continue.");
                 return;
               }
-              signIn("google", { callbackUrl: "/dashboard" });
+              if (!providersLoaded) {
+                setError("Sign-in options are still loading. Please try again in a moment.");
+                return;
+              }
+              if (!googleProviderAvailable) {
+                setError("Google sign-in is temporarily unavailable.");
+                return;
+              }
+              setError("");
+              setStatusMessage("");
+              signIn("google", { callbackUrl });
             }}
             className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-3 transition-all shadow-lg"
           >

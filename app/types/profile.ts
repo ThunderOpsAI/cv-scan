@@ -15,6 +15,43 @@ export interface Profile {
   updated_at: string;
 }
 
+export type ProfileFactType =
+  | 'work_history'
+  | 'education'
+  | 'skill'
+  | 'achievement'
+  | 'metric'
+  | 'goal';
+
+export type ProfileFactSource = 'manual' | 'extracted';
+
+export interface ProfileFact {
+  fact_id: string;
+  user_id: string;
+  fact_type: ProfileFactType;
+  fact_text: string;
+  is_approved: boolean;
+  source: ProfileFactSource;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResumeVersion {
+  version_id: string;
+  user_id: string;
+  raw_content: string;
+  tailored_content?: string | null;
+  label?: string | null;
+  created_at: string;
+}
+
+export interface CandidateProfileFact {
+  temp_id: string;
+  fact_type: ProfileFactType;
+  fact_text: string;
+  source: 'extracted';
+}
+
 export interface Experience {
   id: string;
   profile_id: string;
@@ -119,7 +156,33 @@ export interface CreateProfileRequest {
   github_url?: string;
 }
 
-export interface UpdateProfileRequest extends Partial<CreateProfileRequest> { }
+export type UpdateProfileRequest = Partial<CreateProfileRequest>;
+
+export interface ResumeImportRequest {
+  raw_content: string;
+  label?: string;
+}
+
+export interface ResumeImportResponse {
+  resume_version: ResumeVersion;
+  candidate_facts: CandidateProfileFact[];
+  review_message: string;
+}
+
+export interface SaveProfileFactsRequest {
+  facts: Array<{
+    fact_type: ProfileFactType;
+    fact_text: string;
+    source?: ProfileFactSource;
+  }>;
+}
+
+/** PATCH /api/profile/facts/[id] */
+export interface UpdateProfileFactRequest {
+  fact_type?: ProfileFactType;
+  fact_text?: string;
+  is_approved?: boolean;
+}
 
 export interface CreateExperienceRequest {
   profile_id: string;
@@ -132,7 +195,7 @@ export interface CreateExperienceRequest {
   description?: string;
 }
 
-export interface UpdateExperienceRequest extends Partial<CreateExperienceRequest> { }
+export type UpdateExperienceRequest = Partial<CreateExperienceRequest>;
 
 export interface CreateBulletRequest {
   experience_id: string;
@@ -180,7 +243,7 @@ export interface CreateEducationRequest {
   description?: string;
 }
 
-export interface UpdateEducationRequest extends Partial<CreateEducationRequest> { }
+export type UpdateEducationRequest = Partial<CreateEducationRequest>;
 
 export interface CreateSkillRequest {
   profile_id: string;
@@ -190,7 +253,7 @@ export interface CreateSkillRequest {
   years_of_experience?: number;
 }
 
-export interface UpdateSkillRequest extends Partial<Omit<CreateSkillRequest, 'profile_id'>> { }
+export type UpdateSkillRequest = Partial<Omit<CreateSkillRequest, 'profile_id'>>;
 
 export interface CreateStarStoryRequest {
   profile_id: string;
@@ -202,7 +265,7 @@ export interface CreateStarStoryRequest {
   tags?: string[];
 }
 
-export interface UpdateStarStoryRequest extends Partial<CreateStarStoryRequest> { }
+export type UpdateStarStoryRequest = Partial<CreateStarStoryRequest>;
 
 export interface CreateSmartGoalRequest {
   profile_id: string;
@@ -215,7 +278,7 @@ export interface CreateSmartGoalRequest {
   status?: 'in_progress' | 'completed';
 }
 
-export interface UpdateSmartGoalRequest extends Partial<Omit<CreateSmartGoalRequest, 'profile_id'>> { }
+export type UpdateSmartGoalRequest = Partial<Omit<CreateSmartGoalRequest, 'profile_id'>>;
 
 export interface ProfileStrength {
   overall_percentage: number;

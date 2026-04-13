@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { MineMetricsRequest, SubmitMetricsAnswersRequest } from '@/types/profile';
 
 const CREDIT_COST = 1;
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
     if ('context' in body) {
       return await generateQuestions(body as MineMetricsRequest, session.user.id, supabase);
     } else if ('answers' in body) {
-      return await enhanceBullet(body as SubmitMetricsAnswersRequest, session.user.id, supabase);
+      return await enhanceBullet(body as SubmitMetricsAnswersRequest, session.user.id, supabase, req);
     } else {
       return NextResponse.json(
         { error: 'Invalid request body' },
@@ -52,11 +54,7 @@ async function generateQuestions(
     );
   }
 
-  const { data: bullet } = await supabase
-    .from('bullets')
-    .select('*')
-    .eq('id', bullet_id)
-    .single();
+  const bullet = await getOwnedBullet(supabase, userId, bullet_id);
 
   if (!bullet) {
     return NextResponse.json(
@@ -77,6 +75,8 @@ Generate 3-5 strategic questions that will help uncover specific metrics, number
 - Impact (percentage improvements, time saved, revenue generated)
 - Scale (how many, how often, how large)
 - Results (before/after comparisons)
+
+Do not suggest or invent metrics. Ask questions so the user can provide exact facts.
 
 Return ONLY the questions, one per line, without numbering.`;
 
@@ -101,7 +101,8 @@ Return ONLY the questions, one per line, without numbering.`;
 async function enhanceBullet(
   body: SubmitMetricsAnswersRequest,
   userId: string,
-  supabase: any
+  supabase: any,
+  req: NextRequest
 ) {
   const { bullet_id, answers } = body;
 
@@ -125,11 +126,7 @@ async function enhanceBullet(
     );
   }
 
-  const { data: bullet } = await supabase
-    .from('bullets')
-    .select('*, experiences!inner(*)')
-    .eq('id', bullet_id)
-    .single();
+  const bullet = await getOwnedBullet(supabase, userId, bullet_id);
 
   if (!bullet) {
     return NextResponse.json(
@@ -143,18 +140,20 @@ async function enhanceBullet(
   const prompt = `You are a professional resume writer. Enhance the following resume bullet point using the provided metrics and context.
 
 Original Bullet: ${bullet.content}
-Job Title: ${bullet.experiences.title}
-Company: ${bullet.experiences.company}
+Job Title: ${bullet.experiences?.title || 'Unknown'}
+Company: ${bullet.experiences?.company || 'Unknown'}
 
 Additional Context/Metrics:
 ${answersText}
 
 Create an enhanced, ATS-optimized bullet point that:
 - Starts with a strong action verb
-- Incorporates the quantifiable metrics naturally
+- Incorporates only the quantifiable metrics provided in the user's answers
 - Is concise (1-2 lines maximum)
 - Focuses on impact and results
 - Uses professional language
+- Does not invent achievements, skills, dates, metrics, responsibilities, titles, credentials, or tools
+- If the answers do not provide a metric, write a truthful non-quantified bullet
 
 Return ONLY the enhanced bullet point, nothing else.`;
 
@@ -172,6 +171,7 @@ Return ONLY the enhanced bullet point, nothing else.`;
     p_user_id: userId,
     p_amount: CREDIT_COST,
     p_description: 'Metric mining enhancement',
+    p_reference_id: debitReferenceFromRequest(req, `mine-metrics:${bullet_id}`),
   });
 
   if (deductError || !deductResult?.[0]?.success) {
@@ -188,13 +188,14 @@ Return ONLY the enhanced bullet point, nothing else.`;
     enhanced_content,
   };
 
-  const { data: updatedBullet, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from('bullets')
     .update({
       content: enhanced_content,
       mined_metrics: minedMetrics,
     })
     .eq('id', bullet_id)
+    .eq('experience_id', bullet.experience_id)
     .select()
     .single();
 

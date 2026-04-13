@@ -1,10 +1,8 @@
 // Cultural Analysis - Detects potential red flags in job descriptions
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const flashModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+import { gemini } from '@/lib/gemini';
 
 export async function detectCulturalWarnings(jd: string): Promise<string[]> {
+  const flashModel = gemini.getGenerativeModel();
   const prompt = `Analyze this job description for potential red flags and cultural concerns:
 
 ${jd}

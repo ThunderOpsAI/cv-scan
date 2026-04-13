@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { planMeetsMinimum, type PlanTier } from "@/lib/billing/plan-tier";
 
 interface ChatMessage {
   id: string;
@@ -20,8 +21,12 @@ export default function InterviewPracticePage() {
   const [role, setRole] = useState("Software Engineer");
   const [company, setCompany] = useState("Google");
   const [isStarted, setIsStarted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const planTier = (session?.user?.planTier ?? "free") as PlanTier;
+  const interviewUnlocked = planMeetsMinimum(planTier, "starter");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -35,6 +40,11 @@ export default function InterviewPracticePage() {
   }, [messages]);
 
   const startInterview = async () => {
+    if (!interviewUnlocked) {
+      setErrorMessage("Starter plan or higher required for interview prep. Subscribe on Buy credits.");
+      return;
+    }
+    setErrorMessage("");
     setIsStarted(true);
     setMessages([{ 
       id: Date.now().toString(), 
@@ -47,14 +57,20 @@ export default function InterviewPracticePage() {
     e.preventDefault();
     if (!input.trim() || sending) return;
 
+    if (!interviewUnlocked) {
+      setErrorMessage("Starter plan or higher required for interview prep.");
+      return;
+    }
+
     if ((session?.user?.credits || 0) < 1) {
-      alert("You need at least 1 credit to send a message.");
+      setErrorMessage("You need at least 1 credit to send a mock interview reply.");
       return;
     }
 
     const userMessage = input;
     setInput("");
     setSending(true);
+    setErrorMessage("");
 
     const newMessages: ChatMessage[] = [
       ...messages,
@@ -74,10 +90,18 @@ export default function InterviewPracticePage() {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : { error: (await res.text()) || "The server returned an unexpected response." };
 
-      if (data.error) {
-        alert(data.error);
+      if (!res.ok || data.error) {
+        setErrorMessage(data.error || "Failed to send your reply. Please try again.");
+        return;
+      }
+
+      if (!data.response) {
+        setErrorMessage("The interviewer did not return a response. Please try again.");
         return;
       }
 
@@ -89,7 +113,7 @@ export default function InterviewPracticePage() {
       router.refresh(); // refresh credits in header
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      setErrorMessage("Failed to send your reply. Please try again.");
     } finally {
       setSending(false);
     }
@@ -109,16 +133,33 @@ export default function InterviewPracticePage() {
         <Link href="/dashboard" className="text-2xl font-bold text-white">
           <span className="text-blue-400">CV</span>Scan
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
+          <div className="text-white text-sm">
+            <span className="text-gray-400">Plan:</span>{" "}
+            <span className="font-semibold text-indigo-300">{planTier}</span>
+          </div>
           <div className="text-white">
             <span className="text-gray-400">Credits:</span>{" "}
             <span className="font-bold text-blue-400">{session?.user?.credits || 0}</span>
           </div>
         </div>
       </nav>
+
+      {!interviewUnlocked && (
+        <div className="container mx-auto px-4 pt-4">
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-100 text-sm">
+            Interview prep is a <strong>subscription</strong> feature (Starter or higher). Credits alone do not unlock
+            this page&apos;s API.{" "}
+            <Link href="/buy-credits" className="underline font-semibold text-amber-200">
+              View plans and subscribe
+            </Link>
+            .
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 container mx-auto px-4 py-8 max-w-4xl flex flex-col h-[calc(100vh-100px)]">
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col flex-1 overflow-hidden shadow-2xl">
@@ -206,6 +247,14 @@ export default function InterviewPracticePage() {
               </div>
 
               <form onSubmit={sendMessage} className="p-4 bg-black/20 border-t border-white/10">
+                {errorMessage && (
+                  <div
+                    role="alert"
+                    className="mb-3 rounded-lg border border-red-400/40 bg-red-500/15 px-4 py-3 text-sm text-red-100"
+                  >
+                    {errorMessage}
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <input
                     type="text"

@@ -106,11 +106,19 @@ export interface ProfileForTailoring {
   phone?: string;
   location?: string;
   linkedin_url?: string;
+  approved_facts: ApprovedProfileFactForTailoring[];
   experiences: ExperienceForTailoring[];
   education: EducationForTailoring[];
   skills: SkillForTailoring[];
   star_stories: StarStoryForTailoring[];
   smart_goals: SmartGoalForTailoring[];
+}
+
+export interface ApprovedProfileFactForTailoring {
+  fact_id: string;
+  fact_type: 'work_history' | 'education' | 'skill' | 'achievement' | 'metric' | 'goal';
+  fact_text: string;
+  source: 'manual' | 'extracted';
 }
 
 export interface ExperienceForTailoring {

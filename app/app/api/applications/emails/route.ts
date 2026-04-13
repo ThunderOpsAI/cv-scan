@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { generateEmail } from '@/lib/applications/email-generator';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { GenerateEmailRequest, GenerateEmailResponse } from '@/types/applications';
 
 const CREDIT_COST = 1;
@@ -58,13 +59,24 @@ export async function POST(req: NextRequest) {
 
     // Get stage if provided
     let stage = null;
+    let stageId: string | null = null;
     if (body.stage_id) {
       const { data: stageData } = await (supabase
         .from('application_stages')
         .select as any)('*')
         .eq('id', body.stage_id)
+        .eq('application_id', application.id)
         .single();
+
+      if (!stageData) {
+        return NextResponse.json(
+          { error: 'Stage not found' },
+          { status: 404 }
+        );
+      }
+
       stage = stageData;
+      stageId = stageData.id;
     }
 
     // Generate email
@@ -79,6 +91,10 @@ export async function POST(req: NextRequest) {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Email generation: ${body.email_type}`,
+      p_reference_id: debitReferenceFromRequest(
+        req,
+        `app-email:${body.application_id}:${body.email_type}`
+      ),
     });
 
     if (deductError || !deductResult?.[0]?.success) {
@@ -93,8 +109,8 @@ export async function POST(req: NextRequest) {
       .from('generated_emails')
       .insert as any)({
         user_id: session.user.id,
-        application_id: body.application_id,
-        stage_id: body.stage_id,
+        application_id: application.id,
+        stage_id: stageId,
         email_type: body.email_type,
         subject: emailContent.subject,
         content: emailContent.content,

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
+import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { CompanyData } from '@/types/intelligence';
 
 const CREDIT_COST = 1;
@@ -63,6 +64,10 @@ export async function GET(
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Company research: ${companyName}`,
+      p_reference_id: debitReferenceFromRequest(
+        req,
+        `company:${companyName}:${forceRefresh ? 'refresh' : 'fetch'}`
+      ),
     });
 
     if (deductError || !deductResult?.[0]?.success) {

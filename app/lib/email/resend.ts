@@ -1,10 +1,16 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("Missing env var RESEND_API_KEY");
+  }
+
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendWelcomeEmail(to: string, name: string) {
   try {
-    await resend.emails.send({
+    await getResendClient().emails.send({
       from: "CVScan <onboarding@cv-scan.com>",
       to: [to],
       subject: "Welcome to CVScan! 🎉",
@@ -74,7 +80,7 @@ export async function sendPaymentReceiptEmail(
   amount: number
 ) {
   try {
-    await resend.emails.send({
+    await getResendClient().emails.send({
       from: "CVScan <billing@cv-scan.com>",
       to: [to],
       subject: "Payment Confirmed - Credits Added! ✅",
@@ -143,7 +149,7 @@ export async function sendPaymentReceiptEmail(
 
 export async function sendLowCreditsEmail(to: string, name: string, creditsRemaining: number) {
   try {
-    await resend.emails.send({
+    await getResendClient().emails.send({
       from: "CVScan <notify@cv-scan.com>",
       to: [to],
       subject: "Running Low on Credits",

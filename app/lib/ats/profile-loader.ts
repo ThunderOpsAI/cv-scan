@@ -1,129 +1,123 @@
 // Profile Loader - Loads user profile data for ATS analysis and tailoring
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ProfileForTailoring } from '@/types/job-packs';
+import { ApprovedProfileFactForTailoring, ProfileForTailoring } from '@/types/job-packs';
+import { formatApprovedFactsForPrompt, getFactTypeLabel, shortFactId } from '@/lib/profile/facts';
+
+type LegacyProfile = {
+  full_name?: string | null;
+  headline?: string | null;
+  summary?: string | null;
+  phone?: string | null;
+  location?: string | null;
+  linkedin_url?: string | null;
+};
+
+type UserIdentity = {
+  name?: string | null;
+  email?: string | null;
+};
 
 export async function loadProfileForTailoring(
   userId: string,
   supabase: SupabaseClient
 ): Promise<ProfileForTailoring | null> {
   try {
-    // Load profile
+    // Contact fields can come from the legacy profile, but generation claims below
+    // are sourced only from approved profile_facts rows.
     const { data: profile, error: profileError } = await (supabase
       .from('profiles')
       .select as any)('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
+    if (profileError) {
       console.error('Failed to load profile:', profileError);
+    }
+
+    const { data: user, error: userError } = await (supabase
+      .from('users')
+      .select as any)('name, email')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userError) {
+      console.error('Failed to load user identity:', userError);
+    }
+
+    const { data: approvedFacts, error: factsError } = await (supabase
+      .from('profile_facts')
+      .select as any)('fact_id, fact_type, fact_text, source')
+      .eq('user_id', userId)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: true });
+
+    if (factsError) {
+      console.error('Failed to load approved profile facts:', factsError);
       return null;
     }
 
-    // Load experiences with bullets
-    const { data: experiences, error: expError } = await (supabase
-      .from('experiences')
-      .select as any)('*, bullets(*)')
-      .eq('profile_id', profile.id)
-      .order('sort_order', { ascending: true });
+    const facts = (approvedFacts || []) as ApprovedProfileFactForTailoring[];
 
-    if (expError) {
-      console.error('Failed to load experiences:', expError);
+    if (facts.length === 0) {
+      return null;
     }
 
-    // Load education
-    const { data: education, error: eduError } = await (supabase
-      .from('education')
-      .select as any)('*')
-      .eq('profile_id', profile.id)
-      .order('sort_order', { ascending: true });
-
-    if (eduError) {
-      console.error('Failed to load education:', eduError);
-    }
-
-    // Load skills
-    const { data: skills, error: skillsError } = await (supabase
-      .from('skills')
-      .select as any)('*')
-      .eq('profile_id', profile.id)
-      .order('sort_order', { ascending: true });
-
-    if (skillsError) {
-      console.error('Failed to load skills:', skillsError);
-    }
-
-    // Format experiences with bullets
-    const formattedExperiences = (experiences || []).map((exp: any) => ({
-      company: exp.company,
-      title: exp.title,
-      location: exp.location,
-      start_date: exp.start_date,
-      end_date: exp.end_date,
-      is_current: exp.is_current,
-      bullets: (exp.bullets || []).map((b: any) => b.mined_metrics?.enhanced_content || b.content),
-    }));
-
-    // Format education
-    const formattedEducation = (education || []).map((edu: any) => ({
-      institution: edu.institution,
-      degree: edu.degree,
-      field_of_study: edu.field_of_study,
-      start_date: edu.start_date,
-      end_date: edu.end_date,
-    }));
-
-    // Format skills
-    const formattedSkills = (skills || []).map((skill: any) => ({
-      name: skill.name,
-      category: skill.category,
-      proficiency: skill.proficiency,
-    }));
-
-    // Load STAR stories
-    const { data: starStories, error: starError } = await (supabase
-      .from('star_stories')
-      .select as any)('*')
-      .eq('profile_id', profile.id)
-      .order('created_at', { ascending: false });
-
-    if (starError) {
-      console.error('Failed to load STAR stories:', starError);
-    }
-
-    // Load SMART goals
-    const { data: smartGoals, error: smartError } = await (supabase
-      .from('smart_goals')
-      .select as any)('*')
-      .eq('profile_id', profile.id)
-      .order('sort_order', { ascending: true });
-
-    if (smartError) {
-      console.error('Failed to load SMART goals:', smartError);
-    }
+    const legacyProfile = profile as LegacyProfile | null;
+    const userIdentity = user as UserIdentity | null;
+    const workHistoryFacts = facts.filter((fact) => fact.fact_type === 'work_history');
+    const achievementFacts = facts.filter((fact) => fact.fact_type === 'achievement' || fact.fact_type === 'metric');
+    const educationFacts = facts.filter((fact) => fact.fact_type === 'education');
+    const skillFacts = facts.filter((fact) => fact.fact_type === 'skill');
+    const goalFacts = facts.filter((fact) => fact.fact_type === 'goal');
 
     return {
-      full_name: profile.full_name,
-      headline: profile.headline,
-      summary: profile.summary,
-      phone: profile.phone,
-      location: profile.location,
-      linkedin_url: profile.linkedin_url,
-      experiences: formattedExperiences,
-      education: formattedEducation,
-      skills: formattedSkills,
-      star_stories: (starStories || []).map((s: any) => ({
-        title: s.title,
-        situation: s.situation,
-        task: s.task,
-        action: s.action,
-        result: s.result,
-        tags: s.tags,
+      full_name: legacyProfile?.full_name || userIdentity?.name || userIdentity?.email || 'Candidate',
+      headline: legacyProfile?.headline || undefined,
+      summary: legacyProfile?.summary || undefined,
+      phone: legacyProfile?.phone || undefined,
+      location: legacyProfile?.location || undefined,
+      linkedin_url: legacyProfile?.linkedin_url || undefined,
+      approved_facts: facts,
+      experiences: [
+        ...(workHistoryFacts.length > 0
+          ? [{
+            company: 'Approved profile facts',
+            title: 'Work history',
+            start_date: '',
+            is_current: false,
+            bullets: workHistoryFacts.map((fact) => fact.fact_text),
+          }]
+          : []),
+        ...(achievementFacts.length > 0
+          ? [{
+            company: 'Approved profile facts',
+            title: 'Achievements and metrics',
+            start_date: '',
+            is_current: false,
+            bullets: achievementFacts.map((fact) => fact.fact_text),
+          }]
+          : []),
+      ],
+      education: educationFacts.map((fact) => ({
+        institution: 'Approved education fact',
+        degree: fact.fact_text,
+        start_date: '',
       })),
-      smart_goals: (smartGoals || []).map((g: any) => ({
-        goal: g.goal,
-        status: g.status,
-        achievable: g.achievable,
-        relevant: g.relevant,
+      skills: skillFacts.map((fact) => ({
+        name: fact.fact_text,
+        category: 'approved_fact',
+      })),
+      star_stories: achievementFacts.map((fact) => ({
+        title: `${getFactTypeLabel(fact.fact_type)} ${shortFactId(fact.fact_id)}`,
+        situation: '',
+        task: '',
+        action: '',
+        result: fact.fact_text,
+        tags: [fact.fact_type],
+      })),
+      smart_goals: goalFacts.map((fact) => ({
+        goal: fact.fact_text,
+        status: 'approved',
       })),
     };
   } catch (error) {
@@ -149,6 +143,13 @@ export function buildOriginalResume(profile: ProfileForTailoring): string {
     lines.push('SUMMARY');
     lines.push(profile.summary);
     lines.push('');
+  }
+
+  if (profile.approved_facts.length > 0) {
+    lines.push('APPROVED PROFILE FACTS');
+    lines.push(formatApprovedFactsForPrompt(profile.approved_facts));
+    lines.push('');
+    return lines.join('\n');
   }
 
   // Experience
