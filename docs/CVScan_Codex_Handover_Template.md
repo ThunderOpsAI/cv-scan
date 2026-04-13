@@ -123,18 +123,26 @@ If a file is missing, continue with the available files and state what was missi
 - Optional **`STRIPE_LIVE_MODE`** — checkout/subscribe log warning when set outside production.
 
 ### Branch / commit
-- Latest work committed **locally** with message covering Phase 3.3 + merged SQL; **not pushed** (per product owner).
+- Current checkout: **`codex/nextauth-setup`**.
+- Current local HEAD: **`d5675ad7 Configure Vercel to deploy app directory`**.
+- Phase 2/3 work remains local on `codex/nextauth-setup` unless product owner explicitly asks to push it.
+- Live `main` was hotfixed and pushed through **`8e4c6cae Configure Vercel to deploy app directory`**.
+- The live mobile Copilot chat bug was fixed on `main` in **`6d5c6b87 Fix copilot mobile chat layout`** and cherry-picked into this phase branch as **`dbf67c98 Fix copilot mobile chat layout`**.
+- The Vercel deploy fixes were also brought into this phase branch so the final effective deploy shape matches live: root `vercel.json` runs install/build inside `/app` and uses `app/.next` as output.
 
 ### Tests last run
 - `npx tsc --noEmit` (in `/app`) — pass
 - `npm run build` — pass
+- Root `npm run build` with dummy env values — pass after final Vercel config; it runs `cd app && npm run build`.
 - Full-repo `npm run lint` — known pre-existing debt in legacy files; not used as gate unless touching those files.
+- Targeted `npx eslint app/dashboard/copilot/page.tsx` — pass after Copilot mobile layout fix.
 
 ### Carry forward / not done
 - Apply **`cvscan-full-schema.sql`** (or incremental deltas) to Supabase only when product owner approves.
 - **Phase 4 (Trust)** and **Phase 1.4 (analytics)** per Build Spec.
 - **Product tuning:** which routes beyond interview should require `pro` / `enterprise`; monthly credit grants for subscribers (not implemented — ledger is separate from subscription today).
 - **Pricing page** (`/pricing`) still describes credit-only UX; align copy with subscriptions when marketing is ready.
+- Local untracked generated folder may appear as `app/test-results/`; it is Playwright/test output and has intentionally not been committed.
 
 ---
 
@@ -143,16 +151,61 @@ If a file is missing, continue with the available files and state what was missi
 ### Completed (handoff snapshot)
 - Phase 3.3: plan tier column + Stripe subscription checkout + portal + webhook lifecycle + interview API/UI gating.
 - `app/database/cvscan-full-schema.sql` generated from existing fragments.
-- Handover reset for the next agent.
+- Live hotfix branch flow completed:
+  - Created hotfix branch from `origin/main`.
+  - Fixed Copilot mobile chat layout so the page uses a viewport-contained flex layout, the message pane scrolls internally, and the input stays visible.
+  - Pushed the Copilot fix to live `main`.
+  - Cherry-picked the Copilot fix back into `codex/nextauth-setup`.
+- Vercel deploy recovery completed:
+  - Reproduced root install failure: Vercel was running from repo root while the real app lives in `/app`.
+  - Added root package metadata for Vercel's Next detector.
+  - Final corrected deploy config is root `vercel.json`: `cd app && npm install --legacy-peer-deps`, `cd app && npm run build`, output `app/.next`.
+  - Removed the problematic root lockfile/output-copy approach; copying `app/.next` to root `.next` caused bad file tracing such as `/vercel/node_modules/client-only/index.js`.
+  - Pushed final live deploy fix to `main` and cherry-picked equivalent fixes back into `codex/nextauth-setup`.
+- Handover updated for the next agent.
 
 ### Suggested next
+- First verify Vercel production deploy from `main` is green at commit `8e4c6cae` and confirm `/dashboard/copilot` mobile layout on a real phone or mobile viewport.
 - Wire Stripe products/prices in test mode; run webhook smoke tests.
 - Decide subscriber benefits (bonus credits vs feature flags) and document in Build Spec.
 - Phase 4 trust work or analytics plumbing.
 
 ### Constraints
 - Follow `docs/CVScan_Build_Spec.md`.
-- No push / no live Supabase unless product owner approves.
+- No live Supabase/schema changes unless product owner approves.
+- Do not switch off `codex/nextauth-setup` unless the product owner asks.
+- Do not push phase 2/3 branch unless the product owner asks.
+
+### Prompt for next agent
+
+```text
+You are taking over CVScan in /Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan.
+
+Read these first:
+1. docs/CVScan_Codex_Handover_Template.md
+2. docs/CVScan_Build_Spec.md
+
+Current branch should be codex/nextauth-setup. Do not switch branches or push unless the product owner asks.
+
+Current situation:
+- Phase 1 foundation is locally complete except optional analytics.
+- Phase 2 activation is locally complete.
+- Phase 3 monetisation is locally complete, including Stripe credit packs, credit ledger, subscription checkout/portal/webhook lifecycle, plan tier session exposure, and interview route gating.
+- app/database/cvscan-full-schema.sql is the canonical full schema file, but do not apply it to Supabase without product owner approval.
+- A live-site hotfix was done during the previous session:
+  - Copilot mobile chat layout was fixed on live main and cherry-picked back into this branch.
+  - Vercel deployment was repaired on live main and cherry-picked back into this branch.
+  - Final deploy shape: root vercel.json installs/builds inside app and uses outputDirectory app/.next.
+
+Before coding:
+- Run git status --short --branch and confirm you are on codex/nextauth-setup.
+- Treat app/test-results/ as generated local test output if present; do not commit it.
+- Full npm run lint has known pre-existing repo-wide debt. Use focused lint/type/build checks for touched areas unless asked to clean lint debt.
+
+Recommended next work:
+- Verify Vercel production deploy from main is green at commit 8e4c6cae if the product owner has not confirmed it yet.
+- Then continue with either Stripe test-mode smoke testing, Phase 4 trust work, or Phase 1.4 analytics per docs/CVScan_Build_Spec.md.
+```
 
 ---
 
