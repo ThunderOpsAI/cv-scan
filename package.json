@@ -10,9 +10,9 @@
     "react-dom": "19.2.3"
   },
   "scripts": {
-    "dev": "npm --prefix app run dev",
-    "build": "npm --prefix app run build && node -e \"const fs=require('fs');fs.rmSync('.next',{recursive:true,force:true});fs.cpSync('app/.next','.next',{recursive:true});\"",
-    "start": "npm --prefix app run start",
-    "lint": "npm --prefix app run lint"
+    "dev": "cd app && npm run dev",
+    "build": "cd app && npm run build",
+    "start": "cd app && npm run start",
+    "lint": "cd app && npm run lint"
   }
 }
