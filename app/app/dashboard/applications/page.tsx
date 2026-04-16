@@ -111,10 +111,6 @@ export default function ApplicationsPage() {
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
         </div>
       </nav>
 

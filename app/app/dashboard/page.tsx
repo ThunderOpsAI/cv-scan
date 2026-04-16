@@ -66,10 +66,7 @@ function DashboardContent() {
           <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="w-full sm:w-auto flex items-center justify-between gap-4">
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
+
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="text-gray-300 hover:text-white transition-colors"
@@ -82,15 +79,6 @@ function DashboardContent() {
       {/* Dashboard Content */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto">
-          {session.user.credits < 5 && (
-            <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-100 text-sm">
-              Low balance: you have {session.user.credits} credit{session.user.credits === 1 ? "" : "s"}.{" "}
-              <Link href="/buy-credits" className="font-semibold text-amber-200 underline hover:text-white">
-                Add credits
-              </Link>{" "}
-              before running paid generations.
-            </div>
-          )}
           {/* Header with Welcome and Account Info */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
             <div>
@@ -109,10 +97,6 @@ function DashboardContent() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400 text-sm">Email:</span>
                   <span className="text-white text-sm max-w-[65%] truncate text-right">{session.user.email}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">Credits:</span>
-                  <span className="text-blue-400 font-bold text-lg">{session.user.credits}</span>
                 </div>
               </div>
             </div>
@@ -172,7 +156,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Apply, stretch, or skip — grounded in your approved profile facts
                 </p>
-                <div className="text-cyan-400 text-sm">1 credit per analysis</div>
               </Link>
 
               <Link
@@ -187,7 +170,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Check how well your profile matches any job description
                 </p>
-                <div className="text-green-400 text-sm">Free 3/day, then 1 credit</div>
               </Link>
 
               <Link
@@ -202,7 +184,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Complete application package: tailored resume, cover letter, ATS analysis
                 </p>
-                <div className="text-purple-400 text-sm">5 credits per pack</div>
               </Link>
 
               <Link
@@ -237,7 +218,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Chat with your personal assistant for general career advice
                 </p>
-                <div className="text-blue-400 text-sm">1 credit per message</div>
               </Link>
 
               <Link
@@ -251,7 +231,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Practice answering questions with an AI hiring manager
                 </p>
-                <div className="text-blue-400 text-sm">1 credit per message</div>
               </Link>
 
               <Link
@@ -313,7 +292,6 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Transform job duties into polished, ATS-optimized resume bullets
                 </p>
-                <div className="text-blue-400 text-sm">1 credit per generation</div>
               </Link>
 
               <Link
@@ -327,41 +305,9 @@ function DashboardContent() {
                 <p className="text-gray-400 mb-3">
                   Create a tailored cover letter from your resume and job description
                 </p>
-                <div className="text-blue-400 text-sm">2 credits per generation</div>
-              </Link>
-            </div>
-            {/* Buy Credits Permanent Link */}
-            <div className="mt-6">
-              <Link
-                href="/buy-credits"
-                className="block bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group text-center"
-              >
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <span className="text-2xl">💎</span>
-                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                    Buy More Credits
-                  </h3>
-                </div>
-                <p className="text-gray-400">
-                  Top up your account to keep generating amazing content
-                </p>
               </Link>
             </div>
           </div>
-
-          {/* Buy Credits CTA */}
-          {session.user.credits < 5 && (
-            <div className="mt-8 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 text-center">
-              <h3 className="text-xl font-bold text-white mb-2">Running low on credits?</h3>
-              <p className="text-blue-100 mb-4">Purchase more credits to keep generating content</p>
-              <Link
-                href="/buy-credits"
-                className="inline-block bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all"
-              >
-                Buy Credits
-              </Link>
-            </div>
-          )}
 
           {/* User ID Footer - Discreetly displayed */}
           <div className="mt-12 pt-6 border-t border-white/10">

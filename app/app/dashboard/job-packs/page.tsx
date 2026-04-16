@@ -72,10 +72,6 @@ export default function JobPacksPage() {
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
         </div>
       </nav>
 
@@ -112,7 +108,7 @@ export default function JobPacksPage() {
                 href="/dashboard/job-packs/new"
                 className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
-                Create Job Pack (5 credits)
+                Create Job Pack
               </Link>
             </div>
           ) : (

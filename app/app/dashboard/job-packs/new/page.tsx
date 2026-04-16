@@ -114,10 +114,6 @@ function NewJobPackContent() {
           <Link href="/dashboard/job-packs" className="text-gray-300 hover:text-white">
             ← Back to Job Packs
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
         </div>
       </nav>
 
@@ -129,7 +125,6 @@ function NewJobPackContent() {
             <p className="text-gray-400">
               Generate a tailored resume, cover letter, and ATS analysis
             </p>
-            <p className="text-blue-400 mt-2">Cost: 5 credits</p>
           </div>
 
           {/* Loading State */}
@@ -203,23 +198,11 @@ function NewJobPackContent() {
 
                 <button
                   type="submit"
-                  disabled={session.user.credits < 5}
                   className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all"
                   data-testid="create-job-pack-submit"
                 >
-                  {session.user.credits < 5
-                    ? "Insufficient Credits"
-                    : "Generate Job Pack (5 credits)"}
+                  Generate Job Pack
                 </button>
-
-                {session.user.credits < 5 && (
-                  <Link
-                    href="/buy-credits"
-                    className="block text-center text-blue-400 hover:text-blue-300"
-                  >
-                    Buy more credits →
-                  </Link>
-                )}
               </div>
             </form>
           )}

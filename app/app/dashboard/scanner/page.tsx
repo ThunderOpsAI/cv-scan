@@ -15,60 +15,6 @@ export default function ScannerPage() {
   const [resumeText, setResumeText] = useState("");
   const [parsedResume, setParsedResume] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
-    // Handle file selection
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0] || null;
-      setResumeFile(file);
-      setResumeText("");
-      setError("");
-      if (file) {
-        setUploading(true);
-        try {
-          const formData = new FormData();
-          formData.append("file", file);
-          const res = await fetch("/api/resume/ocr", {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Failed to extract text");
-          setResumeText(data.text);
-          setParsedResume(data.parsed);
-          setJobDescription(data.text); // Optionally auto-fill jobDescription for demo
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setUploading(false);
-        }
-                {/* Parsed Resume Details */}
-                {parsedResume && (
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-4">Extracted Resume Details</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-gray-400"><span className="font-semibold text-white">Name:</span> {parsedResume.name || <span className="italic text-gray-500">Not found</span>}</p>
-                        <p className="text-gray-400"><span className="font-semibold text-white">Email:</span> {parsedResume.email || <span className="italic text-gray-500">Not found</span>}</p>
-                        <p className="text-gray-400"><span className="font-semibold text-white">Phone:</span> {parsedResume.phone || <span className="italic text-gray-500">Not found</span>}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400"><span className="font-semibold text-white">Education:</span></p>
-                        <ul className="list-disc list-inside text-gray-300">
-                          {parsedResume.education?.map((ed: string, i: number) => (
-                            <li key={i}>{ed}</li>
-                          )) || <li className="italic text-gray-500">Not found</li>}
-                        </ul>
-                        <p className="text-gray-400 mt-2"><span className="font-semibold text-white">Experience:</span></p>
-                        <ul className="list-disc list-inside text-gray-300">
-                          {parsedResume.experience?.map((ex: string, i: number) => (
-                            <li key={i}>{ex}</li>
-                          )) || <li className="italic text-gray-500">Not found</li>}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                )}
-      }
-    };
   const [loading, setLoading] = useState(false);
   const [freeScansRemaining, setFreeScansRemaining] = useState<number | null>(null);
   const [scanResult, setScanResult] = useState<ATSScan | null>(null);
@@ -136,6 +82,16 @@ export default function ScannerPage() {
     return "bg-red-500";
   };
 
+  // Handle file selection for resume upload (basic placeholder)
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setResumeFile(file);
+    setResumeText("");
+    setParsedResume(null);
+    setError("");
+    // You can add OCR and parsing logic here as needed
+  };
+
   if (status === "loading") {
     return <ScannerPageSkeleton />;
   }
@@ -153,10 +109,6 @@ export default function ScannerPage() {
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
         </div>
       </nav>
 
@@ -172,7 +124,7 @@ export default function ScannerPage() {
               <p className="text-blue-400 mt-2">
                 {freeScansRemaining > 0
                   ? `${freeScansRemaining} free scans remaining today`
-                  : "Free scans used. Each scan costs 1 credit."}
+                  : "Free scans used."}
               </p>
             )}
           </div>
@@ -217,7 +169,7 @@ export default function ScannerPage() {
                   className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
                   data-testid="create-job-pack-btn"
                 >
-                  Create Job Pack (5cr)
+                  Create Job Pack
                 </Link>
               )}
             </div>
@@ -230,7 +182,7 @@ export default function ScannerPage() {
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-white">ATS Match Score</h2>
+                    <h2 className="text-2xl font-bold text-white">ATS Match Score</h1>
                     <p className="text-gray-400">Based on your profile</p>
                   </div>
                   <div className="relative w-32 h-32">

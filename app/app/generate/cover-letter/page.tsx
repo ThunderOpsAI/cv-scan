@@ -32,10 +32,6 @@ export default function GenerateCoverLetter() {
       return;
     }
 
-    if ((session?.user?.credits || 0) < 2) {
-      setError("You need at least 2 credits. Please purchase more.");
-      return;
-    }
 
     setLoading(true);
     setError("");
@@ -140,10 +136,7 @@ export default function GenerateCoverLetter() {
           <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
+
           <Link
             href="/dashboard"
             className="text-gray-300 hover:text-white transition-colors"
@@ -161,7 +154,7 @@ export default function GenerateCoverLetter() {
             <p className="text-gray-400">
               Create a professional cover letter using only approved career facts
             </p>
-            <div className="mt-2 text-blue-400 text-sm">Cost: 2 credits per generation</div>
+
             <p className="mt-2 text-gray-400 text-sm">
               Need to add facts first?{" "}
               <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">

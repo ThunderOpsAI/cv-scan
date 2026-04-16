@@ -6,8 +6,7 @@ export default async function Home() {
   const session = isAuthConfigured()
     ? await getServerSession(authOptions)
     : null;
-  const pricingHref = session ? "/buy-credits" : "/pricing";
-  const accountHref = session ? "/dashboard" : "/auth/signin";
+  const accountHref = "/dashboard";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -18,16 +17,10 @@ export default async function Home() {
         </div>
         <div className="w-full sm:w-auto flex gap-4 items-center justify-between sm:justify-start">
           <Link
-            href={pricingHref}
-            className="text-gray-300 hover:text-white transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
             href={accountHref}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg shadow-blue-500/20"
           >
-            {session ? "Dashboard" : "Sign In"}
+            Access Beta
           </Link>
         </div>
       </nav>
@@ -49,10 +42,10 @@ export default async function Home() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/auth/signin"
+            href="/dashboard"
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-blue-500/25"
           >
-            Try Free - 3 Credits
+            Access App Platform
           </Link>
           <Link
             href="#how-it-works"
@@ -62,7 +55,7 @@ export default async function Home() {
           </Link>
         </div>
         <p className="mt-4 text-gray-400 text-sm">
-          No credit card required. Start improving your career today.
+          Currently in beta.
         </p>
       </section>
 
@@ -124,48 +117,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="container mx-auto px-4 py-16 sm:py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-          Simple, Affordable Pricing
-        </h2>
-        <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-          Pay only for what you use. No subscriptions, no hidden fees.
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {[
-            { name: "Starter Pack", credits: 20, price: "$2.99", desc: "Perfect for trying out" },
-            { name: "Popular Pack", credits: 50, price: "$4.99", desc: "Best value", popular: true },
-            { name: "Pro Pack", credits: 100, price: "$7.99", desc: "Most credits" },
-          ].map((plan) => (
-            <Link
-              href={pricingHref}
-              key={plan.name}
-              className={`block relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
-                }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
-                  Most Popular
-                </div>
-              )}
-              <h3 className="text-lg font-semibold text-white mb-1">{plan.name}</h3>
-              <div className="text-3xl font-bold text-white mb-1">{plan.price}</div>
-              <div className="text-blue-400 mb-4">{plan.credits} credits</div>
-              <p className="text-gray-400 text-sm">{plan.desc}</p>
-            </Link>
-          ))}
-        </div>
-        <div className="text-center mt-8">
-          <Link
-            href={pricingHref}
-            className="text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            View all packages →
-          </Link>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 sm:py-20">
         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-6 sm:p-12 text-center">
@@ -176,10 +127,10 @@ export default async function Home() {
             Join thousands of job seekers who have landed interviews with CVScan-powered resumes.
           </p>
           <Link
-            href="/auth/signin"
+            href={accountHref}
             className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-all"
           >
-            Get Started Free
+            Access Now
           </Link>
         </div>
       </section>
@@ -192,10 +143,7 @@ export default async function Home() {
           </div>
           <div className="flex gap-6">
             <Link href={accountHref} className="text-gray-400 hover:text-white transition-colors">
-              {session ? "Dashboard" : "Sign In"}
-            </Link>
-            <Link href={pricingHref} className="text-gray-400 hover:text-white transition-colors">
-              Pricing
+              Access Beta
             </Link>
             <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
               Privacy
