@@ -44,9 +44,7 @@ export async function POST(req: NextRequest) {
       .single() as { data: { credits: number } | null };
 
     // Beta: Bypass credit checks
-    /* 
-    /* Credit check bypassed for beta */
-    */
+    // Credit check bypassed for beta
 
     // Load profile
     const profile = await loadProfileForTailoring(session.user.id, supabase);
@@ -89,21 +87,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Beta: Bypass credit deduction
-    /*
-    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
-      p_user_id: session.user.id,
-      p_amount: CREDIT_COST,
-      p_description: `Job pack: ${body.job_title} at ${body.company}`,
-      p_reference_id: debitReferenceFromRequest(req, 'job-pack'),
-    }); */
-
-    if (deductError || !deductResult?.[0]?.success) {
-      return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || 'Failed to deduct credits' },
-        { status: 500 }
-      );
-    }
-    */
+    const deductResult = [{success:true}]; 
+    const deductError = null; 
+    // Deduct removed for beta
 
     // Create job pack
     const { data: jobPack, error: jobPackError } = await supabase
