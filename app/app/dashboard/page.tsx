@@ -67,12 +67,7 @@ function DashboardContent() {
         </Link>
         <div className="w-full sm:w-auto flex items-center justify-between gap-4">
 
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="text-gray-300 hover:text-white transition-colors"
-          >
-            Sign Out
-          </button>
+          {/* Sign Out removed for beta */}
         </div>
       </nav>
 
