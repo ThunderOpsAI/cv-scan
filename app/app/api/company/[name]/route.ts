@@ -51,16 +51,11 @@ export async function GET(
       .eq('id', session.user.id)
       .single();
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Please purchase more credits.' },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     const companyData = await fetchCompanyResearch(companyName);
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Company research: ${companyName}`,
@@ -68,7 +63,7 @@ export async function GET(
         req,
         `company:${companyName}:${forceRefresh ? 'refresh' : 'fetch'}`
       ),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);

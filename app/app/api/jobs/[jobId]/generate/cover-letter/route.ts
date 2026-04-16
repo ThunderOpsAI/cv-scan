@@ -94,12 +94,12 @@ export async function POST(
       );
     }
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Cover letter: ${job.title} @ ${job.company}`,
       p_reference_id: debitReferenceFromRequest(req, `tailor-cover:${params.jobId}`),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(

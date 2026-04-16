@@ -35,12 +35,7 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
       .single() as { data: { credits: number } | null };
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Please purchase more credits.' },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     let conversationId = body.conversation_id;
 
@@ -128,12 +123,12 @@ export async function POST(req: NextRequest) {
     const result = await gemini.generateContent(fullPrompt);
     const assistantResponse = result.response.text();
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: 'Copilot chat message',
       p_reference_id: debitReferenceFromRequest(req, `copilot:${conversationId}`),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);

@@ -79,12 +79,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Mock interview replies cost 1 credit.' },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     // Since this is a specialized interview bot, let's construct the prompt
     // We combine the history into a single prompt for Gemini or use an array if supported. 
@@ -113,12 +108,12 @@ Based on the above, write your next response as the Interviewer. Remember to giv
     const result = await gemini.generateContent(systemPrompt);
     const aiResponse = result.response.text();
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Mock interview reply: ${role} at ${company}`,
       p_reference_id: debitReferenceFromRequest(req, 'interview'),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Interview credit deduction failed:', {

@@ -38,12 +38,7 @@ export async function POST(req: NextRequest) {
       .eq("id", session.user.id)
       .single();
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: "Insufficient credits. Please purchase more credits." },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
@@ -108,12 +103,12 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
       );
     }
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: "Generated resume bullets",
       p_reference_id: debitReferenceFromRequest(req, "gen-bullets"),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
