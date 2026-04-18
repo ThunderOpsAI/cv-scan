@@ -6,6 +6,19 @@ import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { JobPackResponse } from "@/types/job-packs";
 
+type ApiErrorResponse = { error?: string };
+type JobAdOcrResponse = ApiErrorResponse & {
+  text?: string;
+  parsed?: {
+    title?: string;
+    company?: string;
+  };
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 function NewJobPackContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -14,6 +27,7 @@ function NewJobPackContent() {
   const [company, setCompany] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [error, setError] = useState("");
 
@@ -78,18 +92,56 @@ function NewJobPackContent() {
       });
 
       clearInterval(stepInterval);
-      const data: JobPackResponse = await res.json();
+      const data = (await res.json()) as JobPackResponse & ApiErrorResponse;
 
       if (!res.ok) {
-        throw new Error((data as any).error || "Failed to create job pack");
+        throw new Error(data.error || "Failed to create job pack");
       }
 
       // Redirect to the job pack detail page
       router.push(`/dashboard/job-packs/${data.job_pack.id}`);
-    } catch (err: any) {
+    } catch (err) {
       clearInterval(stepInterval);
-      setError(err.message);
+      setError(getErrorMessage(err, "Failed to create job pack"));
       setLoading(false);
+    }
+  };
+
+  const handleJobAdImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setError("");
+    setOcrLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/jobs/ocr", {
+        method: "POST",
+        body: formData,
+      });
+      const data = (await res.json()) as JobAdOcrResponse;
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not read that screenshot");
+      }
+
+      setJobDescription(data.text || "");
+      if (!jobTitle && data.parsed?.title) {
+        setJobTitle(data.parsed.title);
+      }
+      if (!company && data.parsed?.company) {
+        setCompany(data.parsed.company);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not read that screenshot. Try a clearer image or paste the job ad."));
+    } finally {
+      setOcrLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -142,6 +194,26 @@ function NewJobPackContent() {
           {!loading && (
             <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
               <div className="space-y-6">
+                <div>
+                  <label className="block text-white font-semibold mb-2">
+                    Upload job ad screenshot
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleJobAdImageUpload}
+                    disabled={ocrLoading}
+                    className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700 disabled:opacity-60"
+                  />
+                  <p className="mt-2 text-sm text-gray-400">
+                    Take a clear screenshot or photo. CVScan will fill the fields below for review.
+                  </p>
+                  {ocrLoading && (
+                    <p className="mt-2 text-sm text-blue-300">Reading job ad screenshot...</p>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-white font-semibold mb-2">Job Title *</label>
                   <input
@@ -198,6 +270,7 @@ function NewJobPackContent() {
 
                 <button
                   type="submit"
+                  disabled={ocrLoading}
                   className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all"
                   data-testid="create-job-pack-submit"
                 >

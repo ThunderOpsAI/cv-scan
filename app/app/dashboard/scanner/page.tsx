@@ -7,13 +7,18 @@ import Link from "next/link";
 import { ATSScan, ATSScanResponse } from "@/types/job-packs";
 import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
 
+type ApiErrorResponse = { error?: string };
+type JobAdOcrResponse = ApiErrorResponse & { text?: string };
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function ScannerPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [jobDescription, setJobDescription] = useState("");
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeText, setResumeText] = useState("");
-  const [parsedResume, setParsedResume] = useState<any>(null);
+  const [jobAdFile, setJobAdFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [freeScansRemaining, setFreeScansRemaining] = useState<number | null>(null);
@@ -55,16 +60,16 @@ export default function ScannerPage() {
         body: JSON.stringify({ job_description: jobDescription }),
       });
 
-      const data: ATSScanResponse = await res.json();
+      const data = (await res.json()) as ATSScanResponse & ApiErrorResponse;
 
       if (!res.ok) {
-        throw new Error((data as any).error || "Scan failed");
+        throw new Error(data.error || "Scan failed");
       }
 
       setScanResult(data.scan);
       setFreeScansRemaining(data.free_scans_remaining);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err, "Scan failed"));
     } finally {
       setLoading(false);
     }
@@ -82,14 +87,37 @@ export default function ScannerPage() {
     return "bg-red-500";
   };
 
-  // Handle file selection for resume upload (basic placeholder)
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setResumeFile(file);
-    setResumeText("");
-    setParsedResume(null);
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setJobAdFile(file);
     setError("");
-    // You can add OCR and parsing logic here as needed
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/jobs/ocr", {
+        method: "POST",
+        body: formData,
+      });
+      const data = (await res.json()) as JobAdOcrResponse;
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not read that screenshot");
+      }
+
+      setJobDescription(data.text || "");
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not read that screenshot. Try a clearer image or paste the job ad."));
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   };
 
   if (status === "loading") {
@@ -129,30 +157,31 @@ export default function ScannerPage() {
             )}
           </div>
 
-          {/* Scanner Input & Resume Upload */}
+          {/* Scanner Input & Job Ad Upload */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-8">
             <label className="block text-white font-semibold mb-2">
-              Paste Job Description or Upload Resume
+              Paste job description or upload job ad screenshot
             </label>
             <input
               type="file"
-              accept=".pdf,image/*"
+              accept="image/*"
+              capture="environment"
               onChange={handleFileChange}
               className="mb-4 block text-white"
-              data-testid="resume-upload-input"
+              data-testid="job-ad-upload-input"
             />
-            {resumeFile && (
-              <p className="text-gray-300 mb-2">Selected: {resumeFile.name}</p>
+            {jobAdFile && (
+              <p className="text-gray-300 mb-2">Selected: {jobAdFile.name}</p>
             )}
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               rows={10}
-              placeholder="Paste the full job description or upload a resume to extract text..."
+              placeholder="Paste the full job description, or upload a screenshot to fill this box..."
               className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
               data-testid="job-description-input"
             />
-            {uploading && <p className="text-blue-400 mt-2">Extracting text from file...</p>}
+            {uploading && <p className="text-blue-400 mt-2">Reading job ad screenshot...</p>}
             {error && <p className="text-red-400 mt-2">{error}</p>}
             <div className="flex gap-4 mt-4">
               <button
