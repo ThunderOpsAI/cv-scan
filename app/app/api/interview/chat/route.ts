@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { getPlanTierForUser, planMeetsMinimum } from '@/lib/billing/plan-tier';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 const CREDIT_COST = 1;
 
@@ -99,6 +100,7 @@ STRICT RULES:
 4. After the candidate responds, provide brief, constructive feedback on their answer (what was good, what could be improved), and then immediately ask the next interview question.
 5. If the user asks for a hint, provide a small tip on how to answer the question well.
 6. Keep your responses concise (under 150 words).
+7. Return plain text only. Do not use markdown formatting, headings, bold, italics, or bullet symbols.
 
 Here is the conversation so far:
 ${conversationHistory}
@@ -106,7 +108,7 @@ ${conversationHistory}
 Based on the above, write your next response as the Interviewer. Remember to give feedback if the candidate just answered, and then ask the next question.`;
 
     const result = await gemini.generateContent(systemPrompt);
-    const aiResponse = result.response.text();
+    const aiResponse = plainAiText(result.response.text());
 
     const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,

@@ -15,6 +15,7 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(false);
   const [keywords, setKeywords] = useState("");
   const [location, setLocation] = useState("");
+  const [lastSearch, setLastSearch] = useState({ keywords: "", location: "" });
   const [showSaveSearch, setShowSaveSearch] = useState(false);
   const [searchName, setSearchName] = useState("");
 
@@ -36,14 +37,20 @@ export default function JobsPage() {
     }
   };
 
-  const searchJobs = async (e?: React.FormEvent) => {
+  const searchJobs = async (
+    e?: React.FormEvent,
+    override?: { keywords?: string; location?: string }
+  ) => {
     if (e) e.preventDefault();
     setLoading(true);
+    const searchedKeywords = (override?.keywords ?? keywords).trim();
+    const searchedLocation = (override?.location ?? location).trim();
+    setLastSearch({ keywords: searchedKeywords, location: searchedLocation });
 
     try {
       const params = new URLSearchParams();
-      if (keywords) params.set("keywords", keywords);
-      if (location) params.set("location", location);
+      if (searchedKeywords) params.set("keywords", searchedKeywords);
+      if (searchedLocation) params.set("location", searchedLocation);
 
       const res = await fetch(`/api/jobs/discover?${params.toString()}`);
       const data = await res.json();
@@ -90,9 +97,11 @@ export default function JobsPage() {
   };
 
   const loadSavedSearch = async (search: SavedSearch) => {
-    setKeywords(search.query_params.keywords || "");
-    setLocation(search.query_params.location || "");
-    searchJobs();
+    const savedKeywords = search.query_params.keywords || "";
+    const savedLocation = search.query_params.location || "";
+    setKeywords(savedKeywords);
+    setLocation(savedLocation);
+    searchJobs(undefined, { keywords: savedKeywords, location: savedLocation });
   };
 
   const deleteSavedSearch = async (id: string) => {
@@ -107,6 +116,18 @@ export default function JobsPage() {
       console.error("Failed to delete saved search:", error);
     }
   };
+
+  const getBroaderSearchSuggestion = (term: string) => {
+    const normalized = term.toLowerCase();
+    if (normalized.includes("pilot")) return "aviation";
+    if (normalized.includes("teacher")) return "education";
+    if (normalized.includes("nurse")) return "healthcare";
+    if (normalized.includes("developer") || normalized.includes("engineer")) return "technology";
+    if (normalized.includes("driver")) return "transport";
+    return "";
+  };
+
+  const broaderSuggestion = getBroaderSearchSuggestion(lastSearch.keywords);
 
   if (status === "loading") {
     return <JobsPageSkeleton />;
@@ -232,8 +253,19 @@ export default function JobsPage() {
                 </div>
               ) : jobs.length === 0 ? (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-                  <p className="text-gray-400 mb-2">No jobs found</p>
-                  <p className="text-gray-500 text-sm">Try searching to discover opportunities</p>
+                  <p className="text-gray-300 mb-2">No jobs found yet.</p>
+                  <p className="text-gray-500 text-sm">
+                    Try broadening your search
+                    {broaderSuggestion ? (
+                      <>
+                        {" "}
+                        from {lastSearch.keywords} to {broaderSuggestion}
+                      </>
+                    ) : (
+                      " with a wider field, industry, or skill"
+                    )}
+                    . Career Copilot can help you explore related fields or career paths.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">

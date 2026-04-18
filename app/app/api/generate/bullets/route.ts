@@ -9,6 +9,7 @@ import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { approvedFactIds, formatApprovedFactsForPrompt } from "@/lib/profile/facts";
 import { groundingErrorMessage, validateEvidenceTags } from "@/lib/generation/grounding";
+import { plainAiText } from "@/lib/text/plain-ai-output";
 
 const CREDIT_COST = 1;
 
@@ -70,6 +71,7 @@ Requirements:
 - Do not invent or imply achievements, skills, dates, metrics, responsibilities, titles, companies, education, certifications, or credentials
 - Do not treat the target focus as evidence unless it matches an approved fact
 - Add a compact evidence tag like [fact:12345678] to each bullet
+- Use plain text only. Do not use markdown formatting, bold, italics, headings, or code fences
 
 Return ONLY the bullet points, one per line, without any numbering or bullet symbols. Each line should be a complete sentence.`;
 
@@ -88,7 +90,7 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     for (const bullet of rawBullets) {
       const tagValidation = validateEvidenceTags(bullet, profile.approved_facts);
       if (tagValidation.validFactIds.length > 0 && tagValidation.invalidTags.length === 0) {
-        bullets.push(bullet);
+        bullets.push(plainAiText(bullet));
       } else {
         ungroundableNotes.push(
           "A generated bullet was withheld because it did not cite an approved profile fact."

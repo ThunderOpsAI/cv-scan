@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { gemini } from '@/lib/gemini';
 import { SendMessageRequest } from '@/types/intelligence';
 import { buildCopilotContext, buildSystemPrompt } from '@/lib/copilot/utils';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 const MAX_HISTORY_MESSAGES = 8;
 const MAX_HISTORY_CHARS = 9000;
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
       'User: ' + userContent;
 
     const result = await gemini.generateContent(fullPrompt);
-    const assistantResponse = result.response.text();
+    const assistantResponse = plainAiText(result.response.text());
 
     const { data: assistantMessage, error: assistantError } = await supabase
       .from('messages')

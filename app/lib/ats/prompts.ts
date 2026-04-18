@@ -33,15 +33,15 @@ export function buildCoverLetterPrompt(
     INSTRUCTIONS:
     Write a compelling, non-generic cover letter that follows this structure:
     
-    1.  **The Hook**: Open with a strong statement connecting the candidate's background to the company's mission or specific challenges mentioned in the JD. Avoid "I am writing to apply for...".
-    2.  **The Story (The "Meat")**: Select the most relevant approved facts and weave them into a narrative. Show, don't just tell.
-    3.  **The Culture Fit**: Briefly mention why this specific company appeals based on the JD, without inventing personal history.
-    4.  **The Close**: confident call to action.
+    1. The Hook: Open with a strong statement connecting the candidate's background to the company's mission or specific challenges mentioned in the JD. Avoid "I am writing to apply for...".
+    2. The Story: Select the most relevant approved facts and weave them into a narrative. Show, don't just tell.
+    3. The Culture Fit: Briefly mention why this specific company appeals based on the JD, without inventing personal history.
+    4. The Close: confident call to action.
 
     TONE: Professional, confident, authentic. Avoid buzzwords like "passionate", "motivated" unless backed by evidence.
     LENGTH: Keep it under 350 words.
     
-    Return ONLY the cover letter text.
+    Return ONLY the cover letter text. Use plain text only. Do not use markdown formatting, bold, italics, headings, or code fences.
   `;
 }
 
@@ -66,17 +66,17 @@ export function buildResumeTailoringPrompt(
     ${approvedFactsText}
 
     INSTRUCTIONS:
-    1.  **Summary**: Rewrite the summary to be focused on the JD only when approved facts support the claims. Add compact evidence tags like [fact:12345678] beside candidate claims.
-    2.  **Experience**:
+    1. Summary: Rewrite the summary to be focused on the JD only when approved facts support the claims. Add compact evidence tags like [fact:12345678] beside candidate claims.
+    2. Experience:
         -   Reframe approved work, achievement, and metric facts for the JD.
         -   Use JD keywords only when the approved facts support them.
         -   Include compact evidence tags like [fact:12345678] beside rewritten bullets.
-        -   **CRITICAL RULE**: Do NOT invent jobs, companies, dates, achievements, metrics, responsibilities, titles, skills, education, certifications, or credentials.
-        -   **CRITICAL RULE**: Do NOT estimate missing numbers or dates.
-    3.  **Skills**: Include only skills present in approved facts.
-    4.  **Gaps**: If important JD requirements are unsupported by approved facts, list them under a short GAP NOTES section instead of inventing experience.
+        -   CRITICAL RULE: Do NOT invent jobs, companies, dates, achievements, metrics, responsibilities, titles, skills, education, certifications, or credentials.
+        -   CRITICAL RULE: Do NOT estimate missing numbers or dates.
+    3. Skills: Include only skills present in approved facts.
+    4. Gaps: If important JD requirements are unsupported by approved facts, list them under a short GAP NOTES section instead of inventing experience.
 
     OUTPUT FORMAT:
-    Return the complete tailored resume text. Use a clean, plain-text format with clear section headers (SUMMARY, EXPERIENCE, EDUCATION, SKILLS).
+    Return the complete tailored resume text. Use a clean, plain-text format with clear section headers (SUMMARY, EXPERIENCE, EDUCATION, SKILLS). Do not use markdown formatting, bold, italics, headings, or code fences.
   `;
 }

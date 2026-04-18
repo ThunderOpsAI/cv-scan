@@ -6,6 +6,7 @@ import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 import { MineMetricsRequest, SubmitMetricsAnswersRequest } from '@/types/profile';
 
 const CREDIT_COST = 1;
@@ -85,7 +86,7 @@ Return ONLY the questions, one per line, without numbering.`;
 
   const questions = text
     .split('\n')
-    .map((q) => q.trim())
+    .map((q) => plainAiText(q.trim()))
     .filter((q) => q.length > 0 && q.endsWith('?'));
 
   if (questions.length === 0) {
@@ -153,7 +154,7 @@ Create an enhanced, ATS-optimized bullet point that:
 Return ONLY the enhanced bullet point, nothing else.`;
 
   const result = await gemini.generateContent(prompt);
-  const enhanced_content = result.response.text().trim();
+  const enhanced_content = plainAiText(result.response.text());
 
   if (!enhanced_content) {
     return NextResponse.json(

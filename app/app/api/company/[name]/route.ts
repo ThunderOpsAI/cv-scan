@@ -6,6 +6,7 @@ import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { CompanyData } from '@/types/intelligence';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 const CREDIT_COST = 1;
 const CACHE_DURATION_DAYS = 7;
@@ -122,14 +123,14 @@ Format your response as JSON with these exact keys: name, description, industry,
       const parsed = JSON.parse(jsonMatch[0]);
       return {
         name: companyName,
-        description: parsed.description,
-        industry: parsed.industry,
-        size: parsed.size,
-        headquarters: parsed.headquarters,
-        culture: parsed.culture || [],
-        values: parsed.values || [],
-        recent_news: parsed.recent_news || [],
-        summary: parsed.summary,
+        description: typeof parsed.description === 'string' ? plainAiText(parsed.description) : parsed.description,
+        industry: typeof parsed.industry === 'string' ? plainAiText(parsed.industry) : parsed.industry,
+        size: typeof parsed.size === 'string' ? plainAiText(parsed.size) : parsed.size,
+        headquarters: typeof parsed.headquarters === 'string' ? plainAiText(parsed.headquarters) : parsed.headquarters,
+        culture: Array.isArray(parsed.culture) ? parsed.culture.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        values: Array.isArray(parsed.values) ? parsed.values.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        recent_news: Array.isArray(parsed.recent_news) ? parsed.recent_news.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        summary: typeof parsed.summary === 'string' ? plainAiText(parsed.summary) : parsed.summary,
       };
     }
   } catch (parseError) {
@@ -138,7 +139,7 @@ Format your response as JSON with these exact keys: name, description, industry,
 
   return {
     name: companyName,
-    description: text.substring(0, 200),
+    description: plainAiText(text).substring(0, 200),
     summary: 'Unable to fetch detailed company information.',
   };
 }
