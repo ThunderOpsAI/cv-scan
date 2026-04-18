@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { extractCandidateFactsFromResume } from "@/lib/profile/facts";
 import { createClient } from "@/lib/supabase/server";
 import type { ResumeImportRequest, ResumeImportResponse } from "@/types/profile";
@@ -53,6 +54,12 @@ export async function POST(req: NextRequest) {
 
     if (resumeError || !resumeVersion) {
       console.error("Resume import save error:", resumeError);
+      await logCriticalError({
+        workflow: "resume_import_save",
+        userId: session.user.id,
+        supabase,
+        error: resumeError ?? "Missing resume version after insert",
+      });
       return NextResponse.json(
         { error: "Failed to save resume version. Has the Phase 1.2 SQL been applied locally?" },
         { status: 500 }
@@ -67,9 +74,23 @@ export async function POST(req: NextRequest) {
       review_message: "Review each extracted fact. Facts you reject are not saved or used by generation.",
     };
 
+    await emitAnalyticsEvent({
+      eventName: "resume_imported",
+      userId: session.user.id,
+      supabase,
+      properties: {
+        resume_version_id: resumeVersion.version_id,
+        candidate_fact_count: candidateFacts.length,
+      },
+    });
+
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error("Resume import error:", error);
+    await logCriticalError({
+      workflow: "resume_import",
+      error,
+    });
     return NextResponse.json({ error: "Failed to import resume" }, { status: 500 });
   }
 }

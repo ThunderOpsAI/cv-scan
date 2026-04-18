@@ -120,10 +120,6 @@ export default function CopilotPage() {
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session?.user?.credits || 0}</span>
-          </div>
         </div>
       </nav>
 
@@ -243,9 +239,6 @@ export default function CopilotPage() {
                   >
                     Send
                   </button>
-                </div>
-                <div className="text-xs text-gray-400 mt-2">
-                  1 credit per message
                 </div>
               </form>
             </div>

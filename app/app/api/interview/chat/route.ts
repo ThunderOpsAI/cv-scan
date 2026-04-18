@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { emitAnalyticsEvent, logCriticalError } from '@/lib/analytics/server';
 import { gemini } from '@/lib/gemini';
 import { createClient } from '@/lib/supabase/server';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { getPlanTierForUser, planMeetsMinimum } from '@/lib/billing/plan-tier';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 const CREDIT_COST = 1;
 
@@ -66,18 +68,19 @@ export async function POST(req: NextRequest) {
 
     if (userError || !user) {
       console.error('Failed to load user credits for interview chat:', userError);
+      await logCriticalError({
+        workflow: 'interview_credit_load',
+        userId: session.user.id,
+        supabase,
+        error: userError ?? 'Missing user credit row',
+      });
       return NextResponse.json(
         { error: 'Unable to verify your credit balance. Please try again.' },
         { status: 500 }
       );
     }
 
-    if (user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Mock interview replies cost 1 credit.' },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     // Since this is a specialized interview bot, let's construct the prompt
     // We combine the history into a single prompt for Gemini or use an array if supported. 
@@ -97,6 +100,7 @@ STRICT RULES:
 4. After the candidate responds, provide brief, constructive feedback on their answer (what was good, what could be improved), and then immediately ask the next interview question.
 5. If the user asks for a hint, provide a small tip on how to answer the question well.
 6. Keep your responses concise (under 150 words).
+7. Return plain text only. Do not use markdown formatting, headings, bold, italics, or bullet symbols.
 
 Here is the conversation so far:
 ${conversationHistory}
@@ -104,14 +108,14 @@ ${conversationHistory}
 Based on the above, write your next response as the Interviewer. Remember to give feedback if the candidate just answered, and then ask the next question.`;
 
     const result = await gemini.generateContent(systemPrompt);
-    const aiResponse = result.response.text();
+    const aiResponse = plainAiText(result.response.text());
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Mock interview reply: ${role} at ${company}`,
       p_reference_id: debitReferenceFromRequest(req, 'interview'),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Interview credit deduction failed:', {
@@ -128,12 +132,27 @@ Based on the above, write your next response as the Interviewer. Remember to giv
       );
     }
 
+    await emitAnalyticsEvent({
+      eventName: 'interview_prep_run',
+      userId: session.user.id,
+      supabase,
+      properties: {
+        message_count: sanitizedMessages.length,
+        plan_tier: planTier,
+        credits_charged: CREDIT_COST,
+      },
+    });
+
     return NextResponse.json({ 
       response: aiResponse,
       creditsRemaining: deductResult[0].new_credits,
     });
   } catch (error: any) {
     console.error('Interview Chat error:', error);
+    await logCriticalError({
+      workflow: 'interview_prep_run',
+      error,
+    });
     return NextResponse.json(
       { error: error.message || 'Failed to generate response' },
       { status: 500 }

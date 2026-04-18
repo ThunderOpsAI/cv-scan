@@ -19,8 +19,14 @@ export interface CoverLetterEvidence {
   paragraphs: Array<{
     text: string;
     fact_ids: string[];
+    missing_grounding?: boolean;
+    invalid_tags?: string[];
   }>;
   raw_text: string;
+  valid_fact_ids: string[];
+  invalid_fact_tags: string[];
+  missing_grounding_notes: string[];
+  has_ungrounded_claims: boolean;
 }
 
 export interface SaveGeneratedAssetRequest {

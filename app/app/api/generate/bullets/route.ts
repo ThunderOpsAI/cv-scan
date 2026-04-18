@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { gemini } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
 import { deductCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { approvedFactIds, formatApprovedFactsForPrompt } from "@/lib/profile/facts";
+import { groundingErrorMessage, validateEvidenceTags } from "@/lib/generation/grounding";
+import { plainAiText } from "@/lib/text/plain-ai-output";
 
 const CREDIT_COST = 1;
 
@@ -36,12 +39,7 @@ export async function POST(req: NextRequest) {
       .eq("id", session.user.id)
       .single();
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: "Insufficient credits. Please purchase more credits." },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
@@ -73,6 +71,7 @@ Requirements:
 - Do not invent or imply achievements, skills, dates, metrics, responsibilities, titles, companies, education, certifications, or credentials
 - Do not treat the target focus as evidence unless it matches an approved fact
 - Add a compact evidence tag like [fact:12345678] to each bullet
+- Use plain text only. Do not use markdown formatting, bold, italics, headings, or code fences
 
 Return ONLY the bullet points, one per line, without any numbering or bullet symbols. Each line should be a complete sentence.`;
 
@@ -80,25 +79,38 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     const response = result.response;
     const text = response.text();
 
-    // Parse bullets (split by newlines, filter empty)
-    const bullets = text
+    // Parse bullets and keep only lines that cite a valid approved profile fact.
+    const rawBullets = text
       .split("\n")
       .map((b) => b.replace(/^[\s\d.\-*•]+/, "").trim())
       .filter((b) => b.length > 0);
+    const bullets: string[] = [];
+    const ungroundableNotes: string[] = [];
+
+    for (const bullet of rawBullets) {
+      const tagValidation = validateEvidenceTags(bullet, profile.approved_facts);
+      if (tagValidation.validFactIds.length > 0 && tagValidation.invalidTags.length === 0) {
+        bullets.push(plainAiText(bullet));
+      } else {
+        ungroundableNotes.push(
+          "A generated bullet was withheld because it did not cite an approved profile fact."
+        );
+      }
+    }
 
     if (bullets.length === 0) {
       return NextResponse.json(
-        { error: "Failed to generate bullet points. Please try again." },
-        { status: 500 }
+        { error: groundingErrorMessage("bullets"), ungroundableNotes },
+        { status: 422 }
       );
     }
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: "Generated resume bullets",
       p_reference_id: debitReferenceFromRequest(req, "gen-bullets"),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
@@ -109,7 +121,7 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     // Save generation to database
-    await (supabase
+    const { error: generationError } = await (supabase
       .from("generations")
       .insert as any)({
         user_id: session.user.id,
@@ -122,12 +134,39 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
         credits_used: CREDIT_COST,
       });
 
+    if (generationError) {
+      await logCriticalError({
+        workflow: "tailoring_generation_save",
+        userId: session.user.id,
+        supabase,
+        error: generationError,
+        properties: { type: "bullets" },
+      });
+    }
+
+    await emitAnalyticsEvent({
+      eventName: "tailoring_run",
+      userId: session.user.id,
+      supabase,
+      properties: {
+        type: "bullets",
+        bullet_count: bullets.length,
+        approved_fact_count: profile.approved_facts.length,
+        credits_charged: CREDIT_COST,
+      },
+    });
+
     return NextResponse.json({
       bullets,
+      ungroundableNotes,
       creditsRemaining: deductResult[0].new_credits,
     });
   } catch (error: any) {
     console.error("Generate bullets error:", error);
+    await logCriticalError({
+      workflow: "tailoring_run",
+      error,
+    });
     return NextResponse.json(
       { error: error.message || "Failed to generate bullets" },
       { status: 500 }

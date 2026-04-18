@@ -2,15 +2,24 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import Link from "next/link";
 import { ATSScan, ATSScanResponse } from "@/types/job-packs";
 import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
+
+type ApiErrorResponse = { error?: string };
+type JobAdOcrResponse = ApiErrorResponse & { text?: string };
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function ScannerPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [jobDescription, setJobDescription] = useState("");
+  const [jobAdFile, setJobAdFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [freeScansRemaining, setFreeScansRemaining] = useState<number | null>(null);
   const [scanResult, setScanResult] = useState<ATSScan | null>(null);
@@ -51,16 +60,16 @@ export default function ScannerPage() {
         body: JSON.stringify({ job_description: jobDescription }),
       });
 
-      const data: ATSScanResponse = await res.json();
+      const data = (await res.json()) as ATSScanResponse & ApiErrorResponse;
 
       if (!res.ok) {
-        throw new Error((data as any).error || "Scan failed");
+        throw new Error(data.error || "Scan failed");
       }
 
       setScanResult(data.scan);
       setFreeScansRemaining(data.free_scans_remaining);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err, "Scan failed"));
     } finally {
       setLoading(false);
     }
@@ -76,6 +85,39 @@ export default function ScannerPage() {
     if (score >= 80) return "bg-green-500";
     if (score >= 60) return "bg-yellow-500";
     return "bg-red-500";
+  };
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setJobAdFile(file);
+    setError("");
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/jobs/ocr", {
+        method: "POST",
+        body: formData,
+      });
+      const data = (await res.json()) as JobAdOcrResponse;
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not read that screenshot");
+      }
+
+      setJobDescription(data.text || "");
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not read that screenshot. Try a clearer image or paste the job ad."));
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   };
 
   if (status === "loading") {
@@ -95,10 +137,6 @@ export default function ScannerPage() {
           <Link href="/dashboard" className="text-gray-300 hover:text-white">
             Dashboard
           </Link>
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
         </div>
       </nav>
 
@@ -114,29 +152,41 @@ export default function ScannerPage() {
               <p className="text-blue-400 mt-2">
                 {freeScansRemaining > 0
                   ? `${freeScansRemaining} free scans remaining today`
-                  : "Free scans used. Each scan costs 1 credit."}
+                  : "Free scans used."}
               </p>
             )}
           </div>
 
-          {/* Scanner Input */}
+          {/* Scanner Input & Job Ad Upload */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-8">
             <label className="block text-white font-semibold mb-2">
-              Paste Job Description
+              Paste job description or upload job ad screenshot
             </label>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="mb-4 block text-white"
+              data-testid="job-ad-upload-input"
+            />
+            {jobAdFile && (
+              <p className="text-gray-300 mb-2">Selected: {jobAdFile.name}</p>
+            )}
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               rows={10}
-              placeholder="Paste the full job description here..."
+              placeholder="Paste the full job description, or upload a screenshot to fill this box..."
               className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
               data-testid="job-description-input"
             />
+            {uploading && <p className="text-blue-400 mt-2">Reading job ad screenshot...</p>}
             {error && <p className="text-red-400 mt-2">{error}</p>}
             <div className="flex gap-4 mt-4">
               <button
                 onClick={handleScan}
-                disabled={loading}
+                disabled={loading || uploading}
                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 data-testid="scan-button"
               >
@@ -148,7 +198,7 @@ export default function ScannerPage() {
                   className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
                   data-testid="create-job-pack-btn"
                 >
-                  Create Job Pack (5cr)
+                  Create Job Pack
                 </Link>
               )}
             </div>

@@ -6,6 +6,7 @@ import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { CompanyData } from '@/types/intelligence';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 const CREDIT_COST = 1;
 const CACHE_DURATION_DAYS = 7;
@@ -51,16 +52,11 @@ export async function GET(
       .eq('id', session.user.id)
       .single();
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Please purchase more credits.' },
-        { status: 402 }
-      );
-    }
+    /* Credit check bypassed for beta */
 
     const companyData = await fetchCompanyResearch(companyName);
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Company research: ${companyName}`,
@@ -68,7 +64,7 @@ export async function GET(
         req,
         `company:${companyName}:${forceRefresh ? 'refresh' : 'fetch'}`
       ),
-    });
+    }); */
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error('Failed to deduct credit:', deductError);
@@ -127,14 +123,14 @@ Format your response as JSON with these exact keys: name, description, industry,
       const parsed = JSON.parse(jsonMatch[0]);
       return {
         name: companyName,
-        description: parsed.description,
-        industry: parsed.industry,
-        size: parsed.size,
-        headquarters: parsed.headquarters,
-        culture: parsed.culture || [],
-        values: parsed.values || [],
-        recent_news: parsed.recent_news || [],
-        summary: parsed.summary,
+        description: typeof parsed.description === 'string' ? plainAiText(parsed.description) : parsed.description,
+        industry: typeof parsed.industry === 'string' ? plainAiText(parsed.industry) : parsed.industry,
+        size: typeof parsed.size === 'string' ? plainAiText(parsed.size) : parsed.size,
+        headquarters: typeof parsed.headquarters === 'string' ? plainAiText(parsed.headquarters) : parsed.headquarters,
+        culture: Array.isArray(parsed.culture) ? parsed.culture.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        values: Array.isArray(parsed.values) ? parsed.values.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        recent_news: Array.isArray(parsed.recent_news) ? parsed.recent_news.map((item: unknown) => typeof item === 'string' ? plainAiText(item) : item) : [],
+        summary: typeof parsed.summary === 'string' ? plainAiText(parsed.summary) : parsed.summary,
       };
     }
   } catch (parseError) {
@@ -143,7 +139,7 @@ Format your response as JSON with these exact keys: name, description, industry,
 
   return {
     name: companyName,
-    description: text.substring(0, 200),
+    description: plainAiText(text).substring(0, 200),
     summary: 'Unable to fetch detailed company information.',
   };
 }

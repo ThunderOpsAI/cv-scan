@@ -21,19 +21,19 @@ export default function PrivacyPolicyPage() {
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10 text-gray-300">
           <h1 className="text-4xl font-bold text-white mb-6">Privacy Policy</h1>
-          <p className="mb-8">Last Updated: March 2026</p>
+          <p className="mb-8">Last Updated: April 2026</p>
 
           <section className="space-y-6">
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">1. Information We Collect</h2>
               <p>
-                We collect information that you directly provide to us when you create an account, build your profile, upload your resume, or communicate with us. This includes:
+                We collect information that you directly provide to us when you use the platform, build your profile, upload your resume, or communicate with us. <strong>During the public beta, we do not require accounts, authentication, or payment information. No billing data is collected.</strong> This includes:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Name and email address (via OAuth or email signup).</li>
                 <li>Professional history, skills, education, and career goals.</li>
+                <li>Approved Career Memory facts and generated application drafts.</li>
                 <li>Job application tracking data.</li>
-                <li>Billing information (processed securely via Stripe).</li>
+                <li>Product analytics events such as feature usage and error states. These events do not include resume text, job descriptions, cover letters, or raw messages.</li>
               </ul>
             </div>
 
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-2xl font-semibold text-white mb-3">3. Artificial Intelligence & Sub-Processors</h2>
               <p>
                 CVScan uses third-party AI models (such as Google Gemini) to provide core functionality.
-                When you use our generation tools, your relevant profile data and prompts are sent to these providers to generate the requested content.
+                When you use generation tools, the relevant approved profile facts, job details, and prompt instructions are sent to these providers to generate the requested content.
                 <strong> Our AI partners are contractually prohibited from using your personal data to train their foundational models.</strong>
               </p>
             </div>
@@ -67,7 +67,14 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">5. Data Retention & Deletion</h2>
+              <h2 className="text-2xl font-semibold text-white mb-3">5. Data Export</h2>
+              <p>
+                You can request an export of your account data, including approved profile facts and generated assets. For V1, contact privacy@cvscan.com from the email address on your account and we will provide a machine-readable export after verifying the request.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-semibold text-white mb-3">6. Data Retention & Deletion</h2>
               <p>
                 You own your data. You can delete your account and all associated data at any time through your account settings or by contacting support. 
                 Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.

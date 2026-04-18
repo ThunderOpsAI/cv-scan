@@ -110,6 +110,37 @@ CREATE INDEX IF NOT EXISTS idx_generations_type ON generations(type);
 CREATE INDEX IF NOT EXISTS idx_generations_created_at ON generations(created_at);
 
 -- ============================================
+-- ANALYTICS EVENTS TABLE (Build Spec 1.4)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS analytics_events (
+  event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  event_name TEXT NOT NULL CHECK (
+    event_name IN (
+      'user_signed_up',
+      'resume_imported',
+      'facts_reviewed',
+      'job_fit_run',
+      'tailoring_run',
+      'cover_letter_run',
+      'application_saved',
+      'interview_prep_run',
+      'credit_purchased',
+      'credit_spent',
+      'critical_error'
+    )
+  ),
+  properties_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_events_user_created
+  ON analytics_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_name_created
+  ON analytics_events(event_name, created_at DESC);
+
+-- ============================================
 -- PROFILE FACTS TABLE
 -- ============================================
 
@@ -265,6 +296,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credit_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credit_ledger ENABLE ROW LEVEL SECURITY;
 ALTER TABLE generations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profile_facts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resume_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
@@ -294,6 +326,17 @@ CREATE POLICY "Users can view own credit ledger"
 CREATE POLICY "Users can view own generations"
   ON generations FOR SELECT
   USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can view own analytics events" ON analytics_events;
+CREATE POLICY "Users can view own analytics events"
+  ON analytics_events FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Service role can manage analytics events" ON analytics_events;
+CREATE POLICY "Service role can manage analytics events"
+  ON analytics_events FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- Users can manage their own approved profile facts
 CREATE POLICY "Users can view own profile facts"

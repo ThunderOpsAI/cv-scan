@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import type { CoverLetterEvidence } from "@/types/generated-assets";
+import { stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
 
 export default function GenerateCoverLetter() {
   const { data: session, status } = useSession();
@@ -11,6 +13,7 @@ export default function GenerateCoverLetter() {
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [evidence, setEvidence] = useState<CoverLetterEvidence | null>(null);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -29,14 +32,11 @@ export default function GenerateCoverLetter() {
       return;
     }
 
-    if ((session?.user?.credits || 0) < 2) {
-      setError("You need at least 2 credits. Please purchase more.");
-      return;
-    }
 
     setLoading(true);
     setError("");
     setCoverLetter("");
+    setEvidence(null);
 
     try {
       const res = await fetch("/api/generate/cover-letter", {
@@ -52,6 +52,7 @@ export default function GenerateCoverLetter() {
       }
 
       setCoverLetter(data.coverLetter);
+      setEvidence((data.evidence as CoverLetterEvidence) || null);
       setSaved(false); // Reset saved state for new generation
       setSaveMessage("");
 
@@ -65,8 +66,10 @@ export default function GenerateCoverLetter() {
   };
 
   const copyCoverLetter = () => {
-    navigator.clipboard.writeText(coverLetter);
+    navigator.clipboard.writeText(stripFactTagsForExport(coverLetter));
   };
+
+  const coverHasEvidenceTags = /\[fact:[a-f0-9-]{8,36}\]/i.test(coverLetter);
 
   const saveCoverLetter = async () => {
     try {
@@ -133,10 +136,7 @@ export default function GenerateCoverLetter() {
           <span className="text-blue-400">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
-          </div>
+
           <Link
             href="/dashboard"
             className="text-gray-300 hover:text-white transition-colors"
@@ -154,7 +154,7 @@ export default function GenerateCoverLetter() {
             <p className="text-gray-400">
               Create a professional cover letter using only approved career facts
             </p>
-            <div className="mt-2 text-blue-400 text-sm">Cost: 2 credits per generation</div>
+
             <p className="mt-2 text-gray-400 text-sm">
               Need to add facts first?{" "}
               <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">
@@ -202,9 +202,26 @@ export default function GenerateCoverLetter() {
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
                   <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
                     <p className="text-blue-200 text-sm leading-relaxed">
-                      <strong>AI-generated draft:</strong> This draft is grounded in approved career facts. Review every claim before using it in an application.
+                      <strong>AI-generated draft:</strong> Candidate claims cite approved Career Memory
+                      facts. Review the evidence tags before copying or saving.
                     </p>
                   </div>
+                  {evidence && (
+                    <div className="mb-6 p-4 bg-white/5 border border-white/15 rounded-xl">
+                      <p className="text-white text-sm font-semibold">Evidence check</p>
+                      <p className="text-gray-300 text-sm mt-1">
+                        {evidence.valid_fact_ids.length} approved fact
+                        {evidence.valid_fact_ids.length === 1 ? "" : "s"} cited.
+                      </p>
+                      {evidence.missing_grounding_notes.length > 0 && (
+                        <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
+                          {evidence.missing_grounding_notes.map((note, index) => (
+                            <li key={index}>{note}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white">Result</h2>
                     <div className="flex items-center gap-3">
@@ -213,13 +230,14 @@ export default function GenerateCoverLetter() {
                       )}
                       <button
                         onClick={copyCoverLetter}
+                        disabled={!coverHasEvidenceTags}
                         className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold transition-all border border-white/20"
                       >
                         Copy
                       </button>
                       <button
                         onClick={saveCoverLetter}
-                        disabled={saved}
+                        disabled={saved || !coverHasEvidenceTags}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${saved
                             ? "bg-green-600 text-white cursor-default"
                             : "bg-blue-600 hover:bg-blue-700 text-white"

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
 import { isProfileFactType, sanitizeFactText } from "@/lib/profile/facts";
 import type { ProfileFactSource, SaveProfileFactsRequest } from "@/types/profile";
@@ -100,6 +101,12 @@ export async function POST(req: NextRequest) {
 
     if (existingError) {
       console.error("Check duplicate profile facts error:", existingError);
+      await logCriticalError({
+        workflow: "profile_facts_duplicate_check",
+        userId: session.user.id,
+        supabase,
+        error: existingError,
+      });
       return NextResponse.json({ error: "Failed to check existing facts" }, { status: 500 });
     }
 
@@ -119,6 +126,17 @@ export async function POST(req: NextRequest) {
     });
 
     if (dedupedFacts.length === 0) {
+      await emitAnalyticsEvent({
+        eventName: "facts_reviewed",
+        userId: session.user.id,
+        supabase,
+        properties: {
+          approved_count: factsToSave.length,
+          saved_count: 0,
+          skipped_duplicates: factsToSave.length,
+        },
+      });
+
       return NextResponse.json({
         facts: [],
         skipped_duplicates: factsToSave.length,
@@ -135,8 +153,26 @@ export async function POST(req: NextRequest) {
 
     if (insertError) {
       console.error("Save approved profile facts error:", insertError);
+      await logCriticalError({
+        workflow: "profile_facts_save",
+        userId: session.user.id,
+        supabase,
+        error: insertError,
+        properties: { approved_count: factsToSave.length },
+      });
       return NextResponse.json({ error: "Failed to save approved facts" }, { status: 500 });
     }
+
+    await emitAnalyticsEvent({
+      eventName: "facts_reviewed",
+      userId: session.user.id,
+      supabase,
+      properties: {
+        approved_count: factsToSave.length,
+        saved_count: savedFacts?.length ?? 0,
+        skipped_duplicates: factsToSave.length - dedupedFacts.length,
+      },
+    });
 
     return NextResponse.json({
       facts: savedFacts || [],
@@ -145,6 +181,10 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
   } catch (error) {
     console.error("Save approved profile facts error:", error);
+    await logCriticalError({
+      workflow: "profile_facts_save",
+      error,
+    });
     return NextResponse.json({ error: "Failed to save approved facts" }, { status: 500 });
   }
 }

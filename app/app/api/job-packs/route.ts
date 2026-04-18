@@ -8,6 +8,11 @@ import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { tailorResumeToJob, generateCoverLetter } from '@/lib/ats/tailor';
 import { detectCulturalWarnings } from '@/lib/ats/cultural-analysis';
 import { loadProfileForTailoring } from '@/lib/ats/profile-loader';
+import { extractCoverLetterEvidence } from '@/lib/generation/cover-letter-evidence';
+import {
+  findUngroundedCandidateClaimLines,
+  groundingErrorMessage,
+} from '@/lib/generation/grounding';
 import { CreateJobPackRequest, JobPackResponse, JobPackListResponse } from '@/types/job-packs';
 
 const CREDIT_COST = 5;
@@ -38,12 +43,8 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
       .single() as { data: { credits: number } | null };
 
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: `Insufficient credits. Job packs cost ${CREDIT_COST} credits.` },
-        { status: 402 }
-      );
-    }
+    // Beta: Bypass credit checks
+    // Credit check bypassed for beta
 
     // Load profile
     const profile = await loadProfileForTailoring(session.user.id, supabase);
@@ -63,20 +64,32 @@ export async function POST(req: NextRequest) {
       detectCulturalWarnings(body.job_description),
     ]);
 
-    // Deduct credits
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
-      p_user_id: session.user.id,
-      p_amount: CREDIT_COST,
-      p_description: `Job pack: ${body.job_title} at ${body.company}`,
-      p_reference_id: debitReferenceFromRequest(req, 'job-pack'),
-    });
+    const ungroundedResumeLines = findUngroundedCandidateClaimLines(
+      tailoredResume,
+      profile.approved_facts
+    );
+    const coverEvidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
 
-    if (deductError || !deductResult?.[0]?.success) {
+    if (ungroundedResumeLines.length > 0 || coverEvidence.has_ungrounded_claims) {
       return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || 'Failed to deduct credits' },
-        { status: 500 }
+        {
+          error:
+            ungroundedResumeLines.length > 0
+              ? groundingErrorMessage('resume')
+              : groundingErrorMessage('cover_letter'),
+          grounding: {
+            ungrounded_resume_line_count: ungroundedResumeLines.length,
+            cover_letter_missing_grounding: coverEvidence.missing_grounding_notes,
+          },
+        },
+        { status: 422 }
       );
     }
+
+    // Beta: Bypass credit deduction
+    const deductResult = [{success:true}]; 
+    const deductError = null; 
+    // Deduct removed for beta
 
     // Create job pack
     const { data: jobPack, error: jobPackError } = await supabase

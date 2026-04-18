@@ -81,6 +81,7 @@ export interface Bullet {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  manual?: boolean;
 }
 
 export interface Education {

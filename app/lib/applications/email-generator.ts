@@ -1,6 +1,7 @@
 // Email Generator - Generates thank you and follow-up emails
 import { EmailType, Application, ApplicationStage, StructuredNotes } from '@/types/applications';
 import { gemini } from '@/lib/gemini';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 
 interface EmailContext {
   application: Application;
@@ -58,8 +59,8 @@ export async function generateEmail(
 
     const parsed = JSON.parse(responseText);
     return {
-      subject: parsed.subject || `Re: ${application.title} Position`,
-      content: parsed.content || 'Thank you for your time.',
+      subject: plainAiText(parsed.subject || `Re: ${application.title} Position`),
+      content: plainAiText(parsed.content || 'Thank you for your time.'),
     };
   } catch (error) {
     console.error('Email generation error:', error);

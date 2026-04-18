@@ -1,4 +1,5 @@
 import { gemini } from "@/lib/gemini";
+import { plainAiText } from "@/lib/text/plain-ai-output";
 
 export async function generateFollowUpDraft(input: {
   jobTitle: string;
@@ -25,8 +26,9 @@ Date they applied (stated for context only): ${dateStr}
 Rules:
 - Do not invent employers, interviews, or offers.
 - Keep it concise (120–220 words), polite, one clear ask (e.g. status update).
-- Return ONLY the email body text.`;
+- Return ONLY the email body text.
+- Use plain text only. Do not use markdown formatting, bold, italics, headings, or bullet symbols.`;
 
   const result = await gemini.generateContent(prompt);
-  return result.response.text().trim();
+  return plainAiText(result.response.text());
 }

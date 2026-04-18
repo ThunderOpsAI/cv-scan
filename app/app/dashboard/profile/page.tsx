@@ -114,6 +114,42 @@ export default function ProfilePage() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* Data Export & Deletion */}
+          <div className="mb-8 p-6 bg-white/5 border border-white/20 rounded-xl">
+            <h2 className="text-2xl font-semibold text-white mb-3">Data Export & Deletion</h2>
+            <p className="text-gray-300 mb-2">
+              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com" className="underline text-blue-400">privacy@cvscan.com</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
+            </p>
+            <button
+              className="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+              onClick={async () => {
+                const [factsRes, assetsRes] = await Promise.all([
+                  fetch("/api/profile/facts"),
+                  fetch("/api/generated-assets"),
+                ]);
+                const facts = await factsRes.json();
+                const assets = await assetsRes.json();
+                const data = { profile_facts: facts.facts || [], generated_assets: assets.assets || [] };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "cvscan-data-export.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Download Profile Facts & Generated Assets (JSON)
+            </button>
+            <p className="text-gray-300 mb-2">
+              To delete your account and all associated data, use the account deletion option in settings (coming soon) or contact <a href="mailto:privacy@cvscan.com" className="underline text-blue-400">privacy@cvscan.com</a>.
+            </p>
+            <p className="text-gray-400 text-xs">
+              Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.
+            </p>
+          </div>
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>

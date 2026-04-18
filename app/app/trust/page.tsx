@@ -66,6 +66,10 @@ export default function TrustPage() {
               </li>
               <li className="flex items-start">
                 <span className="text-blue-400 mt-1 mr-3">•</span>
+                <p><strong>Grounded Generation:</strong> Resume bullets and cover letters must cite approved Career Memory facts. Unsupported job requirements are shown as gaps rather than rewritten as experience.</p>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-400 mt-1 mr-3">•</span>
                 <p><strong>Hallucination Risk:</strong> While we use leading enterprise-grade models (Google Gemini) instructed not to fabricate information, AI can still hallucinate. You are responsible for the final accuracy of your applications.</p>
               </li>
               <li className="flex items-start">

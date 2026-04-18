@@ -45,6 +45,7 @@ export default function ProfileFactsPage() {
   const [memoryFacts, setMemoryFacts] = useState<ProfileFact[]>([]);
   const [loadingFacts, setLoadingFacts] = useState(true);
   const [importing, setImporting] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [manualType, setManualType] = useState<ProfileFactType>("skill");
   const [manualText, setManualText] = useState("");
@@ -107,6 +108,43 @@ export default function ProfileFactsPage() {
       }
     } catch {
       setError("Could not read that file. Paste the resume text instead.");
+    }
+  };
+
+  const handleResumeImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setOcrLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/resume/ocr", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not read that image");
+      }
+
+      setResumeText(data.text || "");
+      if (!label) {
+        setLabel(file.name.replace(/\.[^.]+$/, ""));
+      }
+      setMessage("Resume text extracted. Review it below before extracting facts.");
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not read that image. Try a clearer photo or paste the resume text."));
+    } finally {
+      setOcrLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -414,6 +452,27 @@ export default function ProfileFactsPage() {
                 <p className="text-gray-400 text-sm mt-2">
                   Text-based uploads work best. Paste the resume text below if the file text looks wrong.
                 </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+                <label htmlFor="resume-image-upload" className="block text-white font-semibold mb-2">
+                  Photo or screenshot of resume
+                </label>
+                <input
+                  id="resume-image-upload"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleResumeImageUpload}
+                  className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700"
+                  disabled={importing || ocrLoading}
+                />
+                <p className="text-gray-400 text-sm mt-2">
+                  Take a clear photo or upload a screenshot. CVScan will read it and fill the resume content box for review.
+                </p>
+                {ocrLoading && (
+                  <p className="text-blue-300 text-sm mt-3">Reading resume image...</p>
+                )}
               </div>
 
               <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">

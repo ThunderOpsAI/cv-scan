@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { emitAnalyticsEvent, logCriticalError } from '@/lib/analytics/server';
 import { createClient } from '@/lib/supabase/server';
 import { CreateApplicationRequest, ApplicationListResponse } from '@/types/applications';
 
@@ -34,6 +35,13 @@ export async function POST(req: NextRequest) {
 
       if (jobPackError) {
         console.error('Failed to verify job pack ownership:', jobPackError);
+        await logCriticalError({
+          workflow: 'application_job_pack_verify',
+          userId: session.user.id,
+          supabase,
+          error: jobPackError,
+          properties: { has_job_pack_id: true },
+        });
         return NextResponse.json(
           { error: 'Failed to verify job pack' },
           { status: 500 }
@@ -69,15 +77,42 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Failed to create application:', error);
+      await logCriticalError({
+        workflow: 'application_create',
+        userId: session.user.id,
+        supabase,
+        error,
+        properties: {
+          has_job_pack_id: Boolean(jobPackId),
+          status: body.status || 'saved',
+          priority: body.priority || 'medium',
+        },
+      });
       return NextResponse.json(
         { error: 'Failed to create application' },
         { status: 500 }
       );
     }
 
+    await emitAnalyticsEvent({
+      eventName: 'application_saved',
+      userId: session.user.id,
+      supabase,
+      properties: {
+        application_id: application.id,
+        status: application.status,
+        priority: application.priority,
+        has_job_pack_id: Boolean(jobPackId),
+      },
+    });
+
     return NextResponse.json({ application });
   } catch (error: any) {
     console.error('Application creation error:', error);
+    await logCriticalError({
+      workflow: 'application_create',
+      error,
+    });
     return NextResponse.json(
       { error: error.message || 'Failed to create application' },
       { status: 500 }

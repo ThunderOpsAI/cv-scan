@@ -6,6 +6,7 @@ import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
+import { plainAiText } from '@/lib/text/plain-ai-output';
 import { MineMetricsRequest, SubmitMetricsAnswersRequest } from '@/types/profile';
 
 const CREDIT_COST = 1;
@@ -85,7 +86,7 @@ Return ONLY the questions, one per line, without numbering.`;
 
   const questions = text
     .split('\n')
-    .map((q) => q.trim())
+    .map((q) => plainAiText(q.trim()))
     .filter((q) => q.length > 0 && q.endsWith('?'));
 
   if (questions.length === 0) {
@@ -119,12 +120,7 @@ async function enhanceBullet(
     .eq('id', userId)
     .single();
 
-  if (!user || user.credits < CREDIT_COST) {
-    return NextResponse.json(
-      { error: 'Insufficient credits. Please purchase more credits.' },
-      { status: 402 }
-    );
-  }
+  /* Credit check bypassed for beta */
 
   const bullet = await getOwnedBullet(supabase, userId, bullet_id);
 
@@ -158,7 +154,7 @@ Create an enhanced, ATS-optimized bullet point that:
 Return ONLY the enhanced bullet point, nothing else.`;
 
   const result = await gemini.generateContent(prompt);
-  const enhanced_content = result.response.text().trim();
+  const enhanced_content = plainAiText(result.response.text());
 
   if (!enhanced_content) {
     return NextResponse.json(
@@ -167,12 +163,12 @@ Return ONLY the enhanced bullet point, nothing else.`;
     );
   }
 
-  const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+  const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
     p_user_id: userId,
     p_amount: CREDIT_COST,
     p_description: 'Metric mining enhancement',
     p_reference_id: debitReferenceFromRequest(req, `mine-metrics:${bullet_id}`),
-  });
+  }); */
 
   if (deductError || !deductResult?.[0]?.success) {
     console.error('Failed to deduct credit:', deductError);

@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const title = typeof body.title === "string" ? body.title.trim() : "Export";
     const content = typeof body.content === "string" ? body.content : "";
+    const reviewAcknowledged = body.review_acknowledged === true;
     const filename =
       typeof body.filename === "string" && body.filename.endsWith(".pdf")
         ? body.filename
@@ -21,6 +22,13 @@ export async function POST(req: NextRequest) {
 
     if (!content.trim()) {
       return NextResponse.json({ error: "content is required" }, { status: 400 });
+    }
+
+    if (!reviewAcknowledged) {
+      return NextResponse.json(
+        { error: "Review the AI-generated content and confirm it is accurate before export." },
+        { status: 400 }
+      );
     }
 
     const bytes = await buildPdfBytes(title, content);

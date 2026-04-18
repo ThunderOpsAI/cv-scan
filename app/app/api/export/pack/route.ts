@@ -46,6 +46,15 @@ export async function POST(req: NextRequest) {
     const zip = new JSZip();
 
     zip.file(
+      "READ_BEFORE_USE.txt",
+      [
+        "CVScan AI-generated application materials require human review before use.",
+        "Only use claims that are accurate and supported by your approved Career Memory facts.",
+        "If a job requirement is not supported by your facts, treat it as a gap rather than adding it as experience.",
+      ].join("\n")
+    );
+
+    zip.file(
       "job.txt",
       `Title: ${job.title}\nCompany: ${job.company}\nURL: ${job.url || ""}\n\n--- Description ---\n\n${job.raw_description}`
     );
@@ -71,7 +80,7 @@ export async function POST(req: NextRequest) {
     const out = await zip.generateAsync({ type: "nodebuffer" });
 
     const safeName = `${job.company}-${job.title}`
-      .replace(/[^\w\-]+/g, "-")
+      .replace(/[^\w-]+/g, "-")
       .slice(0, 80)
       .toLowerCase();
 
