@@ -49,15 +49,20 @@ export async function POST(req: NextRequest) {
         .eq('id', session.user.id)
         .single() as { data: { credits: number } | null };
 
-      /* Credit check bypassed for beta */
+      if (!user || user.credits < CREDIT_COST) {
+        return NextResponse.json(
+          { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+          { status: 402 }
+        );
+      }
 
       // Deduct credit
-      const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: 'ATS scan',
         p_reference_id: debitReferenceFromRequest(req, 'ats-scan'),
-      }); */
+      });
 
       if (deductError || !deductResult?.[0]?.success) {
         return NextResponse.json(

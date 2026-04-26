@@ -43,8 +43,12 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
       .single() as { data: { credits: number } | null };
 
-    // Beta: Bypass credit checks
-    // Credit check bypassed for beta
+    if (!user || user.credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: `Insufficient credits. Job packs cost ${CREDIT_COST} credits.` },
+        { status: 402 }
+      );
+    }
 
     // Load profile
     const profile = await loadProfileForTailoring(session.user.id, supabase);
@@ -86,10 +90,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Beta: Bypass credit deduction
-    const deductResult = [{success:true}]; 
-    const deductError = null; 
-    // Deduct removed for beta
+    // Deduct credits
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Job pack: ${body.job_title} at ${body.company}`,
+      p_reference_id: debitReferenceFromRequest(req, 'job-pack'),
+    });
 
     // Create job pack
     const { data: jobPack, error: jobPackError } = await supabase

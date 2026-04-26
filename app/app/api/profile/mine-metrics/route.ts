@@ -120,7 +120,12 @@ async function enhanceBullet(
     .eq('id', userId)
     .single();
 
-  /* Credit check bypassed for beta */
+  if (!user || user.credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+        { status: 402 }
+      );
+    }
 
   const bullet = await getOwnedBullet(supabase, userId, bullet_id);
 
@@ -163,12 +168,12 @@ Return ONLY the enhanced bullet point, nothing else.`;
     );
   }
 
-  const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+  const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
     p_user_id: userId,
     p_amount: CREDIT_COST,
     p_description: 'Metric mining enhancement',
     p_reference_id: debitReferenceFromRequest(req, `mine-metrics:${bullet_id}`),
-  }); */
+  });
 
   if (deductError || !deductResult?.[0]?.success) {
     console.error('Failed to deduct credit:', deductError);

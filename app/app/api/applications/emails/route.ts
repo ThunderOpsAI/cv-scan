@@ -35,7 +35,12 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
       .single();
 
-    /* Credit check bypassed for beta */
+    if (!user || user.credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+        { status: 402 }
+      );
+    }
 
     // Get application
     const { data: application } = await (supabase
@@ -82,7 +87,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Deduct credit
-    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Email generation: ${body.email_type}`,
@@ -90,7 +95,7 @@ export async function POST(req: NextRequest) {
         req,
         `app-email:${body.application_id}:${body.email_type}`
       ),
-    }); */
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(

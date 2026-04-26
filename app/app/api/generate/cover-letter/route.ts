@@ -77,7 +77,12 @@ export async function POST(req: NextRequest) {
       .eq("id", userId)
       .single() as { data: { credits: number } | null };
 
-    /* Credit check bypassed for beta */
+    if (!user || user.credits < CREDIT_COST) {
+      return NextResponse.json(
+        { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+        { status: 402 }
+      );
+    }
 
     const coverLetter = await generateGroundedCoverLetter(
       profile,
@@ -106,12 +111,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Deduct credits using Supabase function
-    const deductResult = [{success:true}]; const deductError = null; /* const { data: deductResult, error: deductError } = await deductCredits(supabase, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: userId,
       p_amount: CREDIT_COST,
       p_description: "Generated cover letter",
       p_reference_id: debitReferenceFromRequest(req, "gen-cover-letter"),
-    }); */
+    });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
