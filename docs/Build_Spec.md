@@ -1,347 +1,289 @@
-# CVScan — Build Spec
-## Scope: 6 Small Wins + 3-Step Job Search Layer
+# CVScan Production Launch Build Spec
 
-> **Source of truth for execution:** This file is the implementation source of truth for Codex / vibe-coding agents.  
-> If there is any conflict between this file and PRD/SRS wording, this file governs execution order, acceptance criteria, and task boundaries.
+## Summary
 
-## 1. Delivery principles
+Prepare CVScan for an AU/NZ Google Play closed beta by restoring the last working pre-beta MVP auth and payments flow, then adding production-grade compliance, billing separation, security guardrails, and release readiness.
 
-- Keep each agent on a narrow, low-context slice
-- No agent should take more than 2–4 tightly related tasks in one session
-- Prefer vertical slices that can be tested quickly
-- Do not mix schema work, OCR work, search ranking work, and UI polish in one agent pass unless explicitly assigned
-- Every agent must update `Agent_Handover.md` before finishing
+The primary launch goal is a stable Android closed beta that supports secure account creation, CV/resume upload, AI-assisted processing, compliant digital purchases, backend-verified premium access, and operational account deletion.
 
-## 2. Phase map
+## Product Goal
 
-### Phase A — Foundation and ingestion
-- WP01 Resume suggestions
-- WP02 Job URL import
-- WP03 Screenshot-to-job parser
+Ship a stable Android beta that allows users to:
 
-### Phase B — Decisioning and tracker
-- WP04 Apply / Stretch / Skip engine
-- WP05 Unified tracker source model
-- WP06 Duplicate detection and merge flow
+- create an account
+- sign in with email/password and Google
+- upload and process CV/resume documents securely
+- purchase digital credits or premium access correctly
+- manage their account, including deletion
+- use premium features only when backend-verified entitlement exists
 
-### Phase C — Job inbox productization
-- WP07 Universal Job Inbox UI and orchestration
+## Launch Scope
 
-### Phase D — Aggregation and search
-- WP08 Light aggregation pipeline
-- WP09 Unified search index
-- WP10 Search ranking and filters
-- WP11 Saved searches and alerts
+### In Scope
 
-### Phase E — AU tuning and hardening
-- WP12 AU-specific normalization, QA, analytics, and release hardening
+- Android app closed beta on Google Play
+- AU/NZ distribution only
+- Supabase auth and data backend
+- Stripe web checkout retained for web purchases
+- Google Play Billing used for Android in-app digital goods unless a compliant alternative is explicitly approved
+- Privacy Policy, Terms & Conditions, support contact, deletion flow
+- production logging, abuse protection, and purchase verification
+- Play Console listing, compliance forms, and reviewer access path
 
----
+### Out of Scope
 
-## 3. Work packages
+- iOS App Store launch
+- Apple IAP implementation
+- broad global rollout
+- enterprise/admin dashboard
+- advanced experimentation
+- multi-region compliance beyond AU/NZ baseline
+- complex subscription experimentation
 
-## WP01 — Resume-to-job-match instant suggestions
-**Goal:** After resume upload or resume photo extraction, immediately suggest likely role targets and search prompts.
+## Platform Billing Rules
 
-**Primary owner:** Agent 1  
-**Dependencies:** existing resume/profile extraction
+- Android in-app purchases for digital goods/features must use Google Play Billing unless the app has a clearly documented, compliant, approved alternative.
+- Web may retain Stripe checkout for web purchases.
+- Premium access must never be granted from local state alone.
+- Entitlements must be backend-normalized and server-verified.
+- Recommended v1 rule: one user account may hold entitlements from either `play` or `stripe`, but premium unlock must always depend on backend verification.
+- Stripe entitlements and Play entitlements should be stored with source, product, status, expiry, and verification metadata.
 
-### Tasks
-- Inspect current resume upload / parsing flow
-- Add role-target inference step
-- Add suggested job titles
-- Add suggested search terms
-- Add likely seniority and industry hints
-- Allow one-click save of suggested searches
+## Required Workstreams
 
-### Out of scope
-- full search engine work
-- tracker changes
-- OCR improvements unrelated to resume extraction
+## 1. Restore Baseline MVP
 
-### Acceptance criteria
-- Suggestions appear after successful resume parse
-- User can edit suggestions
-- User can save at least one suggested search
+### Objective
 
----
+Restore the last known good commit/branch where auth, payments, credits, and premium gating worked before beta placeholders were introduced.
 
-## WP02 — Paste job URL import
-**Goal:** Create a structured job record from a pasted job link.
+### Deliverables
 
-**Primary owner:** Agent 2  
-**Dependencies:** none beyond existing app infra
+- identified restore commit/branch
+- diff map of placeholder substitutions introduced after MVP
+- restoration checklist for auth, billing, credits, premium gating
+- list of broken flows and missing dependencies
+- file/module inventory for restoration
 
-### Tasks
-- Add `Paste job URL` entry point
-- Build fetch + parse pipeline for supported/public job pages
-- Extract core fields
-- Create review screen before save
-- Persist normalized job draft
+### Acceptance
 
-### Acceptance criteria
-- User can paste a URL
-- Parsed data is visible and editable
-- Job can be saved into tracker draft/canonical flow
+- sign-up, sign-in, and premium gating behavior matches pre-beta MVP intent
+- no placeholder auth/payment UI remains in release flows
+- restored code builds successfully
+- restored flows can be verified end-to-end
 
-### Risks
-- inconsistent page markup
-- network timeouts
-- partial parse failures
+## 2. Authentication
 
----
+### Required Capabilities
 
-## WP03 — Screenshot-to-job parser
-**Goal:** Let users upload a screenshot or image of a job ad and extract a structured draft.
-
-**Primary owner:** Agent 3  
-**Dependencies:** file upload flow; OCR capability
-
-### Tasks
-- Add image upload entry point for jobs
-- Run OCR on uploaded image
-- Extract title, company, location, requirements, salary if present
-- Mark low-confidence fields
-- Add edit-before-save flow
-
-### Acceptance criteria
-- PNG/JPG/JPEG/WEBP supported
-- Draft job record is created
-- User can fix fields before saving
-
-### Risks
-- OCR noise
-- mobile screenshots with awkward crops
-- salary extraction ambiguity
-
----
-
-## WP04 — Apply / Stretch / Skip engine
-**Goal:** Replace generic fit presentation with a clear recommendation and reasoning layer.
-
-**Primary owner:** Agent 4  
-**Dependencies:** normalized user profile and normalized job record
-
-### Tasks
-- Define verdict rules and confidence structure
-- Map matched requirements
-- Detect likely blockers
-- Generate 3–5 plain-English reasons
-- Add verdict badge component and details panel
-
-### Acceptance criteria
-- Every analyzed job gets one verdict
-- Reasons are shown
-- User can override and proceed anyway
+- email/password signup
+- email/password sign-in
+- password reset
+- Google OAuth sign-in
+- session persistence
+- sign-out
+- account deletion entry point
+- reviewer/test account support path
 
 ### Guardrails
-- Never present verdict as guaranteed job outcome
-- Reasons must be explainable
 
----
+- no client-only auth trust
+- secure session refresh behavior
+- abuse protection for signup, login, and reset
+- protected routes must verify user state server-side where applicable
+- deleted users must lose access immediately
 
-## WP05 — Unified tracker source model
-**Goal:** Store jobs from all sources in one tracker with source metadata.
+### Acceptance
 
-**Primary owner:** Agent 5  
-**Dependencies:** WP02 and WP03 can land before or alongside
+- auth works in production build
+- unauthorized access to user data is blocked server-side
+- password reset works
+- Google sign-in works or is clearly blocked as a launch blocker
+- deleted/deactivated users cannot access protected features
 
-### Tasks
-- Review current tracker schema
-- Add source metadata fields
-- Add extraction method and confidence fields
-- Ensure URL-imported and screenshot-imported jobs save correctly
-- Add source badge in tracker UI
-- Add source filter
+## 3. Billing, Credits, and Entitlements
 
-### Acceptance criteria
-- All supported job capture methods land in the same tracker
-- Source is visible
-- Status updates still work
+### Required Capabilities
 
----
+- Stripe retained for web checkout
+- Google Play Billing added for Android digital purchases
+- backend entitlement normalization
+- purchase restore flow
+- subscription/credit ownership visibility
+- webhook/event verification where applicable
+- refund/revocation handling
 
-## WP06 — Duplicate detection and merge flow
-**Goal:** Merge the same job from multiple sources into a single canonical record.
+### Entitlement States
 
-**Primary owner:** Agent 6  
-**Dependencies:** WP05
+- `free`
+- `paid_stripe`
+- `paid_play`
+- `expired`
+- `cancelled`
+- `refunded`
+- `pending_verification`
+- `verification_failed`
 
-### Tasks
-- Add duplicate scoring logic
-- Compare title, company, location, URL, recency, description
-- Create canonical job record behavior
-- Preserve alternate source links
-- Add manual unmerge or override path
+### Rules
 
-### Acceptance criteria
-- High-confidence duplicates merge automatically
-- Alternate source links remain visible
-- User can undo incorrect merge
+- premium access cannot be granted from local state alone
+- Play purchases must be verified server-side before granting access
+- Stripe webhook signatures must be verified
+- restore purchases must reconcile user entitlements safely
+- refunded/revoked/expired purchases must remove premium access
+- entitlement checks must fail closed if verification is unavailable
 
-### Risks
-- false merges
-- poor company name normalization
+### Acceptance
 
----
+- user can buy successfully from app and web in supported channels
+- backend reflects correct entitlement state
+- premium access is granted only after backend verification
+- loss of entitlement is enforced reliably
+- restore purchase path works for Android reinstall/device change
 
-## WP07 — Universal Job Inbox UI and orchestration
-**Goal:** Create one obvious place where users bring in jobs from anywhere.
+## 4. Data and Security
 
-**Primary owner:** Agent 7  
-**Dependencies:** WP02, WP03, WP04, WP05
+### Sensitive Data
 
-### Tasks
-- Build `Add Job` entry point
-- Present options: paste link, upload screenshot, add manually
-- Orchestrate review -> verdict -> save -> tailor next actions
-- Add “next best action” panel after save
+Treat the following as sensitive:
 
-### Acceptance criteria
-- User sees one clear job ingestion flow
-- Post-ingestion actions are obvious
-- Saved jobs feed naturally into existing CVScan workflows
+- CVs/resumes
+- cover letters
+- email addresses
+- password/auth/session data
+- purchase/customer identifiers
+- AI-generated user-specific output
+- uploaded files and extracted text
 
----
+### Required Protections
 
-## WP08 — Light aggregation pipeline
-**Goal:** Add limited discovery from safer and maintainable sources.
+- audit all secrets and environment variables
+- verify Supabase RLS on every user-owned table
+- verify storage bucket access policies
+- validate file type and file size on upload
+- reject unsafe/unsupported uploads
+- use malware/abuse-conscious upload handling
+- rate limit auth, upload, generation, and billing-sensitive endpoints
+- log high-risk events
+- verify payment webhooks/signatures
+- remove placeholder bypasses
+- confirm server-only use of privileged keys
+- confirm no service-role key is exposed to client bundles
 
-**Primary owner:** Agent 8  
-**Dependencies:** WP05
+### Acceptance
 
-### Tasks
-- Define approved source list
-- Add ingestion for employer career pages and public structured job pages
-- Normalize external job data into shared schema
-- Add freshness metadata
-- Add company watchlist seed flow if simple enough
+- cross-user access attempts fail
+- invalid uploads fail safely
+- auth/payment abuse is throttled
+- premium unlock bypasses are not possible from client only
+- secrets are not exposed in frontend/mobile builds
+- storage access is owner-scoped
 
-### Acceptance criteria
-- Aggregated jobs can be stored in normalized schema
-- Aggregated jobs are distinguishable by source
-- No restricted-platform mirroring logic is introduced
+## 5. Compliance and Legal
 
----
+### Required Artifacts
 
-## WP09 — Unified search index
-**Goal:** Create searchable storage/index over approved and normalized jobs.
+- Privacy Policy URL
+- Terms & Conditions URL
+- support email/contact URL
+- account deletion path in-app
+- account deletion web URL for Play Console
+- Data Safety form answers
+- app access/reviewer instructions
 
-**Primary owner:** Agent 9  
-**Dependencies:** WP08
+### Policy Requirements to Reflect
 
-### Tasks
-- Define indexing strategy
-- Build search endpoint / query layer
-- Query across approved aggregated jobs plus user-relevant saved items where appropriate
-- Return normalized result objects
+- account deletion must be available if account creation is supported
+- deletion must include an in-app path and a web path
+- user data disclosures must match actual collection, sharing, retention, and deletion behavior
+- AI processing disclosure must describe user CV/resume handling clearly
+- retention exceptions must be disclosed clearly
+- payment processor use must be disclosed
 
-### Acceptance criteria
-- Search returns normalized dedupable job results
-- Response structure is stable for UI consumption
+### Acceptance
 
----
+- legal pages are public, linked, and consistent with actual behavior
+- deletion works operationally, not just cosmetically
+- Play declarations match app behavior exactly
+- support contact is reachable
 
-## WP10 — Search ranking and filters
-**Goal:** Make search useful, not just technically functional.
+## 6. Play Store Release Readiness
 
-**Primary owner:** Agent 10  
-**Dependencies:** WP09, WP04
+### Deliverables
 
-### Tasks
-- Add ranking signals: relevance, freshness, fit, source quality
-- Add AU-first filters: location, remote type, salary, seniority, industry, sponsorship if known, source
-- Add result cards with fit/verdict summaries where appropriate
+- package/signing readiness
+- Play Console app setup
+- closed testing track
+- screenshots
+- app icon
+- feature graphic
+- short description
+- full description
+- content rating answers
+- privacy policy URL
+- support contact
+- release notes
+- reviewer login path if needed
+- beta tester onboarding instructions
 
-### Acceptance criteria
-- Search results are filterable
-- Ranking feels sensible on test dataset
-- AU-specific filtering works
+### Important Testing Requirement
 
----
+For personal Play developer accounts created after November 13, 2023, production access generally requires at least 12 opted-in closed testers for 14 continuous days before applying for production access.
 
-## WP11 — Saved searches and alerts
-**Goal:** Turn search into retention.
+### Acceptance
 
-**Primary owner:** Agent 11  
-**Dependencies:** WP09, WP10
+- internal test build installs successfully
+- closed test can onboard testers
+- store listing passes policy review readiness checks
+- reviewer can access core functionality
+- release build does not expose debug-only secrets or placeholder flows
 
-### Tasks
-- Add save-search flow
-- Add alert preference storage
-- Add simple alert generation logic
-- Expose alerts in app, email later if infrastructure already exists
+## Non-Functional Requirements
 
-### Acceptance criteria
-- User can save a search
-- User can see alert-ready matching logic
-- Core saved-search data model is stable
+- reliable auth and purchase flows in release build
+- crash-free baseline acceptable for beta
+- low-friction onboarding
+- secure default failure modes
+- supportable with a small team/founder workflow
+- observability sufficient to diagnose auth, billing, upload, and AI-generation issues
+- failure states must be clear to users and safe by default
 
----
+## Dependencies
 
-## WP12 — AU normalization, analytics, and release hardening
-**Goal:** Make the feature set stable enough to ship.
+- Supabase
+- Stripe
+- Google Play Console
+- Google Play Billing integration path
+- hosting for legal pages
+- support inbox/domain
+- analytics/crash reporting provider if not already present
+- Android build/signing pipeline
 
-**Primary owner:** Agent 12  
-**Dependencies:** prior work packages
+## Launch Blockers
 
-### Tasks
-- Improve AU location normalization
-- Standardize AUD salary formatting where possible
-- Add analytics events for resume suggestions, job import, verdict, save, duplicate merge, search, and saved search
-- Add QA pass across happy paths
-- Fix release-critical bugs only
+The following block beta submission:
 
-### Acceptance criteria
-- Core paths are instrumented
-- AU-specific behavior is acceptable
-- No P0 blockers remain
+- placeholder auth still present in release flow
+- placeholder payment/premium unlock still present in release flow
+- premium access controlled only by local/client state
+- missing account deletion path
+- missing privacy policy URL
+- missing Play-compatible billing path for Android digital goods
+- exposed privileged Supabase/service keys
+- broken RLS or cross-user file access
+- release build fails install/signing
+- reviewer cannot access app functionality
 
----
+## Exit Criteria for Beta Submission
 
-## 4. Suggested agent chain
+CVScan is ready for beta submission when:
 
-### Minimal 6-agent chain
-- Agent 1: WP01 + light QA
-- Agent 2: WP02
-- Agent 3: WP03
-- Agent 4: WP04
-- Agent 5: WP05 + WP06
-- Agent 6: WP07, then hand off to later search agents
-
-### Preferred 8-agent chain
-- Agent 1: WP01
-- Agent 2: WP02
-- Agent 3: WP03
-- Agent 4: WP04
-- Agent 5: WP05
-- Agent 6: WP06
-- Agent 7: WP07
-- Agent 8: WP08
-
-### Full 12-agent chain
-- One work package per agent from WP01 to WP12
-
----
-
-## 5. Shared implementation notes
-
-- Use migrations for schema changes
-- Keep write operations idempotent where repeated ingestion is possible
-- Preserve auditability of source and extraction method
-- Never fabricate profile facts or claim unsupported fit evidence
-- Keep all generated reasoning grounded in known user data and parsed job data
-- Do not expand into unauthorized scraping
-
----
-
-## 6. Done definition
-
-This build spec is complete when:
-- all six small wins are delivered
-- the three-step job search layer is implemented in staged form
-- the tracker is multi-source
-- duplicate handling exists
-- verdicting is live
-- saved searches and AU-first tuning are in place
-- all handovers are documented cleanly in `Agent_Handover.md`
+- auth is restored and production-safe
+- Android billing is implemented or explicitly confirmed as compliant
+- legal/compliance pages are live
+- deletion flow is live
+- core RLS and storage protections are verified
+- premium gating is backend-verified
+- Play assets and forms are completed
+- closed test build is available
+- no unresolved launch blockers remain

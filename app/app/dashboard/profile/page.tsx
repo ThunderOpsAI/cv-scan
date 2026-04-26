@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -143,10 +143,34 @@ export default function ProfilePage() {
             >
               Download Profile Facts & Generated Assets (JSON)
             </button>
-            <p className="text-gray-300 mb-2">
-              To delete your account and all associated data, use the account deletion option in settings (coming soon) or contact <a href="mailto:privacy@cvscan.com" className="underline text-blue-400">privacy@cvscan.com</a>.
+            </button>
+            <p className="text-gray-300 mb-2 mt-4 text-sm border-t border-white/10 pt-4">
+              If you wish to permanently delete your account and all associated data, you may delete your account below. This action cannot be undone.
             </p>
-            <p className="text-gray-400 text-xs">
+            <button
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  "Are you absolutely sure you want to permanently delete your account? This action cannot be undone and all data will be lost."
+                );
+                if (confirmed) {
+                  try {
+                    const res = await fetch("/api/profile/delete-account", { method: "DELETE" });
+                    if (res.ok) {
+                      await signOut({ callbackUrl: "/" });
+                    } else {
+                      const data = await res.json();
+                      alert(data.error || "Failed to delete account. Please try again later.");
+                    }
+                  } catch (err) {
+                    alert("An error occurred. Please try again.");
+                  }
+                }
+              }}
+              className="mb-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              Delete Account
+            </button>
+            <p className="text-gray-400 text-xs mt-2">
               Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.
             </p>
           </div>

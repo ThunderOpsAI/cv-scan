@@ -1,6 +1,8 @@
 import Tesseract from "tesseract.js";
 import { NextRequest, NextResponse } from "next/server";
 import { parseResumeText } from "@/lib/applications/parseResume";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
@@ -14,6 +16,12 @@ function cleanOcrText(value: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const formData = await req.formData();
   const file = formData.get("file");
 
