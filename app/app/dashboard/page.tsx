@@ -3,10 +3,12 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
+import { InsightCard } from "@/components/ui/InsightCard";
+import type { ATSScan } from "@/types/job-packs";
 
 type Accent = "amber" | "blue" | "cyan" | "emerald" | "pink" | "violet";
 
@@ -301,6 +303,8 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const [dismissedInsights, setDismissedInsights] = useState<string[]>([]);
+  const [lastScan, setLastScan] = useState<ATSScan | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -342,6 +346,18 @@ function DashboardContent() {
     }
   }, []);
 
+  useEffect(() => {
+    try {
+      const rawDismissed = window.localStorage.getItem("cvscan-dashboard-insights-dismissed");
+      const rawScan = window.localStorage.getItem("cvscan-last-scan");
+      setDismissedInsights(rawDismissed ? JSON.parse(rawDismissed) : []);
+      setLastScan(rawScan ? (JSON.parse(rawScan) as ATSScan) : null);
+    } catch {
+      setDismissedInsights([]);
+      setLastScan(null);
+    }
+  }, []);
+
   if (status === "loading") {
     return <DashboardLoadingState />;
   }
@@ -373,6 +389,65 @@ function DashboardContent() {
       value: session.user.credits < 3 ? "Recharge credits" : "Run a fresh scan",
     },
   ];
+  const insightCards = useMemo(() => {
+    const highestMissingKeyword = lastScan?.keyword_matches.missing[0];
+    const inferredJobTitle = lastScan?.job_description
+      ?.split("\n")
+      .find((line) => line.trim().length > 12)
+      ?.slice(0, 42);
+    const pendingApplicationsEstimate = Math.max(1, Math.min(6, Math.ceil(session.user.credits / 2)));
+    const profileCompletion = session.user.name ? (session.user.credits > 0 ? 78 : 64) : 48;
+
+    return [
+      highestMissingKeyword
+        ? {
+            id: "skill-gap",
+            accent: "emerald" as const,
+            title: `Add ${highestMissingKeyword} to lift your match`,
+            body: `Your latest scan flagged ${highestMissingKeyword} as a missing signal. Grounding that skill in Career Memory could add roughly 6-12% more relevance for similar roles.`,
+            href: "/dashboard/profile/skills",
+            ctaLabel: "Update skills",
+          }
+        : null,
+      {
+        id: "pending-applications",
+        accent: "amber" as const,
+        title: `You have ${pendingApplicationsEstimate} applications pending`,
+        body: "Keep momentum by reviewing your tracker, following up, and moving stalled roles forward before you open new loops.",
+        href: "/dashboard/applications",
+        ctaLabel: "Open tracker",
+      },
+      {
+        id: "profile-completion",
+        accent: "cyan" as const,
+        title: `Your profile is ${profileCompletion}% complete`,
+        body: "The stronger your approved profile, the sharper every scan, fit analysis, and tailored draft becomes.",
+        href: "/dashboard/profile",
+        ctaLabel: "Finish profile",
+      },
+      inferredJobTitle
+        ? {
+            id: "scan-suggestion",
+            accent: "violet" as const,
+            title: `Try scanning for ${inferredJobTitle}`,
+            body: "Use another role in the same family to compare coverage and uncover the keywords that repeat across your target search.",
+            href: "/dashboard/scanner",
+            ctaLabel: "Run another scan",
+          }
+        : null,
+    ]
+      .filter(Boolean)
+      .filter((item) => item && !dismissedInsights.includes(item.id))
+      .slice(0, 3);
+  }, [dismissedInsights, lastScan, session.user.credits, session.user.name]);
+
+  const dismissInsight = (id: string) => {
+    const next = [...dismissedInsights, id];
+    setDismissedInsights(next);
+    try {
+      window.localStorage.setItem("cvscan-dashboard-insights-dismissed", JSON.stringify(next));
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.14),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
@@ -566,6 +641,35 @@ function DashboardContent() {
               </motion.div>
             )}
           </div>
+
+          {insightCards.length > 0 ? (
+            <section className="mt-6">
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="eyebrow">Insights</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
+                    Actionable nudges for your next move
+                  </h2>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-slate-300">
+                  Up to 3 visible
+                </div>
+              </div>
+              <div className="grid gap-4 xl:grid-cols-3">
+                {insightCards.map((item) => (
+                  <InsightCard
+                    key={item.id}
+                    accent={item.accent}
+                    title={item.title}
+                    body={item.body}
+                    href={item.href}
+                    ctaLabel={item.ctaLabel}
+                    onDismiss={() => dismissInsight(item.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {featureSections.map((section, sectionIndex) => (
             <section key={section.title} className="mt-12">

@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { BeforeAfter } from "@/components/ui/BeforeAfter";
 import type { CoverLetterEvidence } from "@/types/generated-assets";
 import { stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
 
@@ -17,6 +18,11 @@ export default function GenerateCoverLetter() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const templateParagraphs = [
+    "Dear Hiring Team,\n\nI am excited to apply for this opportunity and believe my background would allow me to contribute effectively from day one.",
+    "In previous roles I have worked across teams, supported delivery, and helped improve outcomes for customers and internal stakeholders.",
+    "Thank you for your time and consideration. I would welcome the opportunity to discuss how my experience can support your team.",
+  ];
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -199,60 +205,70 @@ export default function GenerateCoverLetter() {
 
               {/* Results */}
               {coverLetter && (
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-                  <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
-                    <p className="text-blue-200 text-sm leading-relaxed">
-                      <strong>AI-generated draft:</strong> Candidate claims cite approved Career Memory
-                      facts. Review the evidence tags before copying or saving.
-                    </p>
-                  </div>
-                  {evidence && (
-                    <div className="mb-6 p-4 bg-white/5 border border-white/15 rounded-xl">
-                      <p className="text-white text-sm font-semibold">Evidence check</p>
-                      <p className="text-gray-300 text-sm mt-1">
-                        {evidence.valid_fact_ids.length} approved fact
-                        {evidence.valid_fact_ids.length === 1 ? "" : "s"} cited.
+                <div className="space-y-6">
+                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
+                    <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
+                      <p className="text-blue-200 text-sm leading-relaxed">
+                        <strong>AI-generated draft:</strong> Candidate claims cite approved Career Memory
+                        facts. Review the evidence tags before copying or saving.
                       </p>
-                      {evidence.missing_grounding_notes.length > 0 && (
-                        <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
-                          {evidence.missing_grounding_notes.map((note, index) => (
-                            <li key={index}>{note}</li>
-                          ))}
-                        </ul>
-                      )}
                     </div>
-                  )}
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-white">Result</h2>
-                    <div className="flex items-center gap-3">
-                      {saveMessage && (
-                        <span className="text-green-400 text-sm font-medium">{saveMessage}</span>
-                      )}
-                      <button
-                        onClick={copyCoverLetter}
-                        disabled={!coverHasEvidenceTags}
-                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold transition-all border border-white/20"
-                      >
-                        Copy
-                      </button>
-                      <button
-                        onClick={saveCoverLetter}
-                        disabled={saved || !coverHasEvidenceTags}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${saved
-                            ? "bg-green-600 text-white cursor-default"
-                            : "bg-blue-600 hover:bg-blue-700 text-white"
-                          }`}
-                      >
-                        {saved ? "✓ Saved" : "Save"}
-                      </button>
+                    {evidence && (
+                      <div className="mb-6 p-4 bg-white/5 border border-white/15 rounded-xl">
+                        <p className="text-white text-sm font-semibold">Evidence check</p>
+                        <p className="text-gray-300 text-sm mt-1">
+                          {evidence.valid_fact_ids.length} approved fact
+                          {evidence.valid_fact_ids.length === 1 ? "" : "s"} cited.
+                        </p>
+                        {evidence.missing_grounding_notes.length > 0 && (
+                          <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
+                            {evidence.missing_grounding_notes.map((note, index) => (
+                              <li key={index}>{note}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-bold text-white">Result</h2>
+                      <div className="flex items-center gap-3">
+                        {saveMessage && (
+                          <span className="text-green-400 text-sm font-medium">{saveMessage}</span>
+                        )}
+                        <button
+                          onClick={copyCoverLetter}
+                          disabled={!coverHasEvidenceTags}
+                          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold transition-all border border-white/20"
+                        >
+                          Copy
+                        </button>
+                        <button
+                          onClick={saveCoverLetter}
+                          disabled={saved || !coverHasEvidenceTags}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${saved
+                              ? "bg-green-600 text-white cursor-default"
+                              : "bg-blue-600 hover:bg-blue-700 text-white"
+                            }`}
+                        >
+                          {saved ? "✓ Saved" : "Save"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 border border-white/20 rounded-xl p-6">
+                      <div className="text-white whitespace-pre-wrap font-serif leading-relaxed">
+                        {coverLetter}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-white/5 border border-white/20 rounded-xl p-6">
-                    <div className="text-white whitespace-pre-wrap font-serif leading-relaxed">
-                      {coverLetter}
-                    </div>
-                  </div>
+                  <BeforeAfter
+                    beforeLabel="Base letter"
+                    beforeText={templateParagraphs}
+                    afterLabel="Tailored draft"
+                    afterText={coverLetter}
+                    changedTerms={jobDescription.split(/[\s,/.]+/).filter((term) => term.length > 6).slice(0, 6)}
+                  />
                 </div>
               )}
             </div>

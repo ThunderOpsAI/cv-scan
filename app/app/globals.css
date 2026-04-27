@@ -151,6 +151,75 @@ button {
   background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.35), rgba(196, 181, 253, 0.25), transparent);
 }
 
+.magic-document-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(7, 14, 28, 0.98), rgba(12, 24, 46, 0.8));
+  padding: 1rem;
+}
+
+.magic-document {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  padding: 1.25rem;
+}
+
+.magic-scan-line {
+  position: absolute;
+  inset-inline: 0.75rem;
+  top: 0;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, rgba(103, 232, 249, 0.9), rgba(165, 180, 252, 0.82), transparent);
+  box-shadow: 0 0 28px rgba(103, 232, 249, 0.42);
+  animation: scan-sweep 2.8s ease-in-out infinite;
+}
+
+.magic-scan-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.magic-scan-particle {
+  position: absolute;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background: rgba(103, 232, 249, 0.34);
+  box-shadow: 0 0 16px rgba(103, 232, 249, 0.28);
+  animation: scan-particle 7s ease-in-out infinite;
+  animation-delay: var(--scan-delay, 0s);
+}
+
+.scan-dropzone {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-dropzone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(103, 232, 249, 0.36), rgba(129, 140, 248, 0.08), rgba(103, 232, 249, 0.36));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-pulse 2.4s ease-in-out infinite;
+}
+
 @keyframes mesh-drift {
   0% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -184,6 +253,40 @@ button {
   50% {
     transform: translate3d(0, -18px, 0) scale(1.08);
     opacity: 0.55;
+  }
+}
+
+@keyframes scan-sweep {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translateY(12.5rem);
+    opacity: 0.96;
+  }
+}
+
+@keyframes scan-particle {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.9);
+    opacity: 0.08;
+  }
+  50% {
+    transform: translate3d(0, -24px, 0) scale(1.15);
+    opacity: 0.42;
+  }
+}
+
+@keyframes border-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.92;
   }
 }
 
