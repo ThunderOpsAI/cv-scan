@@ -7,6 +7,7 @@
   --app-bg: 224 47% 6%;
   --app-panel: 222 36% 11%;
   --app-panel-strong: 223 41% 9%;
+  --app-panel-soft: 223 34% 14%;
   --app-border: 0 0% 100%;
   --app-text: 210 40% 98%;
   --app-muted: 216 19% 72%;
@@ -75,6 +76,23 @@ button {
   background: rgba(168, 85, 247, 0.14);
 }
 
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-particle {
+  position: absolute;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(103, 232, 249, 0.32), rgba(196, 181, 253, 0.12));
+  box-shadow: 0 0 24px rgba(103, 232, 249, 0.12);
+  animation: float-particle var(--particle-duration, 16s) ease-in-out infinite;
+  animation-delay: var(--particle-delay, 0s);
+}
+
 .glass-card {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
@@ -121,6 +139,18 @@ button {
   color: rgba(191, 219, 254, 0.7);
 }
 
+.section-mesh {
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+    radial-gradient(circle at 80% 20%, rgba(129, 140, 248, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+}
+
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.35), rgba(196, 181, 253, 0.25), transparent);
+}
+
 @keyframes mesh-drift {
   0% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -145,8 +175,28 @@ button {
   }
 }
 
+@keyframes float-particle {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) scale(1.08);
+    opacity: 0.55;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .surface-border {
+    @apply border border-white/10;
+  }
+
+  .surface-muted {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
   }
 }

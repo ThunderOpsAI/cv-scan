@@ -300,6 +300,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -333,6 +334,14 @@ function DashboardContent() {
     return () => window.clearTimeout(timeout);
   }, [message]);
 
+  useEffect(() => {
+    try {
+      setOnboardingDismissed(window.localStorage.getItem("cvscan-dashboard-onboarding-dismissed") === "true");
+    } catch {
+      setOnboardingDismissed(false);
+    }
+  }, []);
+
   if (status === "loading") {
     return <DashboardLoadingState />;
   }
@@ -343,6 +352,27 @@ function DashboardContent() {
 
   const displayName = getDisplayName(session.user.name, session.user.email);
   const greeting = getGreeting();
+  const onboardingSteps = [
+    "Career memory imported",
+    "Target role path set",
+    "First scan or fit check run",
+  ];
+  const completedOnboardingSteps = session.user.credits > 0 ? 1 : 0;
+  const onboardingProgress = Math.round((completedOnboardingSteps / onboardingSteps.length) * 100);
+  const profileSignals = [
+    {
+      label: "Credits ready",
+      value: `${session.user.credits}`,
+    },
+    {
+      label: "Plan tier",
+      value: session.user.planTier.charAt(0).toUpperCase() + session.user.planTier.slice(1),
+    },
+    {
+      label: "Next best move",
+      value: session.user.credits < 3 ? "Recharge credits" : "Run a fresh scan",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.14),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
@@ -440,47 +470,106 @@ function DashboardContent() {
               </GlassCard>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.06 }}
-            >
-              <GlassCard accent="violet" className="h-full p-7 sm:p-8">
-                <p className="eyebrow">Activation path</p>
-                <div className="mt-3 flex items-center justify-between gap-4">
-                  <h2 className="text-2xl font-semibold tracking-[-0.04em] text-white">
-                    Three-step launch path
-                  </h2>
-                  <Link href="/dashboard/onboarding" className="text-sm text-cyan-200 transition hover:text-white">
-                    Open
-                  </Link>
-                </div>
-                <p className="mt-4 text-sm leading-7 text-slate-300">
-                  Career memory, target roles, and your first job-fit pass. Optional, but the fastest route to sharper results.
-                </p>
-                <div className="mt-6 space-y-3">
-                  {[
-                    "Build your profile context",
-                    "Define your path and role targets",
-                    "Run a first scan or job-fit pass",
-                  ].map((step, index) => (
-                    <div key={step} className="flex items-center gap-3">
-                      <div
-                        className={[
-                          "h-2.5 flex-1 rounded-full",
-                          index === 0 ? "bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.55)]" : "bg-white/10",
-                        ].join(" ")}
-                      />
-                      <div className="w-48 text-sm text-slate-300">{step}</div>
+            {!onboardingDismissed ? (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.06 }}
+              >
+                <GlassCard accent="violet" className="h-full p-7 sm:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="eyebrow">Activation path</p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <h2 className="text-2xl font-semibold tracking-[-0.04em] text-white">
+                          Three-step launch path
+                        </h2>
+                        <div className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-slate-300">
+                          {onboardingProgress}% complete
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </GlassCard>
-            </motion.div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOnboardingDismissed(true);
+                        window.localStorage.setItem("cvscan-dashboard-onboarding-dismissed", "true");
+                      }}
+                      className="text-sm text-slate-400 transition hover:text-white"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-slate-300">
+                    Career memory, target roles, and your first job-fit pass. Optional, but still the fastest route to sharper results.
+                  </p>
+                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,rgba(103,232,249,0.92),rgba(129,140,248,0.92))] transition-all duration-500"
+                      style={{ width: `${Math.max(onboardingProgress, 20)}%` }}
+                    />
+                  </div>
+                  <div className="mt-6 space-y-3">
+                    {onboardingSteps.map((step, index) => {
+                      const completed = index < completedOnboardingSteps;
+                      const current = index === completedOnboardingSteps;
+
+                      return (
+                        <div key={step} className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div
+                            className={[
+                              "flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold",
+                              completed
+                                ? "border-cyan-300/30 bg-cyan-300/18 text-cyan-100"
+                                : current
+                                  ? "border-violet-300/30 bg-violet-300/14 text-violet-100"
+                                  : "border-white/10 bg-white/[0.04] text-slate-400",
+                            ].join(" ")}
+                          >
+                            0{index + 1}
+                          </div>
+                          <div className="flex-1 text-sm text-slate-300">{step}</div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            {completed ? "Done" : current ? "Now" : "Next"}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <GradientButton href="/dashboard/onboarding" size="md" variant="secondary">
+                      Open onboarding
+                    </GradientButton>
+                    <GradientButton href="/dashboard/profile/facts" size="md" variant="ghost">
+                      Import resume
+                    </GradientButton>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.06 }}
+              >
+                <GlassCard accent="blue" className="h-full p-7 sm:p-8">
+                  <p className="eyebrow">Search pulse</p>
+                  <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                    {profileSignals.map((signal) => (
+                      <div key={signal.label} className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-4">
+                        <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{signal.label}</div>
+                        <div className="mt-3 text-lg font-semibold tracking-[-0.03em] text-white">{signal.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              </motion.div>
+            )}
           </div>
 
           {featureSections.map((section, sectionIndex) => (
             <section key={section.title} className="mt-12">
+              <div className="gradient-divider mb-6" />
               <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="eyebrow">{section.title}</p>

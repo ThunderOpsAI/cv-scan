@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
@@ -83,6 +83,16 @@ const afterExample = [
   "Coordinated cross-functional delivery across support, sales, and operations teams.",
 ];
 
+const particles = [
+  { delay: "0s", duration: "15s", left: "8%", size: "0.45rem", top: "18%" },
+  { delay: "1.6s", duration: "18s", left: "18%", size: "0.35rem", top: "58%" },
+  { delay: "0.8s", duration: "17s", left: "32%", size: "0.5rem", top: "26%" },
+  { delay: "2.3s", duration: "14s", left: "52%", size: "0.4rem", top: "66%" },
+  { delay: "1.2s", duration: "19s", left: "68%", size: "0.55rem", top: "22%" },
+  { delay: "2.8s", duration: "16s", left: "78%", size: "0.38rem", top: "52%" },
+  { delay: "0.4s", duration: "20s", left: "88%", size: "0.48rem", top: "34%" },
+];
+
 function SparkIcon() {
   return (
     <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -119,6 +129,22 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
       <div className="hero-mesh pointer-events-none absolute inset-0" />
       <div className="hero-orb hero-orb-left" />
       <div className="hero-orb hero-orb-right" />
+      <div className="hero-particles" aria-hidden="true">
+        {particles.map((particle) => (
+          <span
+            key={`${particle.left}-${particle.top}`}
+            className="hero-particle"
+            style={{
+              "--particle-delay": particle.delay,
+              "--particle-duration": particle.duration,
+              height: particle.size,
+              left: particle.left,
+              top: particle.top,
+              width: particle.size,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
 
       <nav className="container relative z-10 mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 text-white">
@@ -335,7 +361,12 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
           </GlassCard>
 
           <GlassCard accent="cyan" className="p-6">
-            <p className="text-sm uppercase tracking-[0.22em] text-slate-400">Tailored output preview</p>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm uppercase tracking-[0.22em] text-slate-400">Tailored output preview</p>
+              <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
+                Live demo feel
+              </div>
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={comparisonMode}
@@ -384,6 +415,20 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
                 ))}
               </motion.div>
             </AnimatePresence>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {[
+                "Metrics surfaced",
+                "Keywords tightened",
+                "Ownership clarified",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs uppercase tracking-[0.22em] text-slate-300"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
           </GlassCard>
         </div>
       </section>
@@ -420,10 +465,10 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
       </section>
 
       <section className="container relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <GlassCard accent="violet" className="overflow-hidden p-8 sm:p-10">
+        <GlassCard accent="violet" className="section-mesh overflow-hidden p-8 sm:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(196,181,253,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(103,232,249,0.14),transparent_34%)]" />
           <div className="relative">
-            <p className="eyebrow">Trust signals</p>
+            <p className="eyebrow">Social proof / Trust</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
               Built for people who want help without handing over control.
             </h2>
