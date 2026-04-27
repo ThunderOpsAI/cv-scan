@@ -31,10 +31,10 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Professional history, skills, education, and career goals.</li>
-                <li>Account credentials authenticated via NextAuth.</li>
+                <li>Account sign-in identifiers and authentication events handled via magic-link email and optional Google OAuth.</li>
                 <li>Approved Career Memory facts and generated application drafts.</li>
                 <li>Job application tracking data.</li>
-                <li>Payment and entitlement data processed securely by Stripe or Google Play Billing models.</li>
+                <li>Payment and entitlement data processed securely by Stripe or Google Play Billing services.</li>
                 <li>Product analytics events such as feature usage and error states. These events do not include resume text, job descriptions, cover letters, or raw messages.</li>
               </ul>
             </div>
@@ -55,10 +55,12 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">3. Artificial Intelligence & Sub-Processors</h2>
               <p>
-                CVScan uses third-party AI models (such as Google Gemini, OpenAI, and Anthropic) to provide core functionality.
+                CVScan uses third-party AI models such as Google Gemini and OpenAI to provide core functionality.
                 When you use generation tools, the relevant approved profile facts, job details, and prompt instructions are sent to these providers to generate the requested content.
-                <strong> Our AI partners are contractually prohibited from using your personal data to train their foundational models.</strong>
-                <em> Note: Third-party API data retention policies generally hold data for zero to thirty (30) days for trust and safety before permanent deletion, determined by the respective provider.</em>
+                Their handling of submitted data is governed by the provider terms and privacy commitments that apply to the configured account.
+              </p>
+              <p className="mt-2">
+                AI-processed data may be transiently retained by our AI providers for up to 30 days for safety monitoring purposes.
               </p>
             </div>
 
@@ -72,7 +74,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">5. Data Export</h2>
               <p>
-                You can request an export of your account data, including approved profile facts and generated assets. For V1, contact privacy@cvscan.com from the email address on your account and we will provide a machine-readable export after verifying the request.
+                You can request an export of your account data, including approved profile facts and generated assets. For V1, contact privacy@cvscan.com.au from the email address on your account and we will provide a machine-readable export after verifying the request.
               </p>
             </div>
 
@@ -81,9 +83,9 @@ export default function PrivacyPolicyPage() {
               <p>
                 You own your data. You can delete your account and all associated data at any time directly through your account profile within the app (<strong>Dashboard → Profile → Delete Account</strong>). If you no longer have access to the app, you may request deletion without logging in at{" "}
                 <Link href="/delete-account" className="text-blue-400 hover:text-blue-300 underline">
-                  cvscan.com/delete-account
+                  cvscan.com.au/delete-account
                 </Link>{" "}
-                or by emailing <a href="mailto:privacy@cvscan.com" className="text-blue-400 hover:text-blue-300 underline">privacy@cvscan.com</a>.
+                or by emailing <a href="mailto:privacy@cvscan.com.au" className="text-blue-400 hover:text-blue-300 underline">privacy@cvscan.com.au</a>.
               </p>
               <p className="mt-2">
                 Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies. Uploaded documents (e.g., resumes) are stored in strictly isolated storage buckets exclusively accessible by your authenticated user ID via Row Level Security, and they are fully expunged upon account deletion.
@@ -96,7 +98,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">Contact Us</h2>
               <p>
-                If you have any questions about this Privacy Policy, please contact us at privacy@cvscan.com.
+                If you have any questions about this Privacy Policy, please contact us at privacy@cvscan.com.au.
               </p>
             </div>
           </section>

@@ -1,6 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import EmailProvider from "next-auth/providers/email";
+import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
 import { buildConsentFields } from "@/lib/auth/consent";
@@ -45,10 +45,14 @@ if (hasGoogleAuthEnv) {
 
 if (hasEmailAuthEnv) {
   providers.push(
-    EmailProvider({
-      server: {}, // Not used — sendVerificationRequest overrides
+    {
+      id: "email",
+      name: "Email",
+      type: "email",
+      server: {},
+      maxAge: 24 * 60 * 60,
       from: process.env.EMAIL_FROM || "noreply@example.com",
-      sendVerificationRequest: async ({ identifier, url }) => {
+      sendVerificationRequest: async ({ identifier, url }: SendVerificationRequestParams) => {
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -67,7 +71,7 @@ if (hasEmailAuthEnv) {
           throw new Error("Failed to send verification email");
         }
       },
-    })
+    } as any
   );
 }
 

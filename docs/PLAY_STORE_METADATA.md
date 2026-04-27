@@ -81,7 +81,7 @@ in strictly isolated, owner-only storage. We do not sell your
 personal data or use your information to train AI models.
 
 Full account deletion is available at any time — directly in the 
-app or at cvscan.com/delete-account.
+app or at cvscan.com.au/delete-account.
 
 ──────────────────────────────
 PLANS & CREDITS
@@ -93,10 +93,10 @@ Purchased credits do not expire.
 
 ──────────────────────────────
 
-For support, visit cvscan.com or email support@cvscan.com.
-Privacy Policy: cvscan.com/privacy
-Terms of Service: cvscan.com/terms
-Account Deletion: cvscan.com/delete-account
+For support, visit cvscan.com.au or email support@cvscan.com.au.
+Privacy Policy: cvscan.com.au/privacy
+Terms of Service: cvscan.com.au/terms
+Account Deletion: cvscan.com.au/delete-account
 ```
 
 **Character count:** ~2,400 of 4,000 ✅
@@ -128,7 +128,7 @@ Known limitations in this beta build:
 • Some UI elements are pending final polish
 • Support contact is email-only (in-app chat coming)
 
-Found a bug? Email beta@cvscan.com with your device model 
+Found a bug? Email beta@cvscan.com.au with your device model 
 and a description of the issue. Thank you for helping us 
 test!
 ```
@@ -148,7 +148,7 @@ included in our 1.0 release:
 • Refined onboarding experience
 • Bug fixes reported by beta testers
 
-Questions? Visit cvscan.com or email support@cvscan.com.
+Questions? Visit cvscan.com.au or email support@cvscan.com.au.
 ```
 
 ---
@@ -222,10 +222,10 @@ Google Play **requires** at least 2 screenshots per device type. For beta, targe
 | Category | **Productivity** |
 | Tags | resume, career, jobs, AI, cover letter |
 | Content rating | Everyone (no violence, no mature content) |
-| Privacy Policy URL | `https://cvscan.com/privacy` |
-| Support URL | `https://cvscan.com` or `mailto:support@cvscan.com` |
-| External deletion URL | `https://cvscan.com/delete-account` ✅ |
-| App website | `https://cvscan.com` |
+| Privacy Policy URL | `https://cvscan.com.au/privacy` |
+| Support URL | `https://cvscan.com.au` or `mailto:support@cvscan.com.au` |
+| External deletion URL | `https://cvscan.com.au/delete-account` ✅ |
+| App website | `https://cvscan.com.au` |
 
 ---
 
@@ -237,7 +237,7 @@ Google Play **requires** at least 2 screenshots per device type. For beta, targe
 |---|---|
 | Does your app collect or share any of the required user data types? | **Yes** |
 | Is all user data encrypted in transit? | **Yes** |
-| Do you provide a way for users to request data deletion? | **Yes** — In-app and at `https://cvscan.com/delete-account` |
+| Do you provide a way for users to request data deletion? | **Yes** — In-app and at `https://cvscan.com.au/delete-account` |
 | Financial info collected? | **Yes** — credit history. Shared with Stripe (web), Google Play (Android) |
 | Personal info collected? | **Yes** — name, email, location, phone, profile photo |
 | Health and fitness data? | **No** |

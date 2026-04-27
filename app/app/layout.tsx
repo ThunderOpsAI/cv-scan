@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
+import { IBM_Plex_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
+const outfit = Outfit({
+  display: "swap",
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  display: "swap",
+  subsets: ["latin"],
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500"],
+});
+
 export const metadata: Metadata = {
-  title: "CVScan – AI Job Search Assistant",
+  title: "CVScan | Premium AI Career Workflow",
   description:
-    "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
+    "CVScan helps candidates score, tailor, and track every application with a premium AI workflow built for high-stakes job search.",
   keywords: [
     "resume",
     "bullet points",
@@ -17,9 +31,9 @@ export const metadata: Metadata = {
     "career assistant",
   ],
   openGraph: {
-    title: "CVScan – AI Job Search Assistant",
+    title: "CVScan | Premium AI Career Workflow",
     description:
-      "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
+      "CVScan helps candidates score, tailor, and track every application with a premium AI workflow built for high-stakes job search.",
     type: "website",
   },
 };
@@ -31,11 +45,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans">
-        {/* Beta Banner */}
-        <div className="w-full bg-yellow-400 text-black text-center py-2 font-semibold text-sm z-50 sticky top-0 shadow-md">
-          Beta – No authentication or payments required. All features are open and free during public beta.
-        </div>
+      <body
+        className={`${outfit.variable} ${ibmPlexMono.variable} bg-[hsl(var(--app-bg))] font-sans text-white antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

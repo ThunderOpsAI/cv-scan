@@ -16,7 +16,7 @@ Google Play reviewers must be able to fully exercise the app's premium functiona
 ### Recommended Approach: Pre-Loaded Test Account (No Code Changes Required)
 
 The safest and most reviewable strategy is to **seed a dedicated reviewer account** in Supabase with:
-- A confirmed email/password sign-in credential
+- A confirmed reviewer email address that can receive magic-link sign-in emails
 - A pre-loaded credit balance sufficient to exercise all generation features
 
 This avoids any code-level bypass logic that could weaken production entitlement checks.
@@ -34,7 +34,6 @@ In the production Supabase project, run the following **as a one-time ops task**
 ```sql
 -- 1. Create the user in auth.users via Supabase dashboard or Admin API
 -- Email: reviewer@cvscan-test.com
--- Password: [set a strong temporary password — record securely]
 -- NOTE: Use the Supabase dashboard Auth tab or the Admin API to create this user.
 -- Do NOT insert directly into auth.users.
 
@@ -67,7 +66,7 @@ SELECT SUM(amount) AS balance FROM credit_transactions WHERE user_id = '<auth_us
 ### Step 2: Verify Account Access
 
 Before submitting to Play Console, verify:
-- [ ] Sign in at `https://cvscan.com/auth/signin` with `reviewer@cvscan-test.com`
+- [ ] Sign in at `https://cvscan.com.au/auth/signin` with `reviewer@cvscan-test.com`
 - [ ] Navigate Dashboard → verify credit balance shows 500
 - [ ] Run one Resume Score generation — confirm credit deducts correctly
 - [ ] Navigate Dashboard → Profile → confirm "Delete Account" button exists (do NOT delete)
@@ -76,7 +75,7 @@ Before submitting to Play Console, verify:
 ### Step 3: Rotate Credentials After Review
 
 Once the Play review window closes (typically 3–7 days):
-- Reset the reviewer account password via the Supabase Auth dashboard
+- Disable or rotate access to the reviewer mailbox / magic-link inbox
 - Optionally: delete the account entirely via `DELETE /api/profile/delete-account` with the service role key
 
 ---
@@ -94,9 +93,9 @@ CVScan requires an account to access its core features. A pre-loaded
 test account with 500 review credits has been created for your use.
 
 Sign-In Credentials:
-  Email:    reviewer@cvscan-test.com
-  Password: [INSERT FINAL PASSWORD HERE]
-  URL:      https://cvscan.com/auth/signin
+  Email inbox: reviewer@cvscan-test.com
+  Sign-in URL: https://cvscan.com.au/auth/signin
+  Method: Enter the email address above and use the emailed magic link
 
 This account has been pre-loaded with 500 credits. Credits are used 
 to generate resumes, cover letters, and job fit analyses. You have 
@@ -110,28 +109,27 @@ Key features to review:
   4. Job Pack: Dashboard → Job Packs
   5. Interview Prep: Dashboard → Interview
   6. Career Memory: Dashboard → Profile (build your profile first)
-  7. Credit Purchase: Dashboard → Buy Credits (test with Google Play 
-     license testing — no real charge will be made with test accounts)
+  7. Credit Purchase: Dashboard → Buy Credits (web Stripe checkout only)
   8. Account Deletion: Dashboard → Profile → Delete Account 
-     (also accessible without login at: https://cvscan.com/delete-account)
+     (also accessible without login at: https://cvscan.com.au/delete-account)
 
-Privacy Policy: https://cvscan.com/privacy
-Terms: https://cvscan.com/terms
-Account Deletion URL: https://cvscan.com/delete-account
-Support: support@cvscan.com
+Privacy Policy: https://cvscan.com.au/privacy
+Terms: https://cvscan.com.au/terms
+Account Deletion URL: https://cvscan.com.au/delete-account
+Support: support@cvscan.com.au
 ```
 
 ---
 
-## 4. Google Play License Testing (For Billing Review)
+## 4. Billing Review Status
 
-To allow Play reviewers to exercise the in-app purchase flow without real charges:
+Current Phase 0 verification findings:
 
-1. In Play Console → **Monetisation setup → License testing**, add `reviewer@cvscan-test.com` as a licence tester.
-2. This user will see the standard payment UI but all transactions will complete without charging.
-3. The webhook at `POST /api/billing/play/webhook` will receive `SUBSCRIPTION_PURCHASED` / `ONE_TIME_PRODUCT_PURCHASED` events with test tokens — these will be processed normally by the billing engine.
+- Web purchase flow is implemented with Stripe test mode.
+- Google Play Billing verification scaffolding is present at `/api/google-play/verify` and `/api/google-play/webhook`; the verification route now performs live Android Publisher checks when Play service-account credentials are configured, but it has not yet been verified end-to-end with Play Console credentials.
+- Reviewers can still exercise premium features using the pre-loaded 500-credit reviewer account without making a purchase.
 
-> **Note:** The pre-loaded credit balance means reviewers can test generation features without going through purchase at all. The licence testing configuration is a belt-and-suspenders measure for reviewers who wish to test the purchase flow specifically.
+> **Note:** Do not claim Android in-app billing review is ready until the Google Play purchase verification path is verified end-to-end with real Play Console credentials.
 
 ---
 
@@ -140,5 +138,5 @@ To allow Play reviewers to exercise the in-app purchase flow without real charge
 - No reviewer bypass code committed to the codebase
 - Test account seeded via Supabase ops, not application logic
 - Credits granted via `admin_grant` transaction type for clear audit trail
-- Test account credentials stored securely (e.g. 1Password / Bitwarden) — not in the repository
+- Reviewer inbox access details stored securely (e.g. 1Password / Bitwarden) — not in the repository
 - Reviewer credentials rotated after each review window

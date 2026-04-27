@@ -37,7 +37,7 @@ The codebase uses Tailwind CSS throughout. **Do NOT convert to vanilla CSS.** Al
 
 ### Constraint: Domain
 
-The production domain is **cvscan.com.au** (purchased). All references to `cvscan.com` in existing docs should be updated to `cvscan.com.au`.
+The production domain is **cvscan.com.au** (purchased). All references to the legacy `.com` domain in existing docs should be updated to `cvscan.com.au`.
 
 ---
 
@@ -70,10 +70,9 @@ Before testing anything:
 ### Verification Checklist
 
 #### V1: Authentication
-- [ ] Email/password sign-up creates a new user in Supabase `auth.users` AND `public.users`
-- [ ] Email/password sign-in works and redirects to `/dashboard`
+- [ ] Magic-link email sign-in creates a new user in Supabase `auth.users` AND `public.users`
+- [ ] Magic-link email sign-in works and redirects to `/dashboard`
 - [ ] Google OAuth sign-in works (if `GOOGLE_CLIENT_ID` is configured)
-- [ ] Password reset flow sends email and allows reset
 - [ ] Protected routes (`/dashboard/*`, `/generate/*`, `/buy-credits`) redirect unauthenticated users to `/auth/signin`
 - [ ] Sign-out clears session and redirects to `/`
 - [ ] Deleted user cannot sign in after account deletion
@@ -107,7 +106,7 @@ Before testing anything:
 - [ ] `https://cvscan.com.au/privacy` is publicly accessible
 - [ ] `https://cvscan.com.au/terms` is publicly accessible
 - [ ] `https://cvscan.com.au/delete-account` is publicly accessible
-- [ ] All internal references to `cvscan.com` are updated to `cvscan.com.au`
+- [ ] All internal references to the legacy `.com` domain are updated to `cvscan.com.au`
 
 #### V6: Existing Blockers from Prior Agents
 - [ ] **BA-1 (CRITICAL):** DPA status with AI sub-processors — document current state, escalate to owner if unresolved
@@ -119,7 +118,7 @@ Before testing anything:
 
 - `V_REPORT.md` — Pass/fail for every item above with reproduction notes for failures
 - Fixes for any broken items (commit with descriptive messages)
-- Updated domain references throughout codebase (`cvscan.com` → `cvscan.com.au`)
+- Updated domain references throughout codebase to `cvscan.com.au`
 - Updated `AGENT_HANDOVER.md` with Phase 0 section
 
 ### Acceptance Criteria
@@ -431,7 +430,7 @@ Verify all items in `docs/PRE_SUBMISSION_CHECKLIST.md` that are engineering-acti
 - [ ] No `console.log` statements in production code paths
 - [ ] Reviewer instructions in `REVIEWER_ACCESS.md` are accurate
 - [ ] Play Store metadata in `PLAY_STORE_METADATA.md` is accurate
-- [ ] Update all doc references from `cvscan.com` to `cvscan.com.au`
+- [ ] Update all doc references from the legacy `.com` domain to `cvscan.com.au`
 
 ### Output: `OWNER_INSTRUCTIONS.md`
 
@@ -480,7 +479,7 @@ Agent 4 MUST create `docs/OWNER_INSTRUCTIONS.md` as their final deliverable. Thi
 - 14-day clock tracking
 
 #### Section 8: DPA & Legal Actions
-- Which DPA agreements need to be confirmed (Google Gemini, OpenAI, Anthropic)
+- Which DPA agreements need to be confirmed (Google Gemini, OpenAI)
 - Where to find DPA forms for each provider
 - What to do if DPA cannot be obtained (risk acceptance or provider removal)
 

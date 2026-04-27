@@ -41,7 +41,7 @@ export default function TermsOfServicePage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">3. Credits and Payments</h2>
               <p>
-                CVScan utilizes a credit-based system for certain AI generation features. Credits can be purchased via Stripe or Google Play Billing.
+                CVScan utilizes a credit-based system for certain AI generation features. Credits can be purchased via Stripe on the web or Google Play Billing in Android builds.
                 All credit purchases are subject to the respective payment processor's terms and conditions. Subscriptions and one-time credit top-ups are non-refundable except where required by law.
               </p>
             </div>
@@ -87,7 +87,7 @@ export default function TermsOfServicePage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">Contact</h2>
               <p>
-                Legal inquiries should be directed to legal@cvscan.com.
+                Legal inquiries should be directed to legal@cvscan.com.au.
               </p>
             </div>
           </section>

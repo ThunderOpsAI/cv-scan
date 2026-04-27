@@ -29,7 +29,7 @@ The agent coordination document. Each agent reads this, completes their phase, f
 |----------|-----------|
 | **Tailwind CSS stays** | Entire codebase uses it — ripping it out would be destructive |
 | **Job search layer (WP01-WP12) deferred** | Post-launch roadmap, not blocking for Play Store submission |
-| **Domain is `cvscan.com.au`** | All docs and code refs need updating from `cvscan.com` |
+| **Domain is `cvscan.com.au`** | All docs and code refs need updating from the legacy `.com` domain |
 | **4 agents, not 8** | Each phase is scoped to be completable in one agent session |
 | **Agent 4 owns OWNER_INSTRUCTIONS.md** | Single comprehensive doc for everything the owner must do manually |
 | **Framer Motion pre-approved** | Only new dependency, handles all animation needs |
@@ -43,7 +43,7 @@ These items are **not** agent-solvable:
 
 | Action | When | Priority |
 |--------|------|----------|
-| Confirm DPA agreements with AI providers (Gemini, OpenAI, Anthropic) | Before production | **CRITICAL (BA-1)** |
+| Confirm DPA agreements with AI providers (Gemini, OpenAI) | Before production | **CRITICAL (BA-1)** |
 | Set up `cvscan.com.au` DNS → Vercel | Before Phase 0 verification | HIGH |
 | Design/create app icon (512×512 PNG) | Before Play Store submission | HIGH |
 | Design/create feature graphic (1024×500) | Before Play Store submission | HIGH |
@@ -73,7 +73,7 @@ Key context:
 - Auth was restored from beta placeholders (NextAuth + Supabase)
 - Payments were restored (Stripe)
 - Compliance pages exist (Privacy, Terms, Delete Account)
-- Domain is cvscan.com.au — update all cvscan.com references
+- Domain is cvscan.com.au — update all legacy `.com` domain references
 - BA-1 (DPA agreements) is still a CRITICAL open blocker — escalate to owner
 
 When you're done:

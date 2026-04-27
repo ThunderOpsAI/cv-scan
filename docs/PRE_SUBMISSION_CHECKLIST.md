@@ -40,13 +40,13 @@ All URLs must be publicly accessible **without login** at time of submission.
 
 | # | URL | Required? | Current Status |
 |---|---|---|---|
-| 3.1 | **Privacy Policy** → `https://cvscan.com/privacy` | ✅ Mandatory | Implemented ✅ |
-| 3.2 | **External Deletion URL** → `https://cvscan.com/delete-account` | ✅ Mandatory | Implemented ✅ (Agent 6) |
-| 3.3 | **Support URL/Email** → `https://cvscan.com` or `mailto:support@cvscan.com` | ✅ Mandatory | Pending domain live |
-| 3.4 | **Terms of Service** → `https://cvscan.com/terms` | Highly recommended | Implemented ✅ |
-| 3.5 | **App website** → `https://cvscan.com` | Recommended | Pending domain live |
+| 3.1 | **Privacy Policy** → `https://cvscan.com.au/privacy` | ✅ Mandatory | Implemented ✅ |
+| 3.2 | **External Deletion URL** → `https://cvscan.com.au/delete-account` | ✅ Mandatory | Implemented ✅ (Agent 6) |
+| 3.3 | **Support URL/Email** → `https://cvscan.com.au` or `mailto:support@cvscan.com.au` | ✅ Mandatory | Pending domain live |
+| 3.4 | **Terms of Service** → `https://cvscan.com.au/terms` | Highly recommended | Implemented ✅ |
+| 3.5 | **App website** → `https://cvscan.com.au` | Recommended | Pending domain live |
 
-> **Domain readiness blocker:** All URLs above depend on `cvscan.com` resolving in production. Confirm deployment and domain DNS before submission.
+> **Domain readiness blocker:** All URLs above depend on `cvscan.com.au` resolving in production. Confirm deployment and domain DNS before submission.
 
 ---
 
@@ -89,14 +89,13 @@ All URLs must be publicly accessible **without login** at time of submission.
 
 | # | Check | Status | Notes |
 |---|---|---|---|
-| 6.1 | Email/password sign-in functional in release build | ☐ | Restored by Agent 2 |
-| 6.2 | Google sign-in functional in release build | ☐ | Restored by Agent 2 |
-| 6.3 | Password reset flow functional | ☐ | Restored by Agent 2 |
-| 6.4 | Protected routes reject unauthenticated requests | ☐ | Verified by Agent 4 |
-| 6.5 | `SUPABASE_SERVICE_ROLE_KEY` is server-only (not in client bundles) | ☐ | Confirmed in lib/supabase/server.ts |
-| 6.6 | No placeholder auth (`session = { user: 'test' }`) in any release path | ☐ | Verified by Agent 2 |
-| 6.7 | RLS enabled on all tables containing user data | ☐ | Verified by Agent 4 |
-| 6.8 | `resume_uploads` storage bucket is private (owner-only RLS) | ☐ | Verified by Agent 4 |
+| 6.1 | Magic-link email sign-in functional in release build | ☐ | Uses Resend + NextAuth email provider |
+| 6.2 | Google sign-in functional in release build | ☐ | Optional provider when Google OAuth env is configured |
+| 6.3 | Protected routes reject unauthenticated requests | ☐ | Verified by Agent 4 |
+| 6.4 | `SUPABASE_SERVICE_ROLE_KEY` is server-only (not in client bundles) | ☐ | Confirmed in `lib/supabase/server.ts` |
+| 6.5 | No placeholder auth (`session = { user: 'test' }`) in any release path | ☐ | Verified by Agent 2 |
+| 6.6 | RLS enabled on all tables containing user data | ☐ | Verified by Agent 4 |
+| 6.7 | `resume_uploads` storage bucket is private (owner-only RLS) | ☐ | Verified by Agent 4 |
 
 ---
 
@@ -108,8 +107,8 @@ All URLs must be publicly accessible **without login** at time of submission.
 | 7.2 | `402` returned when credit balance is zero | ☐ | Verified by Agent 3 |
 | 7.3 | Premium unlock cannot be achieved from client state alone | ☐ | Agent 3 requirement |
 | 7.4 | Stripe webhook signature verification enabled | ☐ | Agent 3 requirement |
-| 7.5 | Google Play purchase verification path scaffolded | ☐ | Agent 3 — verify completion status |
-| 7.6 | Android in-app purchases use Google Play Billing (not Stripe) | ☐ | Policy compliance blocker if not met |
+| 7.5 | Google Play purchase verification path scaffolded | ◐ | `/api/google-play/verify` now performs live Android Publisher verification when Play service-account credentials are configured; RTDN webhook enrichment is wired at `/api/google-play/webhook` |
+| 7.6 | Android in-app purchases use Google Play Billing (not Stripe) | ☐ | Web can continue using Stripe; Android release paths must use Play Billing only |
 | 7.7 | Reviewer test account seeded with 500 credits | ☐ | See `REVIEWER_ACCESS.md` |
 | 7.8 | Reviewer email added to Play licence tester list | ☐ | See `REVIEWER_ACCESS.md` Section 4 |
 
@@ -136,7 +135,7 @@ All URLs must be publicly accessible **without login** at time of submission.
 | 9.3 | Testers notified with opt-in invite link | ☐ | |
 | 9.4 | Minimum 12 testers have confirmed opt-in | ☐ | **Required before 14-day clock is meaningful** |
 | 9.5 | 14-day clock start date recorded | ☐ | See `BETA_TRACK.md` Section 6 |
-| 9.6 | Beta feedback channel established (email: `beta@cvscan.com`) | ☐ | |
+| 9.6 | Beta feedback channel established (email: `beta@cvscan.com.au`) | ☐ | |
 
 ---
 
@@ -158,8 +157,8 @@ All URLs must be publicly accessible **without login** at time of submission.
 - [ ] All **Section 1–2** (Build) checks pass
 - [ ] All **Section 3** (URLs) are live and accessible
 - [ ] All **Section 5** compliance checks pass (BA-1 either resolved or formally risk-accepted)
-- [ ] **Section 6** auth security verified by Agent 7
-- [ ] **Section 7** billing verified by Agent 7
+- [ ] **Section 6** auth security verified in final QA
+- [ ] **Section 7** billing verified in final QA
 - [ ] **Section 8** reviewer access confirmed manually
 - [ ] **Section 9** beta track confirmed with ≥ 12 opted-in testers
 

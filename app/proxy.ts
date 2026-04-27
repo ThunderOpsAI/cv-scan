@@ -1,10 +1,25 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-// Auth middleware disabled for beta branch (no authentication required)
-// All routes are now public.
+const DEVELOPMENT_NEXTAUTH_SECRET = "cvscan-development-nextauth-secret";
 
-// Export a no-op proxy function for Next.js build compatibility
-export default function proxy() {
-	// No middleware logic in beta
-	return NextResponse.next();
+export default async function proxy(req: NextRequest) {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET ?? DEVELOPMENT_NEXTAUTH_SECRET,
+  });
+
+  if (token) {
+    return NextResponse.next();
+  }
+
+  const signInUrl = new URL("/auth/signin", req.url);
+  signInUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search);
+
+  return NextResponse.redirect(signInUrl);
 }
+
+export const config = {
+  matcher: ["/dashboard/:path*", "/generate/:path*", "/buy-credits/:path*"],
+};

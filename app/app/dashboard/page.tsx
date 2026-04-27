@@ -2,8 +2,298 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { motion } from "framer-motion";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { GradientButton } from "@/components/ui/GradientButton";
+
+type Accent = "amber" | "blue" | "cyan" | "emerald" | "pink" | "violet";
+
+type FeatureCard = {
+  accent: Accent;
+  badge: string;
+  copy: string;
+  href: string;
+  icon: ReactNode;
+  title: string;
+};
+
+type FeatureSection = {
+  cards: FeatureCard[];
+  description: string;
+  title: string;
+};
+
+const quickActions = [
+  { href: "/dashboard/scanner", label: "Scan resume", variant: "primary" as const },
+  { href: "/generate/cover-letter", label: "New cover letter", variant: "secondary" as const },
+  { href: "/dashboard/jobs", label: "Browse jobs", variant: "ghost" as const },
+];
+
+const featureSections: FeatureSection[] = [
+  {
+    description: "Build the context that powers stronger tailoring everywhere else.",
+    title: "Profile foundation",
+    cards: [
+      {
+        accent: "blue",
+        badge: "Career memory",
+        copy: "Create your professional profile with experiences, education, and skills for stronger matching.",
+        href: "/dashboard/profile",
+        icon: (
+          <path
+            d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-7 8a7 7 0 0 1 14 0"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Build your profile",
+      },
+      {
+        accent: "violet",
+        badge: "Guided path",
+        copy: "Career memory, target roles, and first job fit all in one optional activation flow.",
+        href: "/dashboard/onboarding",
+        icon: (
+          <path
+            d="M5 12h4l2-6 2 12 2-6h4"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Activation checklist",
+      },
+    ],
+  },
+  {
+    description: "Use targeted tools to evaluate roles, tailor assets, and keep applications moving.",
+    title: "Application engine",
+    cards: [
+      {
+        accent: "cyan",
+        badge: "1 credit per analysis",
+        copy: "Apply, stretch, or skip with profile-grounded reasoning for each job description.",
+        href: "/dashboard/job-fit",
+        icon: (
+          <path
+            d="m4 16 4-4 3 3 7-7M4 7h5m0 0v5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Job fit",
+      },
+      {
+        accent: "emerald",
+        badge: "Free 3/day, then 1 credit",
+        copy: "Check keyword coverage and ATS alignment before you send another draft.",
+        href: "/dashboard/scanner",
+        icon: (
+          <path
+            d="M10.5 4H7a2 2 0 0 0-2 2v3.5m11-5.5H17a2 2 0 0 1 2 2v3.5M16 20h1a2 2 0 0 0 2-2v-3.5M8 20H7a2 2 0 0 1-2-2v-3.5M9.5 9.5a4 4 0 1 0 5 5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "ATS scanner",
+      },
+      {
+        accent: "violet",
+        badge: "5 credits per pack",
+        copy: "Assemble a complete application package with tailored assets and analysis in one flow.",
+        href: "/dashboard/job-packs",
+        icon: (
+          <path
+            d="M4 8.5 12 4l8 4.5M4 8.5v7L12 20l8-4.5v-7M12 20v-8"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Job packs",
+      },
+      {
+        accent: "amber",
+        badge: "Kanban + list views",
+        copy: "Track interviews, follow-ups, and application momentum without leaving the app.",
+        href: "/dashboard/applications",
+        icon: (
+          <path
+            d="M6 5h12M6 12h12M6 19h12"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Application tracker",
+      },
+    ],
+  },
+  {
+    description: "Stay sharp with intelligence tools and tailored generation on demand.",
+    title: "Intelligence studio",
+    cards: [
+      {
+        accent: "blue",
+        badge: "1 credit per message",
+        copy: "Talk through strategy, blockers, and next steps with your career copilot.",
+        href: "/dashboard/copilot",
+        icon: (
+          <path
+            d="M12 4a6 6 0 0 0-6 6v2.5L4 16v1h16v-1l-2-3.5V10a6 6 0 0 0-6-6Zm-2 14h4"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Career copilot",
+      },
+      {
+        accent: "cyan",
+        badge: "Free job discovery",
+        copy: "Find roles matched to your profile and prioritize where to spend your energy next.",
+        href: "/dashboard/jobs",
+        icon: (
+          <path
+            d="m20 20-3.5-3.5M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13Z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Discover jobs",
+      },
+      {
+        accent: "pink",
+        badge: "Interview context",
+        copy: "Structure stronger stories and prep responses with STAR-ready context.",
+        href: "/dashboard/profile/stories",
+        icon: (
+          <path
+            d="m12 3 2.5 5 5.5.8-4 3.9 1 5.5L12 15.7 7 18.2l1-5.5-4-3.9L9.5 8 12 3Z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "STAR stories",
+      },
+      {
+        accent: "violet",
+        badge: "Career tracking",
+        copy: "Set career objectives and keep your search aligned with a measurable plan.",
+        href: "/dashboard/profile/goals",
+        icon: (
+          <path
+            d="M5 19 19 5M9 5h10v10"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "SMART goals",
+      },
+      {
+        accent: "blue",
+        badge: "1 credit per generation",
+        copy: "Transform rough responsibilities into polished, ATS-aware bullet points.",
+        href: "/generate/bullets",
+        icon: (
+          <path
+            d="M7 7h10M7 12h10M7 17h6"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Generate bullets",
+      },
+      {
+        accent: "cyan",
+        badge: "2 credits per generation",
+        copy: "Draft sharper cover letters that stay grounded in your actual experience.",
+        href: "/generate/cover-letter",
+        icon: (
+          <path
+            d="M4 7.5 12 13l8-5.5M6 19h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        ),
+        title: "Generate cover letter",
+      },
+    ],
+  },
+];
+
+function getGreeting(now = new Date()) {
+  const hour = now.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function getDisplayName(sessionName: string | null | undefined, email: string | null | undefined) {
+  if (sessionName?.trim()) {
+    return sessionName.split(" ")[0];
+  }
+
+  if (email?.includes("@")) {
+    return email.split("@")[0];
+  }
+
+  return "there";
+}
+
+function IconWrap({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] text-white">
+      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+        {children}
+      </svg>
+    </div>
+  );
+}
+
+function DashboardLoadingState() {
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.1),transparent_24%),linear-gradient(180deg,#060b15_0%,#081120_100%)]">
+      <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between py-2">
+          <div className="h-12 w-40 animate-pulse rounded-2xl bg-white/[0.08]" />
+          <div className="h-10 w-32 animate-pulse rounded-full bg-white/[0.08]" />
+        </div>
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="h-64 animate-pulse rounded-[2rem] bg-white/[0.08]" />
+          <div className="h-64 animate-pulse rounded-[2rem] bg-white/[0.08]" />
+        </div>
+        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-56 animate-pulse rounded-[1.75rem] bg-white/[0.08]" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function DashboardContent() {
   const { data: session, status } = useSession();
@@ -34,354 +324,248 @@ function DashboardContent() {
     }
   }, [status, router, searchParams]);
 
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setMessage(null), 5000);
+    return () => window.clearTimeout(timeout);
+  }, [message]);
+
   if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <DashboardLoadingState />;
   }
 
   if (!session) {
     return null;
   }
 
+  const displayName = getDisplayName(session.user.name, session.user.email);
+  const greeting = getGreeting();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.14),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
       {message && (
-        <div className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300 ${message.type === "success"
-          ? "bg-green-500/20 border-green-500/50 text-green-100"
-          : "bg-red-500/20 border-red-500/50 text-red-100"
-          }`}>
+        <div
+          className={`fixed left-4 right-4 top-4 z-50 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl sm:left-auto sm:right-6 sm:w-[32rem] ${
+            message.type === "success"
+              ? "border-emerald-300/[0.26] bg-emerald-300/10 text-emerald-50"
+              : "border-rose-300/[0.26] bg-rose-300/10 text-rose-50"
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <span className="text-xl">{message.type === "success" ? "✅" : "⚠️"}</span>
-            <p className="font-medium">{message.text}</p>
-            <button onClick={() => setMessage(null)} className="ml-2 hover:text-white">✕</button>
+            <div className="h-2.5 w-2.5 rounded-full bg-current" />
+            <p className="flex-1 font-medium">{message.text}</p>
+            <button onClick={() => setMessage(null)} className="ml-2 text-current/80 transition hover:text-white">
+              Close
+            </button>
           </div>
         </div>
       )}
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-4 sm:py-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-        <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+
+      <nav className="container mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <Link href="/" className="flex items-center gap-3 text-white">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.14] bg-white/[0.06] shadow-[0_18px_44px_rgba(2,8,23,0.32)]">
+            <span className="bg-[linear-gradient(135deg,#7dd3fc,#c4b5fd)] bg-clip-text text-lg font-semibold text-transparent">
+              CV
+            </span>
+          </div>
+          <div>
+            <div className="text-lg font-semibold tracking-[-0.03em]">CVScan</div>
+            <div className="text-xs text-slate-400">premium career workflow</div>
+          </div>
         </Link>
-        <div className="w-full sm:w-auto flex items-center justify-between gap-4">
-          <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session.user.credits}</span>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="rounded-full border border-cyan-300/[0.18] bg-cyan-300/10 px-4 py-2 text-sm text-cyan-50">
+            Credits <span className="ml-2 font-semibold text-white">{session.user.credits}</span>
+          </div>
+          <div className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-slate-200">
+            Plan <span className="ml-2 font-semibold capitalize text-white">{session.user.planTier}</span>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="text-gray-300 hover:text-white transition-colors"
+            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:bg-white/[0.09] hover:text-white"
           >
-            Sign Out
+            Sign out
           </button>
         </div>
       </nav>
 
-      {/* Dashboard Content */}
-      <div className="container mx-auto px-4 py-8 sm:py-12">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto">
           {session.user.credits < 5 && (
-            <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-100 text-sm">
+            <div className="mb-6 rounded-2xl border border-amber-300/[0.24] bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
               Low balance: you have {session.user.credits} credit{session.user.credits === 1 ? "" : "s"}.{" "}
-              <Link href="/buy-credits" className="font-semibold text-amber-200 underline hover:text-white">
+              <Link href="/buy-credits" className="font-semibold text-amber-200 underline decoration-amber-200/60 underline-offset-4 hover:text-white">
                 Add credits
               </Link>{" "}
               before running paid generations.
             </div>
           )}
-          {/* Header with Welcome and Account Info */}
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                Welcome back, {session.user.name}!
-              </h1>
-              <p className="text-gray-400">
-                Ready to optimize your job search
-              </p>
-            </div>
 
-            {/* Account Information - Compact Box */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 w-full md:min-w-[280px]">
-              <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Account Info</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">Email:</span>
-                  <span className="text-white text-sm max-w-[65%] truncate text-right">{session.user.email}</span>
+          <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+            >
+              <GlassCard accent="cyan" className="h-full p-7 sm:p-8">
+                <div className="flex flex-col gap-8">
+                  <div className="flex flex-wrap items-start justify-between gap-5">
+                    <div className="max-w-2xl">
+                      <p className="eyebrow">Dashboard</p>
+                      <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+                        {greeting}, {displayName}.
+                      </h1>
+                      <p className="mt-4 max-w-2xl text-base leading-8 text-slate-300">
+                        Keep your search moving with grounded scoring, faster tailoring, and a cleaner view of what to do next.
+                      </p>
+                    </div>
+                    <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-300">
+                      <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Account</div>
+                      <div className="mt-2 font-medium text-white">{session.user.email}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    {quickActions.map((action) => (
+                      <GradientButton key={action.href} href={action.href} size="md" variant={action.variant}>
+                        {action.label}
+                      </GradientButton>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">Credits:</span>
-                  <span className="text-blue-400 font-bold text-lg">{session.user.credits}</span>
+              </GlassCard>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.06 }}
+            >
+              <GlassCard accent="violet" className="h-full p-7 sm:p-8">
+                <p className="eyebrow">Activation path</p>
+                <div className="mt-3 flex items-center justify-between gap-4">
+                  <h2 className="text-2xl font-semibold tracking-[-0.04em] text-white">
+                    Three-step launch path
+                  </h2>
+                  <Link href="/dashboard/onboarding" className="text-sm text-cyan-200 transition hover:text-white">
+                    Open
+                  </Link>
                 </div>
-              </div>
-            </div>
+                <p className="mt-4 text-sm leading-7 text-slate-300">
+                  Career memory, target roles, and your first job-fit pass. Optional, but the fastest route to sharper results.
+                </p>
+                <div className="mt-6 space-y-3">
+                  {[
+                    "Build your profile context",
+                    "Define your path and role targets",
+                    "Run a first scan or job-fit pass",
+                  ].map((step, index) => (
+                    <div key={step} className="flex items-center gap-3">
+                      <div
+                        className={[
+                          "h-2.5 flex-1 rounded-full",
+                          index === 0 ? "bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.55)]" : "bg-white/10",
+                        ].join(" ")}
+                      />
+                      <div className="w-48 text-sm text-slate-300">{step}</div>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
           </div>
 
-          {/* Onboarding */}
-          <div className="mb-8">
-            <Link
-              href="/dashboard/onboarding"
-              className="block bg-gradient-to-r from-violet-600/25 to-fuchsia-600/25 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-violet-500/30 hover:border-violet-400/50 transition-all"
-            >
-              <div className="flex justify-between items-center gap-4">
+          {featureSections.map((section, sectionIndex) => (
+            <section key={section.title} className="mt-12">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Activation checklist</h2>
-                  <p className="text-gray-400 text-sm mt-1">
-                    Career memory → your path → first job fit (optional guided path)
+                  <p className="eyebrow">{section.title}</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl">
+                    {section.title}
+                  </h2>
+                </div>
+                <p className="max-w-2xl text-sm leading-7 text-slate-400">{section.description}</p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {section.cards.map((card, cardIndex) => (
+                  <motion.div
+                    key={card.href}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: sectionIndex * 0.06 + cardIndex * 0.04 }}
+                  >
+                    <Link
+                      href={card.href}
+                      data-testid={
+                        card.href === "/dashboard/scanner"
+                          ? "ats-scanner-link"
+                          : card.href === "/dashboard/job-packs"
+                            ? "job-packs-link"
+                            : card.href === "/dashboard/applications"
+                              ? "application-tracker-link"
+                              : undefined
+                      }
+                    >
+                      <GlassCard accent={card.accent} interactive className="h-full p-6">
+                        <div className="flex h-full flex-col">
+                          <div className="flex items-start justify-between gap-4">
+                            <IconWrap>{card.icon}</IconWrap>
+                            <div className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-slate-300">
+                              {card.badge}
+                            </div>
+                          </div>
+                          <h3 className="mt-6 text-2xl font-semibold tracking-[-0.04em] text-white">
+                            {card.title}
+                          </h3>
+                          <p className="mt-3 flex-1 text-sm leading-7 text-slate-300">{card.copy}</p>
+                          <div className="mt-6 text-sm text-cyan-200">Open workspace</div>
+                        </div>
+                      </GlassCard>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+          ))}
+
+          <section className="mt-12">
+            <GlassCard accent="blue" className="p-6 sm:p-7">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="eyebrow">Billing</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
+                    Keep the workflow moving.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    Web purchases run through Stripe today. Android release paths are scaffolded for Google Play Billing verification.
                   </p>
                 </div>
-                <span className="text-violet-300 text-sm font-semibold shrink-0">Open →</span>
+                <GradientButton href="/buy-credits" size="md">
+                  Buy credits
+                </GradientButton>
               </div>
-            </Link>
-          </div>
+            </GlassCard>
+          </section>
 
-          {/* Profile Section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Your Profile</h2>
-            <Link
-              href="/dashboard/profile"
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-5 sm:p-6 border border-blue-500/50 hover:border-blue-400 transition-all block group"
-            >
-              <div className="flex justify-between items-start sm:items-center gap-3">
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
-                    Build Your Professional Profile
-                  </h3>
-                  <p className="text-blue-100 mb-3">
-                    Create your profile with experiences, education, and skills for better job matching
-                  </p>
-                </div>
-                <div className="text-3xl sm:text-4xl shrink-0">👤</div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Job Applications */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Job Applications</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <Link
-                href="/dashboard/job-fit"
-                className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-cyan-500/30 hover:border-cyan-400/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
-                  Job fit
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Apply, stretch, or skip — grounded in your approved profile facts
-                </p>
-                <div className="text-cyan-400 text-sm">1 credit per analysis</div>
-              </Link>
-
-              <Link
-                href="/dashboard/scanner"
-                className="bg-gradient-to-r from-green-600/20 to-teal-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-green-500/30 hover:border-green-400/50 transition-all group"
-                data-testid="ats-scanner-link"
-              >
-                <div className="text-3xl mb-3">📊</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">
-                  ATS Scanner
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Check how well your profile matches any job description
-                </p>
-                <div className="text-green-400 text-sm">Free 3/day, then 1 credit</div>
-              </Link>
-
-              <Link
-                href="/dashboard/job-packs"
-                className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-purple-500/30 hover:border-purple-400/50 transition-all group"
-                data-testid="job-packs-link"
-              >
-                <div className="text-3xl mb-3">📦</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
-                  Job Packs
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Complete application package: tailored resume, cover letter, ATS analysis
-                </p>
-                <div className="text-purple-400 text-sm">5 credits per pack</div>
-              </Link>
-
-              <Link
-                href="/dashboard/applications"
-                className="bg-gradient-to-r from-orange-600/20 to-amber-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-orange-500/30 hover:border-orange-400/50 transition-all group"
-                data-testid="application-tracker-link"
-              >
-                <div className="text-3xl mb-3">📋</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
-                  Application Tracker
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Track applications, interviews, and generate follow-up emails
-                </p>
-                <div className="text-orange-400 text-sm">Kanban + List views</div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Intelligence Features */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Intelligence</h2>
-            <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-              <Link
-                href="/dashboard/copilot"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🤖</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Career Copilot
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Chat with your personal assistant for general career advice
-                </p>
-                <div className="text-blue-400 text-sm">1 credit per message</div>
-              </Link>
-
-              <Link
-                href="/dashboard/interview"
-                className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🎙️</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Mock Interview
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Practice answering questions with an AI hiring manager
-                </p>
-                <div className="text-blue-400 text-sm">1 credit per message</div>
-              </Link>
-
-              <Link
-                href="/dashboard/jobs"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🔍</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Discover Jobs
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Find jobs matched to your profile with intelligent scoring
-                </p>
-                <div className="text-blue-400 text-sm">Free job discovery</div>
-              </Link>
-
-              <Link
-                href="/dashboard/profile/stories"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🌟</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  STAR Stories
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Structure your interview answers with the STAR method
-                </p>
-                <div className="text-blue-400 text-sm">Profile context</div>
-              </Link>
-
-              <Link
-                href="/dashboard/profile/goals"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  SMART Goals
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Set and track specific career objectives
-                </p>
-                <div className="text-blue-400 text-sm">Career tracking</div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Generation Tools */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Content Generation</h2>
-            <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-              <Link
-                href="/generate/bullets"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">📝</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Generate Bullet Points
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Transform job duties into polished, ATS-optimized resume bullets
-                </p>
-                <div className="text-blue-400 text-sm">1 credit per generation</div>
-              </Link>
-
-              <Link
-                href="/generate/cover-letter"
-                className="bg-white/5 backdrop-blur-lg rounded-2xl p-5 sm:p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
-              >
-                <div className="text-3xl mb-3">✉️</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                  Generate Cover Letter
-                </h3>
-                <p className="text-gray-400 mb-3">
-                  Create a tailored cover letter from your resume and job description
-                </p>
-                <div className="text-blue-400 text-sm">2 credits per generation</div>
-              </Link>
-            </div>
-            {/* Buy Credits Permanent Link */}
-            <div className="mt-6">
-              <Link
-                href="/buy-credits"
-                className="block bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 hover:border-blue-400/50 transition-all group text-center"
-              >
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <span className="text-2xl">💎</span>
-                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                    Buy More Credits
-                  </h3>
-                </div>
-                <p className="text-gray-400">
-                  Top up your account to keep generating amazing content
-                </p>
-              </Link>
-            </div>
-          </div>
-
-          {/* Buy Credits CTA */}
-          {session.user.credits < 5 && (
-            <div className="mt-8 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 text-center">
-              <h3 className="text-xl font-bold text-white mb-2">Running low on credits?</h3>
-              <p className="text-blue-100 mb-4">Purchase more credits to keep generating content</p>
-              <Link
-                href="/buy-credits"
-                className="inline-block bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all"
-              >
-                Buy Credits
-              </Link>
-            </div>
-          )}
-
-          {/* User ID Footer - Discreetly displayed */}
-          <div className="mt-12 pt-6 border-t border-white/10">
-            <p className="text-xs text-gray-600 font-mono">
+          <div className="mt-12 border-t border-white/[0.08] pt-6">
+            <p className="text-xs font-mono text-slate-600">
               User ID: <span className="select-all">{session.user.id}</span>
             </p>
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={<DashboardLoadingState />}>
       <DashboardContent />
     </Suspense>
   );

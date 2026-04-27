@@ -118,7 +118,7 @@ export default function ProfilePage() {
           <div className="mb-8 p-6 bg-white/5 border border-white/20 rounded-xl">
             <h2 className="text-2xl font-semibold text-white mb-3">Data Export & Deletion</h2>
             <p className="text-gray-300 mb-2">
-              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com" className="underline text-blue-400">privacy@cvscan.com</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
+              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com.au" className="underline text-blue-400">privacy@cvscan.com.au</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
             </p>
             <button
               className="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
@@ -142,7 +142,6 @@ export default function ProfilePage() {
               }}
             >
               Download Profile Facts & Generated Assets (JSON)
-            </button>
             </button>
             <p className="text-gray-300 mb-2 mt-4 text-sm border-t border-white/10 pt-4">
               If you wish to permanently delete your account and all associated data, you may delete your account below. This action cannot be undone.

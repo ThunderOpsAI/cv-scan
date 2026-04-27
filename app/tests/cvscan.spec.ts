@@ -11,7 +11,7 @@ test('public homepage routes visitors to the public pricing page', async ({ page
   await page.goto('/');
 
   await expect(
-    page.getByRole('heading', { name: /Supercharge Your Job Search/i })
+    page.getByRole('heading', { name: /Make every application feel hand-built/i })
   ).toBeVisible();
 
   await page.getByRole('navigation').getByRole('link', { name: 'Pricing' }).click();

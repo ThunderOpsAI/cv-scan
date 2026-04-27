@@ -100,14 +100,32 @@ export default function ProfileFactsPage() {
       return;
     }
 
+    setError("");
+    setMessage("");
+    setOcrLoading(true);
+
     try {
-      const text = await file.text();
-      setResumeText(text);
-      if (!label) {
-        setLabel(file.name.replace(/\.[^.]+$/, ""));
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/profile/resume-upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Could not read that file");
       }
-    } catch {
-      setError("Could not read that file. Paste the resume text instead.");
+
+      setResumeText(data.text || "");
+      setLabel((current) => current || data.label || file.name.replace(/\.[^.]+$/, ""));
+      setMessage("Resume text extracted. Review it below before extracting facts.");
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not read that file. Upload a TXT, PDF, or DOCX resume, or paste the text instead."));
+    } finally {
+      setOcrLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -444,13 +462,13 @@ export default function ProfileFactsPage() {
                 <input
                   id="resume-upload"
                   type="file"
-                  accept=".txt,.md,.rtf,.csv,.pdf,.doc,.docx"
+                  accept=".txt,.md,.rtf,.csv,.pdf,.docx"
                   onChange={handleFileUpload}
                   className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700"
                   disabled={importing}
                 />
                 <p className="text-gray-400 text-sm mt-2">
-                  Text-based uploads work best. Paste the resume text below if the file text looks wrong.
+                  Upload TXT, PDF, or DOCX resumes. Paste the resume text below if the extracted text looks wrong.
                 </p>
               </div>
 
