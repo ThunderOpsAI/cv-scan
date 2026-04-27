@@ -27,12 +27,14 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">1. Information We Collect</h2>
               <p>
-                We collect information that you directly provide to us when you use the platform, build your profile, upload your resume, or communicate with us. <strong>During the public beta, we do not require accounts, authentication, or payment information. No billing data is collected.</strong> This includes:
+                We collect information that you directly provide to us when you use the platform, build your profile, upload your resume, or communicate with us. This includes:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Professional history, skills, education, and career goals.</li>
+                <li>Account credentials authenticated via NextAuth.</li>
                 <li>Approved Career Memory facts and generated application drafts.</li>
                 <li>Job application tracking data.</li>
+                <li>Payment and entitlement data processed securely by Stripe or Google Play Billing models.</li>
                 <li>Product analytics events such as feature usage and error states. These events do not include resume text, job descriptions, cover letters, or raw messages.</li>
               </ul>
             </div>
@@ -53,9 +55,10 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">3. Artificial Intelligence & Sub-Processors</h2>
               <p>
-                CVScan uses third-party AI models (such as Google Gemini) to provide core functionality.
+                CVScan uses third-party AI models (such as Google Gemini, OpenAI, and Anthropic) to provide core functionality.
                 When you use generation tools, the relevant approved profile facts, job details, and prompt instructions are sent to these providers to generate the requested content.
                 <strong> Our AI partners are contractually prohibited from using your personal data to train their foundational models.</strong>
+                <em> Note: Third-party API data retention policies generally hold data for zero to thirty (30) days for trust and safety before permanent deletion, determined by the respective provider.</em>
               </p>
             </div>
 
@@ -74,10 +77,19 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">6. Data Retention & Deletion</h2>
+              <h2 className="text-2xl font-semibold text-white mb-3">6. Data Retention &amp; Deletion</h2>
               <p>
-                You own your data. You can delete your account and all associated data at any time through your account settings or by contacting support. 
-                Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.
+                You own your data. You can delete your account and all associated data at any time directly through your account profile within the app (<strong>Dashboard → Profile → Delete Account</strong>). If you no longer have access to the app, you may request deletion without logging in at{" "}
+                <Link href="/delete-account" className="text-blue-400 hover:text-blue-300 underline">
+                  cvscan.com/delete-account
+                </Link>{" "}
+                or by emailing <a href="mailto:privacy@cvscan.com" className="text-blue-400 hover:text-blue-300 underline">privacy@cvscan.com</a>.
+              </p>
+              <p className="mt-2">
+                Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies. Uploaded documents (e.g., resumes) are stored in strictly isolated storage buckets exclusively accessible by your authenticated user ID via Row Level Security, and they are fully expunged upon account deletion.
+              </p>
+              <p className="mt-2">
+                <strong className="text-white">Note on billing records:</strong> Stripe billing records related to completed transactions (transaction metadata only — no resume or application content) may be retained for up to 7 years in compliance with financial regulations and cannot be deleted on demand.
               </p>
             </div>
 

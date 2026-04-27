@@ -34,14 +34,15 @@ export default function TermsOfServicePage() {
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">2. Description of Service</h2>
               <p>
-                CVScan is an AI-powered career assistant providing resume scoring, cover letter generation, job tracking, and application insights. <strong>During the public beta, all features are open and free. No authentication or payments are required.</strong> CVScan is not a recruiter, staffing agency, credential verifier, or autonomous application-submission service.
+                CVScan is an AI-powered career assistant providing resume scoring, cover letter generation, job tracking, and application insights. CVScan is not a recruiter, staffing agency, credential verifier, or autonomous application-submission service.
               </p>
             </div>
 
             <div>
               <h2 className="text-2xl font-semibold text-white mb-3">3. Credits and Payments</h2>
               <p>
-                <strong>During the public beta, credits and payments are disabled. All features are free to use. No payment or account is required.</strong>
+                CVScan utilizes a credit-based system for certain AI generation features. Credits can be purchased via Stripe or Google Play Billing.
+                All credit purchases are subject to the respective payment processor's terms and conditions. Subscriptions and one-time credit top-ups are non-refundable except where required by law.
               </p>
             </div>
 

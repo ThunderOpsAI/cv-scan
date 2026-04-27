@@ -317,6 +317,19 @@ CREATE POLICY "Users can view own generations"
   ON generations FOR SELECT
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can insert own generations"
+  ON generations FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own generations"
+  ON generations FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own generations"
+  ON generations FOR DELETE
+  USING (auth.uid() = user_id);
+
 DROP POLICY IF EXISTS "Users can view own analytics events" ON analytics_events;
 CREATE POLICY "Users can view own analytics events"
   ON analytics_events FOR SELECT
@@ -582,3 +595,55 @@ WHERE NOT EXISTS (SELECT 1 FROM credit_ledger cl WHERE cl.user_id = u.id);
 --       ('demo@example.com', 'Demo User', 5);
 --   END IF;
 -- END $$;
+
+-- ============================================
+-- STORAGE BUCKETS (OCR & PHOTO CAPTURES)
+-- ============================================
+
+-- Create resume_uploads bucket for OCR / Document parsing if it doesn't exist
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'resume_uploads',
+  'resume_uploads',
+  false,
+  10485760, -- 10 MB limit
+  '{image/jpeg,image/png,image/webp,application/pdf}'
+) ON CONFLICT (id) DO UPDATE SET
+  public = false,
+  file_size_limit = 10485760,
+  allowed_mime_types = '{image/jpeg,image/png,image/webp,application/pdf}';
+
+-- RLS policies for storage buckets mapping to authenticated user folders
+-- E.g., uploading to 'resume_uploads/{user_id}/file.jpg'
+
+CREATE POLICY "Users can upload their own resume files"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bucket_id = 'resume_uploads' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "Users can view their own resume files"
+  ON storage.objects FOR SELECT
+  TO authenticated
+  USING (
+    bucket_id = 'resume_uploads' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "Users can update their own resume files"
+  ON storage.objects FOR UPDATE
+  TO authenticated
+  USING (
+    bucket_id = 'resume_uploads' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "Users can delete their own resume files"
+  ON storage.objects FOR DELETE
+  TO authenticated
+  USING (
+    bucket_id = 'resume_uploads' AND
+    (storage.foldername(name))[1] = auth.uid()::text
+  );
