@@ -8,6 +8,7 @@ import Link from "next/link";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { InsightCard } from "@/components/ui/InsightCard";
+import { useToast } from "@/components/ui/Toast";
 import type { ATSScan } from "@/types/job-packs";
 
 type Accent = "amber" | "blue" | "cyan" | "emerald" | "pink" | "violet";
@@ -301,7 +302,7 @@ function DashboardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const { showToast } = useToast();
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [dismissedInsights, setDismissedInsights] = useState<string[]>([]);
   const [lastScan, setLastScan] = useState<ATSScan | null>(null);
@@ -314,29 +315,17 @@ function DashboardContent() {
     const paymentStatus = searchParams.get("payment");
     const subscriptionStatus = searchParams.get("subscription");
     if (paymentStatus === "success") {
-      setMessage({ text: "Payment successful! Your credits are being added to your account.", type: "success" });
+      showToast({ variant: "success", title: "Payment successful", body: "Your credits are being added to your account." });
       const newUrl = window.location.pathname;
       window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
     } else if (paymentStatus === "cancelled") {
-      setMessage({ text: "Payment was cancelled.", type: "error" });
+      showToast({ variant: "error", title: "Payment cancelled", body: "You can try again from the credits page." });
     } else if (subscriptionStatus === "success") {
-      setMessage({
-        text: "Subscription updated. Your plan may take a moment to refresh — sign out and back in if needed.",
-        type: "success",
-      });
+      showToast({ variant: "success", title: "Subscription updated", body: "Your plan may take a moment to refresh — sign out and back in if needed." });
       const newUrl = window.location.pathname;
       window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, "", newUrl);
     }
-  }, [status, router, searchParams]);
-
-  useEffect(() => {
-    if (!message) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setMessage(null), 5000);
-    return () => window.clearTimeout(timeout);
-  }, [message]);
+  }, [status, router, searchParams, showToast]);
 
   useEffect(() => {
     try {
@@ -451,23 +440,6 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.14),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
-      {message && (
-        <div
-          className={`fixed left-4 right-4 top-4 z-50 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl sm:left-auto sm:right-6 sm:w-[32rem] ${
-            message.type === "success"
-              ? "border-emerald-300/[0.26] bg-emerald-300/10 text-emerald-50"
-              : "border-rose-300/[0.26] bg-rose-300/10 text-rose-50"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-2.5 w-2.5 rounded-full bg-current" />
-            <p className="flex-1 font-medium">{message.text}</p>
-            <button onClick={() => setMessage(null)} className="ml-2 text-current/80 transition hover:text-white">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       <nav className="container mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <Link href="/" className="flex items-center gap-3 text-white">

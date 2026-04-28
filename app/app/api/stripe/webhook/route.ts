@@ -46,7 +46,7 @@ async function creditPurchaseFromStripe(params: {
     return false;
   }
 
-  console.log(`Credits applied for ${userId} ref=${referenceId} (+${credits})`);
+  console.info(`Credits applied for ${userId} ref=${referenceId} (+${credits})`);
 
   if (process.env.RESEND_API_KEY && customerEmail) {
     const { data: user } = await (supabase.from("users").select as any)("name").eq("id", userId).single();
@@ -142,7 +142,7 @@ async function handleCheckoutSessionCompleted(
   }
 
   if (session.mode !== "payment") {
-    console.log(`checkout.session.completed mode=${session.mode} — no handler`);
+    console.info(`checkout.session.completed mode=${session.mode} — no handler`);
     return { ok: true };
   }
 
@@ -261,7 +261,7 @@ export async function POST(req: NextRequest) {
       await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
     } else if (event.type === "payment_intent.succeeded") {
       const pi = event.data.object as Stripe.PaymentIntent;
-      console.log(`payment_intent.succeeded ${pi.id} (one-time credits use checkout.session.completed)`);
+      console.info(`payment_intent.succeeded ${pi.id} (one-time credits use checkout.session.completed)`);
     } else if (event.type === "payment_intent.payment_failed") {
       const pi = event.data.object as Stripe.PaymentIntent;
       console.warn("Stripe payment failed:", {
@@ -269,7 +269,7 @@ export async function POST(req: NextRequest) {
         last_error: pi.last_payment_error?.message,
       });
     } else {
-      console.log(`Unhandled event type: ${event.type}`);
+      console.info(`Unhandled event type: ${event.type}`);
     }
   } catch (err: any) {
     console.error(`Webhook error: ${err.message}`);
