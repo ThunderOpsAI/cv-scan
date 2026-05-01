@@ -1,83 +1,60 @@
 import Link from "next/link";
+import { APP_NAME, appTitle, brandWordmark } from "@/lib/branding";
+
+const brand = brandWordmark();
 
 export const metadata = {
-  title: "Privacy Policy | CVScan",
-  description: "How CVScan collects, uses, and protects your personal data.",
+  title: appTitle("Privacy Policy"),
+  description: `How ${APP_NAME} collects, uses, and protects personal data.`,
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+      <nav className="container mx-auto flex items-center justify-between px-4 py-5">
+        <Link href="/" className="text-xl font-semibold tracking-tight text-white">
+          <span className="text-cyan-300">{brand.leading}</span>
+          {brand.trailing}
         </Link>
-        <Link href="/trust" className="text-gray-300 hover:text-white transition-colors">
-          Trust & Security Center
+        <Link href="/trust" className="text-sm text-slate-300 transition-colors hover:text-white">
+          Trust center
         </Link>
       </nav>
 
-      <main className="container mx-auto px-4 py-16 max-w-4xl">
-        <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10 text-gray-300">
-          <h1 className="text-4xl font-bold text-white mb-6">Privacy Policy</h1>
-          <p className="mb-8">Last Updated: March 2026</p>
+      <main className="container mx-auto max-w-4xl px-4 pb-16 pt-10">
+        <div className="rounded-[2rem] border border-white/10 bg-white/6 p-8 text-sm text-slate-300 backdrop-blur md:p-10">
+          <h1 className="text-4xl font-semibold tracking-tight text-white">Privacy Policy</h1>
+          <p className="mt-3 text-slate-500">Last updated: May 2026</p>
 
-          <section className="space-y-6">
+          <section className="mt-8 space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">1. Information We Collect</h2>
-              <p>
-                We collect information that you directly provide to us when you create an account, build your profile, upload your resume, or communicate with us. This includes:
-              </p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Name and email address (via OAuth or email signup).</li>
-                <li>Professional history, skills, education, and career goals.</li>
-                <li>Job application tracking data.</li>
-                <li>Billing information (processed securely via Stripe).</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">2. How We Use Your Data</h2>
-              <p>
-                We use the information we collect to operate, test, and improve CVScan. Specifically to:
-              </p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Provide you with AI-driven resume scoring and tailoring.</li>
-                <li>Generate cover letters and interview prep materials.</li>
-                <li>Process transactions and send related information.</li>
-                <li>Comply with legal obligations.</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">3. Artificial Intelligence & Sub-Processors</h2>
-              <p>
-                CVScan uses third-party AI models (such as Google Gemini) to provide core functionality.
-                When you use our generation tools, your relevant profile data and prompts are sent to these providers to generate the requested content.
-                <strong> Our AI partners are contractually prohibited from using your personal data to train their foundational models.</strong>
+              <h2 className="text-xl font-semibold text-white">1. Information we collect</h2>
+              <p className="mt-2">
+                We collect the account, profile, and workflow information you provide when using {APP_NAME}, including email address, professional background, and application-related content.
               </p>
             </div>
-
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">4. Data Sharing</h2>
-              <p>
-                We do not sell your personal data. We may share your data with third-party vendors, consultants, and service providers who need access to such information to carry out work on our behalf (e.g., Stripe for payment processing, Supabase for hosting).
+              <h2 className="text-xl font-semibold text-white">2. How we use it</h2>
+              <p className="mt-2">
+                We use your data to run scanning, interview practice, application support, billing, and product improvement tied to the service experience.
               </p>
             </div>
-
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">5. Data Retention & Deletion</h2>
-              <p>
-                You own your data. You can delete your account and all associated data at any time through your account settings or by contacting support. 
-                Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.
+              <h2 className="text-xl font-semibold text-white">3. AI processing</h2>
+              <p className="mt-2">
+                Relevant prompts and profile context may be sent to third-party AI providers to generate the requested output. That processing is limited to product functionality.
               </p>
             </div>
-
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">Contact Us</h2>
-              <p>
-                If you have any questions about this Privacy Policy, please contact us at privacy@cvscan.com.
+              <h2 className="text-xl font-semibold text-white">4. Sharing</h2>
+              <p className="mt-2">
+                We do not sell your personal data. We share data only with service providers needed to operate the platform, such as hosting, payments, and AI infrastructure partners.
+              </p>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white">5. Retention and deletion</h2>
+              <p className="mt-2">
+                You retain ownership of your data and can request deletion of your account and stored information according to our operational and legal retention requirements.
               </p>
             </div>
           </section>

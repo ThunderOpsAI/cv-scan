@@ -4,6 +4,9 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { brandWordmark } from "@/lib/branding";
+
+const brand = brandWordmark();
 
 function DashboardContent() {
   const { data: session, status } = useSession();
@@ -56,7 +59,8 @@ function DashboardContent() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+          <span className="text-cyan-300">{brand.leading}</span>
+          {brand.trailing}
         </Link>
         <div className="flex items-center gap-4">
           <div className="text-white">

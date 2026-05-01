@@ -2,230 +2,305 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Message } from "@/types/intelligence";
+import { APP_NAME, brandWordmark } from "@/lib/branding";
 
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+const brand = brandWordmark();
 
 export default function InterviewPracticePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
   const [role, setRole] = useState("Software Engineer");
-  const [company, setCompany] = useState("Google");
-  const [isStarted, setIsStarted] = useState(false);
-  
+  const [company, setCompany] = useState("OpenAI");
+  const [sending, setSending] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(true);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
+    } else if (status === "authenticated") {
+      loadSession();
     }
   }, [status, router]);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const startInterview = async () => {
-    setIsStarted(true);
-    setMessages([{ 
-      id: Date.now().toString(), 
-      role: "assistant", 
-      content: `Hello! I'm the hiring manager at ${company}. Thanks for taking the time to interview for the ${role} position today. To start us off, could you walk me through your background and why you're interested in this role?` 
-    }]);
+  const loadSession = async () => {
+    setLoadingSession(true);
+    try {
+      const res = await fetch("/api/interview/chat");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to load interview session.");
+      }
+
+      if (data.conversation) {
+        setConversationId(data.conversation.id);
+        setMessages(data.messages || []);
+        if (data.config?.role) setRole(data.config.role);
+        if (data.config?.company) setCompany(data.config.company);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoadingSession(false);
+    }
   };
 
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || sending) return;
-
-    if ((session?.user?.credits || 0) < 1) {
-      alert("You need at least 1 credit to send a message.");
-      return;
-    }
-
-    const userMessage = input;
-    setInput("");
+  const startInterview = async () => {
     setSending(true);
-
-    const newMessages: ChatMessage[] = [
-      ...messages,
-      { id: Date.now().toString(), role: "user", content: userMessage }
-    ];
-    
-    setMessages(newMessages);
+    setError("");
 
     try {
       const res = await fetch("/api/interview/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages,
+          start: true,
           role,
-          company
+          company,
         }),
       });
 
       const data = await res.json();
 
-      if (data.error) {
-        alert(data.error);
-        return;
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to start interview.");
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { id: (Date.now() + 1).toString(), role: "assistant", content: data.response }
-      ]);
-      
-      router.refresh(); // refresh credits in header
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      setConversationId(data.conversation.id);
+      setMessages(data.messages || []);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setSending(false);
     }
   };
 
-  if (status === "loading") {
+  const sendMessage = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!input.trim() || sending || !conversationId) {
+      return;
+    }
+
+    const userContent = input.trim();
+    const optimisticMessage: Message = {
+      id: `${Date.now()}`,
+      conversation_id: conversationId,
+      role: "user",
+      content: userContent,
+      created_at: new Date().toISOString(),
+    };
+
+    setInput("");
+    setSending(true);
+    setError("");
+    setMessages((prev) => [...prev, optimisticMessage]);
+
+    try {
+      const res = await fetch("/api/interview/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          content: userContent,
+          role,
+          company,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message.");
+      }
+
+      if (data.assistant_message) {
+        setMessages((prev) => [
+          ...prev.filter((message) => message.id !== optimisticMessage.id),
+          data.user_message,
+          data.assistant_message,
+        ]);
+      }
+
+      router.refresh();
+    } catch (err: any) {
+      setMessages((prev) => prev.filter((message) => message.id !== optimisticMessage.id));
+      setInput(userContent);
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const resetInterview = () => {
+    setConversationId(null);
+    setMessages([]);
+    setInput("");
+    setError("");
+  };
+
+  if (status === "loading" || loadingSession) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+        <div className="text-sm text-slate-200">Loading interview workspace...</div>
       </div>
     );
   }
 
+  if (!session) {
+    return null;
+  }
+
+  const isStarted = Boolean(conversationId);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex flex-col">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+    <div className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+      <nav className="container mx-auto flex items-center justify-between px-4 py-5">
+        <Link href="/dashboard" className="text-xl font-semibold tracking-tight text-white">
+          <span className="text-cyan-300">{brand.leading}</span>
+          {brand.trailing}
         </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/dashboard" className="text-slate-300 transition-colors hover:text-white">
             Dashboard
           </Link>
           <div className="text-white">
-            <span className="text-gray-400">Credits:</span>{" "}
-            <span className="font-bold text-blue-400">{session?.user?.credits || 0}</span>
+            <span className="text-slate-400">Credits:</span>{" "}
+            <span className="font-semibold text-cyan-300">{session.user.credits || 0}</span>
           </div>
         </div>
       </nav>
 
-      <div className="flex-1 container mx-auto px-4 py-8 max-w-4xl flex flex-col h-[calc(100vh-100px)]">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 flex flex-col flex-1 overflow-hidden shadow-2xl">
-          
-          {/* Header */}
-          <div className="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
+      <div className="container mx-auto flex flex-1 px-4 pb-8">
+        <div className="mx-auto flex h-[calc(100vh-7rem)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/6 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+          <div className="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                🎙️ Mock Interview Simulator
-              </h2>
-              {isStarted && <p className="text-sm text-gray-400">Interviewing for: {role} @ {company}</p>}
+              <h1 className="text-xl font-semibold text-white">Mock Interview</h1>
+              <p className="text-sm text-slate-400">
+                Multi-turn practice with saved chat history inside your current {APP_NAME} session.
+              </p>
             </div>
             {isStarted && (
-              <button 
-                onClick={() => {
-                  if(confirm("End current practice session?")) setIsStarted(false);
-                }}
-                className="text-xs bg-red-500/20 text-red-300 hover:bg-red-500/40 px-3 py-1 rounded"
+              <button
+                onClick={resetInterview}
+                className="rounded-full border border-white/15 bg-white/6 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/12"
               >
-                End Session
+                Start new session
               </button>
             )}
           </div>
 
-          {/* Setup / Chat Area */}
           {!isStarted ? (
-            <div className="flex-1 p-8 flex flex-col items-center justify-center text-center">
-              <div className="bg-white/5 p-8 rounded-2xl max-w-md w-full border border-white/10">
-                <h3 className="text-2xl font-bold text-white mb-2">Setup Your Interview</h3>
-                <p className="text-gray-400 mb-6 text-sm">Our AI hiring manager will adapt its questions to your target role and company.</p>
-                
-                <div className="space-y-4 text-left">
+            <div className="flex flex-1 items-center justify-center p-6">
+              <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-slate-950/35 p-6">
+                <h2 className="text-2xl font-semibold text-white">Set up your interview</h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Choose the role and company you want to rehearse for. Your last session will reload automatically
+                  until you start a new one.
+                </p>
+
+                <div className="mt-6 space-y-4">
                   <div>
-                    <label className="block text-gray-300 text-sm font-semibold mb-2">Target Role</label>
-                    <input 
-                      type="text" 
-                      value={role} 
-                      onChange={e => setRole(e.target.value)}
-                      placeholder="e.g. Senior Frontend Engineer"
-                      className="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                    <label className="mb-2 block text-sm font-semibold text-slate-200">Target role</label>
+                    <input
+                      type="text"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      placeholder="Senior Frontend Engineer"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-gray-300 text-sm font-semibold mb-2">Target Company</label>
-                    <input 
-                      type="text" 
-                      value={company} 
-                      onChange={e => setCompany(e.target.value)}
-                      placeholder="e.g. Google, OpenAI, Stripe"
-                      className="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                    <label className="mb-2 block text-sm font-semibold text-slate-200">Target company</label>
+                    <input
+                      type="text"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      placeholder="OpenAI, Stripe, Canva"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
                     />
                   </div>
-                  <button 
-                    onClick={startInterview}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-4 transition-colors"
-                  >
-                    Start Interview
-                  </button>
                 </div>
+
+                {error && <p className="mt-4 text-sm text-rose-300">{error}</p>}
+
+                <button
+                  onClick={startInterview}
+                  disabled={sending}
+                  className="mt-6 w-full rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-cyan-900 disabled:text-slate-300"
+                >
+                  {sending ? "Starting..." : "Start Interview"}
+                </button>
               </div>
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-5 py-4 shadow-md ${
-                        msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-slate-700 text-gray-100 rounded-bl-none border border-white/10"
-                      }`}>
-                      <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+              <div className="border-b border-white/10 px-5 py-3 text-sm text-slate-300">
+                Interviewing for <span className="font-semibold text-white">{role}</span> at{" "}
+                <span className="font-semibold text-white">{company}</span>. 1 credit per candidate reply.
+              </div>
+
+              <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[85%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-md ${
+                        message.role === "user"
+                          ? "rounded-br-md bg-cyan-400 text-slate-950"
+                          : "rounded-bl-md border border-white/10 bg-slate-900/80 text-slate-100"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{message.content}</div>
                     </div>
                   </div>
                 ))}
-                
+
                 {sending && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-700 text-gray-100 rounded-2xl rounded-bl-none px-5 py-4 border border-white/10 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+                    <div className="flex items-center gap-1 rounded-3xl rounded-bl-md border border-white/10 bg-slate-900/80 px-4 py-3">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-cyan-300" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-cyan-300" style={{ animationDelay: "0.12s" }} />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-cyan-300" style={{ animationDelay: "0.24s" }} />
                     </div>
                   </div>
                 )}
+
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={sendMessage} className="p-4 bg-black/20 border-t border-white/10">
+              <form onSubmit={sendMessage} className="border-t border-white/10 px-5 py-4">
                 <div className="flex gap-3">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your answer..."
+                    placeholder="Type your answer or ask for a hint..."
                     disabled={sending}
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    className="flex-1 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none disabled:opacity-60"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || sending}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
+                    className="rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-cyan-900 disabled:text-slate-300"
                   >
-                    Reply
+                    Send
                   </button>
                 </div>
-                <div className="text-center text-xs text-gray-500 mt-2">
-                  1 credit per message. The AI will evaluate your answer and ask the next question.
-                </div>
+                {error && <p className="mt-3 text-sm text-rose-300">{error}</p>}
               </form>
             </>
           )}

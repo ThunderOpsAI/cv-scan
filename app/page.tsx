@@ -1,211 +1,256 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { APP_NAME, APP_DESCRIPTION, SUPPORT_EMAIL, brandWordmark } from "@/lib/branding";
+import { CREDIT_PACKAGES } from "@/lib/pricing";
+
+const brand = brandWordmark();
+
+const testimonials = [
+  {
+    quote: "AICVScan helped me turn vague bullet points into sharp evidence that matched the role in one pass.",
+    name: "Priya K.",
+    role: "Product Analyst",
+  },
+  {
+    quote: "The interview practice felt much more focused than generic chat tools because it kept the role context.",
+    name: "Liam T.",
+    role: "Frontend Engineer",
+  },
+  {
+    quote: "I used the scanner on a screenshot from my phone and had an action plan in under two minutes.",
+    name: "Marta S.",
+    role: "Operations Manager",
+  },
+];
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <div className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+      <nav className="container mx-auto flex items-center justify-between px-4 py-5">
+        <div className="text-xl font-semibold tracking-tight text-white">
+          <span className="text-cyan-300">{brand.leading}</span>
+          {brand.trailing}
         </div>
-        <div className="flex gap-4 items-center">
-          <Link
-            href="/buy-credits"
-            className="text-gray-300 hover:text-white transition-colors"
-          >
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/pricing" className="text-slate-300 transition-colors hover:text-white">
             Pricing
           </Link>
-          {session ? (
-            <Link
-              href="/dashboard"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg shadow-blue-500/20"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/auth/signin"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
-            >
-              Sign In
-            </Link>
-          )}
+          <Link href="/trust" className="text-slate-300 transition-colors hover:text-white">
+            Trust
+          </Link>
+          <Link
+            href={session ? "/dashboard" : "/auth/signin"}
+            className="rounded-full bg-cyan-400 px-4 py-2 font-semibold text-slate-950 transition hover:bg-cyan-300"
+          >
+            {session ? "Open dashboard" : "Sign in"}
+          </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block mb-4 px-4 py-1 bg-blue-500/20 rounded-full text-blue-300 text-sm">
-          AI Career & Application Platform
-        </div>
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-          Supercharge Your Job Search
-          <br />
-          <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            Resume, Cover Letter, Tracking & More
-          </span>
-        </h1>
-        <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-          CVScan is your all-in-one AI platform for job search, resume optimization, cover letter generation, application tracking, interview prep, and more.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/auth/signin"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-blue-500/25"
-          >
-            Try Free - 3 Credits
-          </Link>
-          <Link
-            href="#how-it-works"
-            className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all border border-white/20"
-          >
-            See How It Works
-          </Link>
-        </div>
-        <p className="mt-4 text-gray-400 text-sm">
-          No credit card required. Start improving your career today.
-        </p>
-      </section>
-
-      {/* Before/After Example */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
-            <div className="text-red-400 font-semibold mb-3 flex items-center gap-2">
-              <span className="text-xl">✗</span> Before
-            </div>
-            <p className="text-gray-300 italic">
-              &quot;Responsible for managing team and handling customer issues&quot;
-            </p>
+      <section className="container mx-auto px-4 pb-14 pt-10">
+        <div className="mx-auto max-w-5xl text-center">
+          <div className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+            Resume scanning, tailoring, and interview prep
           </div>
-          <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6">
-            <div className="text-green-400 font-semibold mb-3 flex items-center gap-2">
-              <span className="text-xl">✓</span> After (CVScan)
-            </div>
-            <p className="text-gray-300">
-              &quot;Led cross-functional team of 8, reducing customer complaint resolution time by 40% and improving satisfaction scores from 3.2 to 4.7/5&quot;
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="how-it-works" className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
-          How It Works
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
-              1
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Discover & Track</h3>
-            <p className="text-gray-400">
-              Find relevant jobs, track your applications, and organize your entire job search in one place.
-            </p>
-          </div>
-          <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
-              2
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Score & Tailor</h3>
-            <p className="text-gray-400">
-              Get AI-powered scoring and ATS optimization for your resume, cover letters, and job applications.
-            </p>
-          </div>
-          <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center text-2xl mb-4 text-blue-400">
-              3
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Apply & Land Offers</h3>
-            <p className="text-gray-400">
-              Submit tailored applications with confidence and track your progress toward landing your dream job.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Preview */}
-      <section className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-          Simple, Affordable Pricing
-        </h2>
-        <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-          Pay only for what you use. No subscriptions, no hidden fees.
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {[
-            { name: "Starter Pack", credits: 20, price: "$2.99", desc: "Perfect for trying out" },
-            { name: "Popular Pack", credits: 50, price: "$4.99", desc: "Best value", popular: true },
-            { name: "Pro Pack", credits: 100, price: "$7.99", desc: "Most credits" },
-          ].map((plan) => (
+          <h1 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-tight text-white md:text-5xl">
+            Make each application sharper before it reaches a recruiter.
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-300 md:text-lg">
+            {APP_DESCRIPTION}
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/buy-credits"
-              key={plan.name}
-              className={`block relative bg-white/5 backdrop-blur rounded-2xl p-6 border transition-all hover:scale-105 ${plan.popular ? "border-blue-500 ring-2 ring-blue-500/30" : "border-white/10"
-                }`}
+              href={session ? "/dashboard" : "/auth/signin"}
+              className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
             >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
-                  Most Popular
-                </div>
-              )}
-              <h3 className="text-lg font-semibold text-white mb-1">{plan.name}</h3>
-              <div className="text-3xl font-bold text-white mb-1">{plan.price}</div>
-              <div className="text-blue-400 mb-4">{plan.credits} credits</div>
-              <p className="text-gray-400 text-sm">{plan.desc}</p>
+              Start with 3 free credits
             </Link>
+            <Link
+              href="#before-after"
+              className="rounded-full border border-white/15 bg-white/6 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
+            >
+              See the transformation
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16" id="before-after">
+        <div className="mx-auto max-w-4xl rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur md:p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-white">Before & After</h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-400">
+              Turn generic, low-signal resume content into role-aligned proof that reads like a stronger candidate.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-rose-400/20 bg-rose-400/8 p-5">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-rose-200">Before</div>
+              <p className="text-sm leading-7 text-slate-200">
+                Responsible for customer issues, worked with teams, updated reports, and helped improve service levels.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/8 p-5">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">After with {APP_NAME}</div>
+              <p className="text-sm leading-7 text-slate-100">
+                Partnered with support and operations teams to redesign escalation workflows, cutting response times by
+                38%, reducing repeat tickets by 22%, and improving CSAT from 84% to 92%.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16">
+        <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+          {[
+            {
+              title: "Capture or paste a job description",
+              body: "Use text, screenshots, or camera capture to bring the target role into the scanner quickly.",
+            },
+            {
+              title: "See where your profile is weak",
+              body: "Get keyword coverage, section-level scoring, and next-step recommendations that are easy to act on.",
+            },
+            {
+              title: "Practice the interview flow",
+              body: "Run a saved multi-turn mock interview so your prep keeps context instead of restarting each time.",
+            },
+          ].map((item, index) => (
+            <div key={item.title} className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">0{index + 1}</div>
+              <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+              <p className="mt-2 text-sm text-slate-400">{item.body}</p>
+            </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <Link
-            href="/buy-credits"
-            className="text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            View all packages →
-          </Link>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16" id="pricing">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold text-white">Pricing</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-400">
+              Static, pay-as-you-go pricing. No subscription pressure, just credits when you need them.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {CREDIT_PACKAGES.map((plan) => (
+              <Link
+                href="/pricing"
+                key={plan.id}
+                className={`rounded-3xl border p-5 backdrop-blur transition-colors ${
+                  plan.popular
+                    ? "border-cyan-400/30 bg-cyan-400/10"
+                    : "border-white/10 bg-white/6 hover:bg-white/8"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
+                    <p className="mt-2 text-sm text-slate-400">{plan.description}</p>
+                  </div>
+                  {plan.popular && (
+                    <span className="rounded-full bg-cyan-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-950">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <div className="mt-5 text-3xl font-semibold text-white">${plan.price.toFixed(2)}</div>
+                <div className="mt-1 text-sm text-cyan-200">{plan.credits} credits</div>
+                {plan.offerLabel && (
+                  <div className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs font-medium text-amber-100">
+                    {plan.offerLabel}
+                  </div>
+                )}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-12 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Upgrade Your Resume?
-          </h2>
-          <p className="text-blue-100 mb-8 max-w-xl mx-auto">
-            Join thousands of job seekers who have landed interviews with CVScan-powered resumes.
+      <section className="container mx-auto px-4 pb-16">
+        <div className="mx-auto max-w-5xl rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-white">Trust built into the workflow</h2>
+              <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                Minimal data collection, clear human review expectations, and secure login via time-limited magic links.
+              </p>
+            </div>
+            <Link href="/trust" className="text-sm font-semibold text-cyan-200 transition hover:text-cyan-100">
+              Read trust details
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {[
+              "Magic-link authentication only",
+              "Your resume and application edits stay under your control",
+              "AI output is positioned as guidance, not blind automation",
+            ].map((item) => (
+              <div key={item} className="rounded-3xl border border-white/10 bg-slate-950/35 p-4 text-sm text-slate-300">
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold text-white">What Customers Say</h2>
+              <p className="mt-2 text-sm text-slate-400">Early feedback focused on speed, clarity, and better interview confidence.</p>
+            </div>
+            <Link href="/testimonials" className="text-sm font-semibold text-cyan-200 transition hover:text-cyan-100">
+              View all testimonials
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {testimonials.map((item) => (
+              <div key={item.name} className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
+                <p className="text-sm leading-7 text-slate-200">“{item.quote}”</p>
+                <div className="mt-4 text-sm font-semibold text-white">{item.name}</div>
+                <div className="text-xs text-slate-500">{item.role}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pb-12">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-slate-950/35 px-5 py-5 text-center">
+          <h2 className="text-xl font-semibold text-white">Move faster on your next application</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Start free, keep the parts that help, and buy credits only when the workflow earns it.
           </p>
           <Link
-            href="/auth/signin"
-            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-all"
+            href={session ? "/dashboard" : "/auth/signin"}
+            className="mt-4 inline-flex rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
-            Get Started Free
+            Open {APP_NAME}
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 border-t border-white/10">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-gray-400">
-            © 2026 CVScan. All rights reserved.
-          </div>
-          <div className="flex gap-6">
-            <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/buy-credits" className="text-gray-400 hover:text-white transition-colors">
-              Pricing
-            </Link>
-            <a href="mailto:support@cv-scan.com" className="text-gray-400 hover:text-white transition-colors">
-              Support
-            </a>
-          </div>
+      <footer className="container mx-auto flex flex-col items-center justify-between gap-4 border-t border-white/10 px-4 py-6 text-sm text-slate-400 md:flex-row">
+        <div>© 2026 {APP_NAME}. All rights reserved.</div>
+        <div className="flex items-center gap-5">
+          <Link href="/pricing" className="transition-colors hover:text-white">
+            Pricing
+          </Link>
+          <Link href="/testimonials" className="transition-colors hover:text-white">
+            Testimonials
+          </Link>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="transition-colors hover:text-white">
+            Support
+          </a>
         </div>
       </footer>
     </main>

@@ -1,32 +1,26 @@
 import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
+import { APP_NAME } from "@/lib/branding";
 
 export const authOptions: NextAuthOptions = {
-  // Custom adapter using public schema (no next_auth schema needed)
   adapter: CustomSupabaseAdapter() as any,
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-    }),
     EmailProvider({
-      server: {}, // Not used — sendVerificationRequest overrides
+      server: {},
       from: process.env.EMAIL_FROM || "noreply@example.com",
-      sendVerificationRequest: async ({ identifier, url, provider }) => {
+      maxAge: 10 * 60,
+      sendVerificationRequest: async ({ identifier, url }) => {
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY!);
-
         const { host } = new URL(url);
 
         try {
           await resend.emails.send({
-            from: process.env.EMAIL_FROM || "CVScan <onboarding@resend.dev>",
+            from: process.env.EMAIL_FROM || `${APP_NAME} <onboarding@resend.dev>`,
             to: identifier,
-            subject: `Sign in to ${host}`,
+            subject: `Your ${APP_NAME} sign-in link`,
             text: text({ url, host }),
             html: html({ url, host }),
           });
@@ -38,30 +32,23 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-
   session: {
     strategy: "jwt",
   },
-
   callbacks: {
-    // The adapter creates users in public.users.
-    // No manual sync needed anymore.
     async signIn({ user }) {
       return !!user.email;
     },
-
     async jwt({ token, user }) {
       if (user) {
         token.email = user.email;
       }
       return token;
     },
-
     async session({ session, token }) {
       if (session.user && token.email) {
         session.user.id = token.sub || "";
@@ -82,46 +69,36 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-function html(params: { url: string; host: string }) {
-  const { url, host } = params;
+function html({ url, host }: { url: string; host: string }) {
   const escapedHost = host.replace(/\./g, "&#8203;.");
 
-  const brandColor = "#667eea";
-  const color = {
-    background: "#f9f9f9",
-    text: "#444",
-    mainBackground: "#fff",
-    buttonBackground: brandColor,
-    buttonBorder: brandColor,
-    buttonText: "#fff",
-  };
-
   return `
-<body style="background: ${color.background};">
-  <table width="100%" border="0" cellspacing="20" cellpadding="0"
-    style="background: ${color.mainBackground}; max-width: 600px; margin: auto; border-radius: 10px;">
+<body style="background:#f4f8fb;margin:0;padding:24px 0;font-family:Arial,sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
-      <td align="center"
-        style="padding: 10px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        Sign in to <strong>${escapedHost}</strong>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding: 20px 0;">
-        <table border="0" cellspacing="0" cellpadding="0">
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px;background:#07111f;border-radius:18px;overflow:hidden;">
           <tr>
-            <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><a href="${url}"
-                target="_blank"
-                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Sign
-                in</a></td>
+            <td style="padding:32px 32px 12px 32px;text-align:center;">
+              <div style="font-size:24px;font-weight:700;color:#ffffff;">${APP_NAME}</div>
+              <p style="margin:12px 0 0 0;color:#cbd5e1;font-size:15px;line-height:24px;">
+                Use the secure button below to sign in to <strong>${escapedHost}</strong>.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px;text-align:center;">
+              <a href="${url}" target="_blank" style="display:inline-block;border-radius:999px;background:#67e8f9;color:#082f49;padding:14px 24px;font-size:15px;font-weight:700;text-decoration:none;">
+                Sign in to ${APP_NAME}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 32px 32px;color:#94a3b8;font-size:13px;line-height:22px;text-align:center;">
+              This link expires in 10 minutes. If you did not request it, you can ignore this email.
+            </td>
           </tr>
         </table>
-      </td>
-    </tr>
-    <tr>
-      <td align="center"
-        style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        If you did not request this email, you can safely ignore it.
       </td>
     </tr>
   </table>
@@ -130,5 +107,5 @@ function html(params: { url: string; host: string }) {
 }
 
 function text({ url, host }: { url: string; host: string }) {
-  return `Sign in to ${host}\n${url}\n\n`;
+  return `Sign in to ${APP_NAME} on ${host}\n${url}\n\nThis link expires in 10 minutes.`;
 }

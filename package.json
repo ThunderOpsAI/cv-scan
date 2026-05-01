@@ -1,7 +1,7 @@
 {
-  "name": "cvscan",
+  "name": "aicvscan",
   "version": "0.1.0",
-  "description": "AI Resume & Career Coach - Score, Tailor, and Land Your Dream Job",
+  "description": "AICVScan - AI resume review, ATS scanning, and interview prep",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -2,32 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Stripe from "stripe";
+import { CREDIT_PACKAGE_MAP } from "@/lib/pricing";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20" as any,
 });
-
-// Credit packages
-const CREDIT_PACKAGES = {
-  starter: {
-    credits: 20,
-    price: 299, // $2.99 AUD
-    name: "Starter Pack",
-    description: "20 credits for resume bullets and cover letters",
-  },
-  popular: {
-    credits: 50,
-    price: 499, // $4.99 AUD
-    name: "Popular Pack",
-    description: "50 credits - Best value!",
-  },
-  pro: {
-    credits: 100,
-    price: 799, // $7.99 AUD
-    name: "Pro Pack",
-    description: "100 credits for power users",
-  },
-};
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,11 +19,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { packageType } = body;
 
-    if (!packageType || !CREDIT_PACKAGES[packageType as keyof typeof CREDIT_PACKAGES]) {
+    if (!packageType || !CREDIT_PACKAGE_MAP[packageType as keyof typeof CREDIT_PACKAGE_MAP]) {
       return NextResponse.json({ error: "Invalid package type" }, { status: 400 });
     }
 
-    const pkg = CREDIT_PACKAGES[packageType as keyof typeof CREDIT_PACKAGES];
+    const pkg = CREDIT_PACKAGE_MAP[packageType as keyof typeof CREDIT_PACKAGE_MAP];
 
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -58,7 +37,7 @@ export async function POST(req: NextRequest) {
               name: pkg.name,
               description: pkg.description,
             },
-            unit_amount: pkg.price,
+            unit_amount: pkg.priceInCents,
           },
           quantity: 1,
         },
@@ -83,6 +62,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// Export credit packages for use in UI
-export { CREDIT_PACKAGES };

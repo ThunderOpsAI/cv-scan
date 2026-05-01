@@ -1,43 +1,40 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/branding";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CVScan – AI Job Search Assistant",
-  description:
-    "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
   keywords: [
-    "resume",
-    "bullet points",
+    "resume scanner",
+    "AI resume review",
     "cover letter",
-    "AI",
     "job search",
     "ATS",
-    "job applications",
+    "interview prep",
     "career assistant",
   ],
   openGraph: {
-    title: "CVScan – AI Job Search Assistant",
-    description:
-      "CVScan is the AI-powered job search assistant that helps candidates score, tailor, and track every application — from discovery to offer.",
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
     type: "website",
   },
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={manrope.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
-
