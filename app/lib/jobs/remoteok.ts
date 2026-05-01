@@ -7,7 +7,7 @@ export async function searchRemoteOk(params: { keywords?: string }) {
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "CVScan-Job-Aggregator/1.0",
+        "User-Agent": "AICVScan-Job-Aggregator/1.0",
       },
     });
 

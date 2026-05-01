@@ -1,103 +1,55 @@
 import Link from "next/link";
+import { appTitle, APP_NAME, brandWordmark } from "@/lib/branding";
+
+const brand = brandWordmark();
 
 export const metadata = {
-  title: "Trust & Security | CVScan",
-  description: "Learn how CVScan handles your data, our privacy commitments, and our approach to AI.",
+  title: appTitle("Trust & Security"),
+  description: `How ${APP_NAME} handles data, access, and AI output.`,
 };
 
 export default function TrustPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+      <nav className="container mx-auto flex items-center justify-between px-4 py-5">
+        <Link href="/" className="text-xl font-semibold tracking-tight text-white">
+          <span className="text-cyan-300">{brand.leading}</span>
+          {brand.trailing}
         </Link>
-        <Link
-          href="/"
-          className="text-gray-300 hover:text-white transition-colors"
-        >
-          Back to Home
+        <Link href="/auth/signin" className="text-sm text-slate-300 transition-colors hover:text-white">
+          Sign in
         </Link>
       </nav>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-          Trust & Security
-        </h1>
-        <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          We believe your career data is yours. Here is how we protect your privacy,
-          secure your information, and navigate AI responsibly.
+      <section className="container mx-auto px-4 pb-12 pt-10 text-center">
+        <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">Trust & Security</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-300 md:text-base">
+          A clean summary of how {APP_NAME} protects access, frames AI assistance, and keeps candidate data under user control.
         </p>
       </section>
 
-      {/* Content Sections */}
-      <section className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="space-y-12">
-          {/* Data Privacy */}
-          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
-            <div className="text-3xl mb-4 text-blue-400">🔒 Data Privacy & Ownership</div>
-            <h2 className="text-2xl font-semibold text-white mb-4">Your Data is Yours</h2>
-            <ul className="space-y-4 text-gray-300">
-              <li className="flex items-start">
-                <span className="text-green-400 mr-3">✓</span>
-                <p><strong>Storage & Security:</strong> We use industry-standard encryption and SOC2-compliant infrastructure to store your profile, experiences, and applications.</p>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-3">✓</span>
-                <p><strong>No Third-Party Selling:</strong> We never sell your personal data or resume information to recruiters, advertisers, or third parties.</p>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-3">✓</span>
-                <p><strong>Data Deletion:</strong> You have the right to request the complete deletion of your account and all associated data at any time.</p>
-              </li>
-            </ul>
-          </div>
-
-          {/* AI Limitations */}
-          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
-            <div className="text-3xl mb-4 text-blue-400">🤖 AI Transparency</div>
-            <h2 className="text-2xl font-semibold text-white mb-4">Assisted, Not Automated</h2>
-            <ul className="space-y-4 text-gray-300">
-              <li className="flex items-start">
-                <span className="text-blue-400 mt-1 mr-3">•</span>
-                <p><strong>Human-in-the-Loop Concept:</strong> CVScan generates drafts formatting your achievements. We strongly recommend that you read, review, and edit all AI-generated content before pasting it into your resume or submitting an application.</p>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-400 mt-1 mr-3">•</span>
-                <p><strong>Grounded Generation:</strong> Resume bullets and cover letters must cite approved Career Memory facts. Unsupported job requirements are shown as gaps rather than rewritten as experience.</p>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-400 mt-1 mr-3">•</span>
-                <p><strong>Hallucination Risk:</strong> While we use leading enterprise-grade models (Google Gemini) instructed not to fabricate information, AI can still hallucinate. You are responsible for the final accuracy of your applications.</p>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-400 mt-1 mr-3">•</span>
-                <p><strong>Data Processing:</strong> Your prompts and profile elements are processed by our AI partners strictly to provide you with the generated text. They are not used to train global AI models.</p>
-              </li>
-            </ul>
-          </div>
-
-          {/* Compliance */}
-          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
-            <div className="text-3xl mb-4 text-blue-400">✅ Compliance</div>
-            <h2 className="text-2xl font-semibold text-white mb-4">Meeting Standards</h2>
-            <p className="text-gray-300 mb-4">
-              We are actively rolling out our formal Terms of Service and comprehensive Privacy Policy. 
-              In the meantime, these Trust & Security principles govern our handling of your candidate data.
+      <section className="container mx-auto px-4 pb-16">
+        <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <h2 className="text-lg font-semibold text-white">Secure access</h2>
+            <p className="mt-3 text-sm text-slate-300">
+              Authentication is handled with time-limited magic links only. No password storage and no social login sprawl.
             </p>
-            <p className="text-gray-300">
-              We aim for fully transparent data handling that respects candidate agency. If you have any compliance questions or data requests, please contact our support team.
+          </div>
+          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <h2 className="text-lg font-semibold text-white">Human review expected</h2>
+            <p className="mt-3 text-sm text-slate-300">
+              AI output accelerates drafting and preparation, but you should still review every resume, cover letter, and answer.
+            </p>
+          </div>
+          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <h2 className="text-lg font-semibold text-white">Data stays contextual</h2>
+            <p className="mt-3 text-sm text-slate-300">
+              We use the information you provide to power scanning, generation, and coaching workflows inside the product.
             </p>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 border-t border-white/10 mt-12 text-center text-gray-400">
-        <p>© 2026 CVScan. All rights reserved.</p>
-      </footer>
     </main>
   );
 }

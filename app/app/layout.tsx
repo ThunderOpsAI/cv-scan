@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/branding";
 
 const outfit = Outfit({
   display: "swap",
@@ -17,9 +18,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CVScan | Premium AI Career Workflow",
-  description:
-    "CVScan helps candidates score, tailor, and track every application with a premium AI workflow built for high-stakes job search.",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
   keywords: [
     "resume",
     "bullet points",
@@ -31,9 +31,8 @@ export const metadata: Metadata = {
     "career assistant",
   ],
   openGraph: {
-    title: "CVScan | Premium AI Career Workflow",
-    description:
-      "CVScan helps candidates score, tailor, and track every application with a premium AI workflow built for high-stakes job search.",
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
     type: "website",
   },
 };

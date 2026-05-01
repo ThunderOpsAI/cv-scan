@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { APP_NAME } from "@/lib/branding";
 
 function getResendClient() {
   if (!process.env.RESEND_API_KEY) {
@@ -11,9 +12,9 @@ function getResendClient() {
 export async function sendWelcomeEmail(to: string, name: string) {
   try {
     await getResendClient().emails.send({
-      from: "CVScan <onboarding@cv-scan.com>",
+      from: `${APP_NAME} <onboarding@cv-scan.com>`,
       to: [to],
-      subject: "Welcome to CVScan! 🎉",
+      subject: `Welcome to ${APP_NAME}!`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -23,7 +24,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
           </head>
           <body style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to CVScan!</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to ${APP_NAME}!</h1>
             </div>
 
             <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
@@ -58,7 +59,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
               </p>
 
               <p style="font-size: 14px; color: #6b7280; margin: 10px 0 0 0;">
-                - The CVScan Team
+                - The ${APP_NAME} Team
               </p>
             </div>
           </body>
@@ -81,7 +82,7 @@ export async function sendPaymentReceiptEmail(
 ) {
   try {
     await getResendClient().emails.send({
-      from: "CVScan <billing@cv-scan.com>",
+      from: `${APP_NAME} <billing@cv-scan.com>`,
       to: [to],
       subject: "Payment Confirmed - Credits Added! ✅",
       html: `
@@ -132,7 +133,7 @@ export async function sendPaymentReceiptEmail(
               </p>
 
               <p style="font-size: 14px; color: #6b7280; margin: 10px 0 0 0;">
-                - The CVScan Team
+                - The ${APP_NAME} Team
               </p>
             </div>
           </body>
@@ -150,7 +151,7 @@ export async function sendPaymentReceiptEmail(
 export async function sendLowCreditsEmail(to: string, name: string, creditsRemaining: number) {
   try {
     await getResendClient().emails.send({
-      from: "CVScan <notify@cv-scan.com>",
+      from: `${APP_NAME} <notify@cv-scan.com>`,
       to: [to],
       subject: "Running Low on Credits",
       html: `
@@ -184,7 +185,7 @@ export async function sendLowCreditsEmail(to: string, name: string, creditsRemai
               </div>
 
               <p style="font-size: 14px; color: #6b7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                - The CVScan Team
+                - The ${APP_NAME} Team
               </p>
             </div>
           </body>

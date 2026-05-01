@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy | CVScan",
-  description: "How CVScan collects, uses, and protects your personal data.",
+  title: "Privacy Policy | AICVScan",
+  description: "How AICVScan collects, uses, and protects your personal data.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Professional history, skills, education, and career goals.</li>
-                <li>Account sign-in identifiers and authentication events handled via magic-link email and optional Google OAuth.</li>
+                <li>Account sign-in identifiers and authentication events handled via magic-link email.</li>
                 <li>Approved Career Memory facts and generated application drafts.</li>
                 <li>Job application tracking data.</li>
                 <li>Payment and entitlement data processed securely by Stripe or Google Play Billing services.</li>

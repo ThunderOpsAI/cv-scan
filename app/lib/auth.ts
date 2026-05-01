@@ -1,18 +1,17 @@
 import type { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
 import { buildConsentFields } from "@/lib/auth/consent";
 import {
   hasEmailAuthEnv,
-  hasGoogleAuthEnv,
   hasSupabaseServerEnv,
   nextAuthSecret,
   sessionTokenCookieName,
   useSecureCookies,
 } from "@/lib/auth/env";
 import { normalizePlanTier } from "@/lib/billing/plan-tier";
+import { APP_NAME } from "@/lib/branding";
 
 export { isAuthConfigured } from "@/lib/auth/env";
 
@@ -33,16 +32,6 @@ const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;
 
 const providers: NextAuthOptions["providers"] = [];
 
-if (hasGoogleAuthEnv) {
-  providers.push(
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-    })
-  );
-}
-
 if (hasEmailAuthEnv) {
   providers.push(
     {
@@ -60,9 +49,9 @@ if (hasEmailAuthEnv) {
 
         try {
           await resend.emails.send({
-            from: process.env.EMAIL_FROM || "CVScan <onboarding@resend.dev>",
+            from: process.env.EMAIL_FROM || `${APP_NAME} <onboarding@resend.dev>`,
             to: identifier,
-            subject: `Sign in to ${host}`,
+            subject: `Your ${APP_NAME} sign-in link`,
             text: text({ url, host }),
             html: html({ url, host }),
           });
@@ -202,7 +191,7 @@ function html(params: { url: string; host: string }) {
     <tr>
       <td align="center"
         style="padding: 10px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        Sign in to <strong>${escapedHost}</strong>
+        Sign in to <strong>${APP_NAME}</strong>
       </td>
     </tr>
     <tr>
@@ -211,8 +200,7 @@ function html(params: { url: string; host: string }) {
           <tr>
             <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><a href="${url}"
                 target="_blank"
-                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Sign
-                in</a></td>
+                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Sign in</a></td>
           </tr>
         </table>
       </td>
@@ -220,7 +208,7 @@ function html(params: { url: string; host: string }) {
     <tr>
       <td align="center"
         style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        If you did not request this email, you can safely ignore it.
+        Open this secure magic link to continue on ${escapedHost}. If you did not request it, you can safely ignore this email.
       </td>
     </tr>
   </table>
@@ -229,5 +217,5 @@ function html(params: { url: string; host: string }) {
 }
 
 function text({ url, host }: { url: string; host: string }) {
-  return `Sign in to ${host}\n${url}\n\n`;
+  return `Sign in to ${APP_NAME} on ${host}\n${url}\n\n`;
 }

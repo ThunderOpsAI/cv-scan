@@ -9,35 +9,27 @@ function AuthErrorContent() {
   const error = searchParams.get("error");
 
   const errorMessages: Record<string, string> = {
-    Configuration: "Sign-in is not configured correctly. Please try again later.",
-    AccessDenied: "Access was denied. Use the same email or provider you signed up with.",
-    Verification: "That sign-in link has expired or has already been used.",
-    OAuthSignin: "Google sign-in could not start.",
-    OAuthCallback: "Google did not finish signing you in.",
-    OAuthCreateAccount: "We could not create an account from Google.",
-    EmailCreateAccount: "We could not create an account from that email link.",
-    EmailSignin: "We could not send the sign-in email.",
-    OAuthAccountNotLinked: "This email is already linked to another sign-in method.",
-    SessionRequired: "Your session expired or this page requires sign-in.",
-    Callback: "The sign-in flow could not be completed.",
-    Default: "Sign-in failed.",
+    Configuration: "There is a problem with the authentication configuration.",
+    AccessDenied: "You do not have permission to sign in.",
+    Verification: "That magic link has expired or has already been used.",
+    Default: "We couldn't complete sign-in. Please request a fresh magic link.",
   };
 
-  const errorMessage = errorMessages[error || "Default"] || errorMessages.Default;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">Authentication Error</h1>
-        <p className="text-gray-300 mb-3">{errorMessage}</p>
-        <p className="text-gray-400 mb-8 text-sm">
-          Request a new magic link or try another configured sign-in method.
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)] px-4">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/6 p-7 text-center shadow-2xl shadow-cyan-950/20 backdrop-blur">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+          !
+        </div>
+        <h1 className="text-2xl font-semibold text-white">Authentication error</h1>
+        <p className="mt-3 text-sm text-slate-300">
+          {errorMessages[error || "Default"] || errorMessages.Default}
         </p>
         <Link
           href="/auth/signin"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all"
+          className="mt-6 inline-flex rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
         >
-          Try Again
+          Request a new link
         </Link>
       </div>
     </div>
@@ -46,7 +38,13 @@ function AuthErrorContent() {
 
 export default function AuthError() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+          <div className="text-sm text-slate-200">Loading...</div>
+        </div>
+      }
+    >
       <AuthErrorContent />
     </Suspense>
   );
