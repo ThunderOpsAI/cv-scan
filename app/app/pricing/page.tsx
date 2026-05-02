@@ -59,8 +59,8 @@ export default function PricingPage() {
               <div className="mt-1 text-sm text-cyan-200">{plan.credits} credits</div>
 
               {plan.offerLabel ? (
-                <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs font-medium text-amber-100">
-                  {plan.offerLabel}
+                <div className="mt-5 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[13px] font-medium text-cyan-200">
+                  ✨ {plan.offerLabel}
                 </div>
               ) : null}
 
