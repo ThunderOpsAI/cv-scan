@@ -9,6 +9,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { InsightCard } from "@/components/ui/InsightCard";
 import { useToast } from "@/components/ui/Toast";
+import Image from "next/image";
 import type { ATSScan } from "@/types/job-packs";
 
 type Accent = "amber" | "blue" | "cyan" | "emerald" | "pink" | "violet";
@@ -442,11 +443,9 @@ function DashboardContent() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_90%_10%,rgba(129,140,248,0.14),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
 
       <nav className="container mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <Link href="/" className="flex items-center gap-3 text-white">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.14] bg-white/[0.06] shadow-[0_18px_44px_rgba(2,8,23,0.32)]">
-            <span className="bg-[linear-gradient(135deg,#7dd3fc,#c4b5fd)] bg-clip-text text-lg font-semibold text-transparent">
-              CV
-            </span>
+        <Link href="/" className="flex items-center gap-3 text-white group">
+          <div className="relative h-11 w-11 overflow-hidden rounded-2xl border border-white/[0.14] shadow-[0_18px_44px_rgba(2,8,23,0.32)] transition-transform duration-300 group-hover:scale-105">
+            <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
           </div>
           <div>
             <div className="text-lg font-semibold tracking-[-0.03em]">CVScan</div>

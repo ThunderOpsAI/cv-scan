@@ -4,7 +4,7 @@ export const hasSupabaseServerEnv =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 export const hasGoogleAuthEnv =
   !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
-export const hasEmailAuthEnv = !!process.env.RESEND_API_KEY;
+export const hasEmailAuthEnv = !!process.env.SMTP_HOST;
 export const nextAuthSecret =
   process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV === "production" ? undefined : DEVELOPMENT_NEXTAUTH_SECRET);

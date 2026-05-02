@@ -3,9 +3,8 @@
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { APP_NAME, brandWordmark } from "@/lib/branding";
-
-const brand = brandWordmark();
+import Image from "next/image";
+import { APP_NAME } from "@/lib/branding";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -45,9 +44,11 @@ export default function SignIn() {
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)] px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-block text-3xl font-semibold tracking-tight text-white">
-            <span className="text-cyan-300">{brand.leading}</span>
-            {brand.trailing}
+          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-semibold tracking-tight text-white group">
+            <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-white/[0.14] shadow-[0_18px_44px_rgba(2,8,23,0.32)] transition-transform duration-300 group-hover:scale-105">
+              <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
+            </div>
+            {APP_NAME}
           </Link>
           <p className="mt-3 text-sm text-slate-400">Secure magic-link access only. No passwords to remember.</p>
         </div>

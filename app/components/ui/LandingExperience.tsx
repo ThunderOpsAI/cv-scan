@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { APP_NAME } from "@/lib/branding";
+import Image from "next/image";
 
 type LandingExperienceProps = {
   accountHref: string;
@@ -39,11 +40,9 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
       <nav className="container relative z-10 mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3 text-white">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.14] bg-white/[0.06] shadow-[0_18px_44px_rgba(2,8,23,0.32)]">
-            <span className="bg-[linear-gradient(135deg,#7dd3fc,#c4b5fd)] bg-clip-text text-base font-semibold text-transparent">
-              AI
-            </span>
+        <Link href="/" className="flex items-center gap-3 text-white group">
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/[0.14] shadow-[0_18px_44px_rgba(2,8,23,0.32)] transition-transform duration-300 group-hover:scale-105">
+            <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
           </div>
           <div>
             <div className="text-base font-semibold tracking-[-0.03em]">{APP_NAME}</div>

@@ -42,14 +42,22 @@ if (hasEmailAuthEnv) {
       maxAge: 24 * 60 * 60,
       from: process.env.EMAIL_FROM || "noreply@example.com",
       sendVerificationRequest: async ({ identifier, url }: SendVerificationRequestParams) => {
-        const { Resend } = await import("resend");
-        const resend = new Resend(process.env.RESEND_API_KEY!);
+        const nodemailer = await import("nodemailer");
+        const transport = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || "587"),
+          secure: process.env.SMTP_PORT === "465",
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD,
+          },
+        });
 
         const { host } = new URL(url);
 
         try {
-          await resend.emails.send({
-            from: process.env.EMAIL_FROM || `${APP_NAME} <onboarding@resend.dev>`,
+          await transport.sendMail({
+            from: process.env.EMAIL_FROM || `${APP_NAME} <noreply@${host}>`,
             to: identifier,
             subject: `Your ${APP_NAME} sign-in link`,
             text: text({ url, host }),

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { appTitle, APP_NAME, brandWordmark } from "@/lib/branding";
+import Image from "next/image";
+import { appTitle, APP_NAME } from "@/lib/branding";
 import { CREDIT_PACKAGES } from "@/lib/pricing";
 
-const brand = brandWordmark();
 
 export const metadata = {
   title: appTitle("Pricing"),
@@ -13,9 +13,11 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
       <nav className="container mx-auto flex items-center justify-between px-4 py-5">
-        <Link href="/" className="text-xl font-semibold tracking-tight text-white">
-          <span className="text-cyan-300">{brand.leading}</span>
-          {brand.trailing}
+        <Link href="/" className="flex items-center gap-2 text-xl font-semibold tracking-tight text-white group">
+          <div className="relative h-8 w-8 overflow-hidden rounded-lg border border-white/[0.14] shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
+          </div>
+          {APP_NAME}
         </Link>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/trust" className="text-slate-300 transition-colors hover:text-white">
