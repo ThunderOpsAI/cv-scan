@@ -10,6 +10,7 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
 
@@ -23,6 +24,11 @@ export default function SignIn() {
 
     setLoading(true);
     setError("");
+
+    // Store marketing opt-in preference for the consent callback
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cvscan_marketing_opt_in", marketingOptIn ? "1" : "0");
+    }
 
     const result = await signIn("email", {
       email,
@@ -113,6 +119,18 @@ export default function SignIn() {
                 <span className="text-xs leading-5 text-slate-400">
                   I agree to the <Link href="/terms" className="text-cyan-300 hover:text-cyan-200">Terms</Link> and{" "}
                   <Link href="/privacy" className="text-cyan-300 hover:text-cyan-200">Privacy Policy</Link>.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 rounded-2xl border border-white/8 bg-slate-950/35 p-4">
+                <input
+                  type="checkbox"
+                  checked={marketingOptIn}
+                  onChange={(e) => setMarketingOptIn(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
+                />
+                <span className="text-xs leading-5 text-slate-400">
+                  I&apos;d like to receive product updates, tips, and occasional promotional emails from {APP_NAME}. You can unsubscribe at any time.
                 </span>
               </label>
 

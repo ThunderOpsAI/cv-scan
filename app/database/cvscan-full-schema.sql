@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS users (
   terms_accepted_at TIMESTAMPTZ,
   privacy_accepted_at TIMESTAMPTZ,
   consent_version TEXT DEFAULT '2026-04-12',
+  marketing_opt_in BOOLEAN NOT NULL DEFAULT FALSE,
+  marketing_opt_in_at TIMESTAMPTZ,
   career_path TEXT CHECK (
     career_path IS NULL OR career_path IN (
       'new_grad',
