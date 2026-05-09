@@ -348,38 +348,9 @@ function DashboardContent() {
     }
   }, []);
 
-  if (status === "loading") {
-    return <DashboardLoadingState />;
-  }
-
-  if (!session) {
-    return null;
-  }
-
-  const displayName = getDisplayName(session.user.name, session.user.email);
-  const greeting = getGreeting();
-  const onboardingSteps = [
-    "Career memory imported",
-    "Target role path set",
-    "First scan or fit check run",
-  ];
-  const completedOnboardingSteps = session.user.credits > 0 ? 1 : 0;
-  const onboardingProgress = Math.round((completedOnboardingSteps / onboardingSteps.length) * 100);
-  const profileSignals = [
-    {
-      label: "Credits ready",
-      value: `${session.user.credits}`,
-    },
-    {
-      label: "Plan tier",
-      value: session.user.planTier.charAt(0).toUpperCase() + session.user.planTier.slice(1),
-    },
-    {
-      label: "Next best move",
-      value: session.user.credits < 3 ? "Recharge credits" : "Run a fresh scan",
-    },
-  ];
   const insightCards = useMemo(() => {
+    if (!session) return [];
+    
     const highestMissingKeyword = lastScan?.keyword_matches.missing[0];
     const inferredJobTitle = lastScan?.job_description
       ?.split("\n")
@@ -411,7 +382,7 @@ function DashboardContent() {
         id: "profile-completion",
         accent: "cyan" as const,
         title: `Your profile is ${profileCompletion}% complete`,
-        body: "The stronger your approved profile, the sharper every scan, fit analysis, and tailored draft becomes.",
+        body: "The stronger your approved profile, the sharper every scan, fit analysis, and tailored drafts becomes.",
         href: "/dashboard/profile",
         ctaLabel: "Finish profile",
       },
@@ -429,7 +400,39 @@ function DashboardContent() {
       .filter(Boolean)
       .filter((item) => item && !dismissedInsights.includes(item.id))
       .slice(0, 3);
-  }, [dismissedInsights, lastScan, session.user.credits, session.user.name]);
+  }, [dismissedInsights, lastScan, session?.user?.credits, session?.user?.name, session]);
+
+  if (status === "loading") {
+    return <DashboardLoadingState />;
+  }
+
+  if (!session) {
+    return null;
+  }
+
+  const displayName = getDisplayName(session.user.name, session.user.email);
+  const greeting = getGreeting();
+  const onboardingSteps = [
+    "Career memory imported",
+    "Target role path set",
+    "First scan or fit check run",
+  ];
+  const completedOnboardingSteps = session.user.credits > 0 ? 1 : 0;
+  const onboardingProgress = Math.round((completedOnboardingSteps / onboardingSteps.length) * 100);
+  const profileSignals = [
+    {
+      label: "Credits ready",
+      value: `${session.user.credits}`,
+    },
+    {
+      label: "Plan tier",
+      value: session.user.planTier.charAt(0).toUpperCase() + session.user.planTier.slice(1),
+    },
+    {
+      label: "Next best move",
+      value: session.user.credits < 3 ? "Recharge credits" : "Run a fresh scan",
+    },
+  ];
 
   const dismissInsight = (id: string) => {
     const next = [...dismissedInsights, id];
