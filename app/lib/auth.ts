@@ -119,11 +119,11 @@ export const authOptions: NextAuthOptions = {
 
       if (user.id && hasSupabaseServerEnv && !isEmailVerificationRequest) {
         const supabase = createClient();
-        const { error } = await (supabase.from("users").update as any)(buildConsentFields()).eq("id", user.id);
+        const { error } = await supabase.from("users").update(buildConsentFields() as any).eq("id", user.id);
 
         if (error) {
-          console.error("Failed to record auth consent:", error);
-          return false;
+          console.error("Failed to record auth consent (non-fatal):", error);
+          // Do not return false here, so the user can still log in even if the migration hasn't run
         }
       }
 
