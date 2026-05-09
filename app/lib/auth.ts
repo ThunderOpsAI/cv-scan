@@ -119,8 +119,7 @@ export const authOptions: NextAuthOptions = {
 
       if (user.id && hasSupabaseServerEnv && !isEmailVerificationRequest) {
         const supabase = createClient();
-        const updateConsent = supabase.from("users").update as unknown as UserConsentUpdate;
-        const { error } = await updateConsent(buildConsentFields()).eq("id", user.id);
+        const { error } = await (supabase.from("users").update as any)(buildConsentFields()).eq("id", user.id);
 
         if (error) {
           console.error("Failed to record auth consent:", error);
