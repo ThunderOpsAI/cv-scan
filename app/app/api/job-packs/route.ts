@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Deduct credits
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    await deductCredits(supabase as any, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Job pack: ${body.job_title} at ${body.company}`,
@@ -137,6 +137,24 @@ export async function POST(req: NextRequest) {
       } as any)
       .select()
       .single();
+
+    const { error: applicationError } = await supabase
+      .from('applications')
+      .insert({
+        user_id: session.user.id,
+        company: body.company,
+        title: body.job_title,
+        job_description: body.job_description,
+        source: 'other',
+        status: 'saved',
+        priority: 'medium',
+        notes: 'Auto-created from saved Job Pack.',
+        job_pack_id: jobPack.id,
+      } as any);
+
+    if (applicationError) {
+      console.error('Failed to auto-create application tracker entry:', applicationError);
+    }
 
     const response: JobPackResponse = {
       job_pack: jobPack,

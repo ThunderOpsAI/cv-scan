@@ -90,7 +90,7 @@ export default function OnboardingPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-violet-900 to-slate-900 flex items-center justify-center text-white">
+      <div className="min-h-screen bg-[#E0F2F1] flex items-center justify-center text-[#1A237E]">
         Loading…
       </div>
     );
@@ -102,16 +102,16 @@ export default function OnboardingPage() {
 
   if (finished) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-violet-900 to-slate-900 flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-[#E0F2F1] flex flex-col items-center justify-center px-4">
         <div className="max-w-md text-center space-y-6">
-          <h1 className="text-3xl font-bold text-white">You&apos;re set</h1>
-          <p className="text-gray-300">
-            Run <strong className="text-white">Job fit</strong>, then open <strong className="text-white">Tailor</strong>{" "}
+          <h1 className="text-3xl font-bold text-[#1A237E]">You&apos;re set</h1>
+          <p className="text-[#4E5B7A]">
+            Run <strong className="text-[#1A237E]">Job fit</strong>, then open <strong className="text-[#1A237E]">Tailor</strong>{" "}
             to generate grounded bullets and cover letters. Everything stays review-first.
           </p>
           <Link
             href="/dashboard"
-            className="inline-block rounded-lg bg-white px-8 py-3 font-semibold text-slate-900 hover:bg-gray-100"
+            className="inline-block rounded-lg bg-[#26A69A] px-8 py-3 font-semibold text-white shadow-sm transition hover:bg-[#1f8f85]"
           >
             Go to dashboard
           </Link>
@@ -121,38 +121,38 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-violet-900 to-slate-900">
+    <div className="min-h-screen bg-[#E0F2F1]">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-violet-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
-        <Link href="/dashboard" className="text-gray-300 hover:text-white text-sm">
+        <Link href="/dashboard" className="text-[#4E5B7A] hover:text-[#1A237E] text-sm">
           Skip to dashboard
         </Link>
       </nav>
 
       <main className="container mx-auto px-4 py-10 max-w-lg">
         <div className="mb-8">
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-violet-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+          <div className="h-2 bg-[#B2DFDB] rounded-full overflow-hidden">
+            <div className="h-full bg-[#26A69A] transition-all duration-300" style={{ width: `${pct}%` }} />
           </div>
-          <p className="text-gray-500 text-xs mt-2">
+          <p className="text-[#4E5B7A] text-xs mt-2">
             Step {step + 1} of {STEP_COUNT}
           </p>
         </div>
 
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-8 space-y-6">
+        <div className="rounded-2xl border border-black/[0.08] bg-white p-8 space-y-6 shadow-[0_18px_48px_rgba(26,35,126,0.08)]">
           {step === 0 && (
             <>
-              <h1 className="text-2xl font-bold text-white">Welcome</h1>
-              <p className="text-gray-300">
+              <h1 className="text-2xl font-bold text-[#1A237E]">Welcome</h1>
+              <p className="text-[#4E5B7A]">
                 A short setup puts you on the path: career memory → your context → first job fit. You can skip any
                 step.
               </p>
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="w-full rounded-lg bg-violet-600 py-3 font-semibold text-white hover:bg-violet-500"
+                className="w-full rounded-lg bg-[#26A69A] py-3 font-semibold text-white transition hover:bg-[#1f8f85]"
               >
                 Continue
               </button>
@@ -161,20 +161,26 @@ export default function OnboardingPage() {
 
           {step === 1 && (
             <>
-              <h1 className="text-2xl font-bold text-white">Career memory</h1>
-              <p className="text-gray-300">
+              <h1 className="text-2xl font-bold text-[#1A237E]">Career memory</h1>
+              <p className="text-[#4E5B7A]">
                 Import a resume and approve facts. Tailoring and fit only use what you approve.
               </p>
               <Link
+                href="/dashboard/scanner"
+                className="block text-center rounded-lg border border-[#26A69A]/30 bg-[#26A69A]/10 py-3 font-semibold text-[#1A237E] transition hover:bg-[#26A69A]/15"
+              >
+                Scan resume
+              </Link>
+              <Link
                 href="/dashboard/profile/facts"
-                className="block text-center rounded-lg bg-violet-600 py-3 font-semibold text-white hover:bg-violet-500"
+                className="block text-center rounded-lg bg-[#26A69A] py-3 font-semibold text-white transition hover:bg-[#1f8f85]"
               >
                 Open Career Memory
               </Link>
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="w-full rounded-lg bg-white/10 py-3 font-semibold text-white hover:bg-white/20"
+                className="w-full rounded-lg border border-black/[0.08] bg-[#F7FAFA] py-3 font-semibold text-[#1A237E] transition hover:bg-[#EEF7F6]"
               >
                 Next
               </button>
@@ -183,17 +189,17 @@ export default function OnboardingPage() {
 
           {step === 2 && (
             <>
-              <h1 className="text-2xl font-bold text-white">Your path</h1>
-              <p className="text-gray-300 text-sm">Stored on your account for future prompt tuning.</p>
-              {msg && <p className="text-amber-200 text-sm">{msg}</p>}
+              <h1 className="text-2xl font-bold text-[#1A237E]">Your path</h1>
+              <p className="text-[#4E5B7A] text-sm">Stored on your account for future prompt tuning.</p>
+              {msg && <p className="text-amber-700 text-sm">{msg}</p>}
               <div className="space-y-2">
                 {PATHS.map((p) => (
                   <label
                     key={p.id}
                     className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer ${
                       careerPath === p.id
-                        ? "border-violet-500 bg-violet-500/20"
-                        : "border-white/20 bg-white/5"
+                        ? "border-[#26A69A] bg-[#26A69A]/10"
+                        : "border-black/[0.08] bg-[#F7FAFA]"
                     }`}
                   >
                     <input
@@ -201,9 +207,9 @@ export default function OnboardingPage() {
                       name="path"
                       checked={careerPath === p.id}
                       onChange={() => setCareerPath(p.id)}
-                      className="accent-violet-500"
+                      className="accent-[#26A69A]"
                     />
-                    <span className="text-gray-100">{p.label}</span>
+                    <span className="text-[#1A237E]">{p.label}</span>
                   </label>
                 ))}
               </div>
@@ -211,14 +217,14 @@ export default function OnboardingPage() {
                 type="button"
                 disabled={saving}
                 onClick={savePath}
-                className="w-full rounded-lg bg-violet-600 py-3 font-semibold text-white hover:bg-violet-500 disabled:opacity-50"
+                className="w-full rounded-lg bg-[#26A69A] py-3 font-semibold text-white transition hover:bg-[#1f8f85] disabled:opacity-50"
               >
                 {saving ? "Saving…" : "Save and continue"}
               </button>
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="w-full text-sm text-gray-400 hover:text-white"
+                className="w-full text-sm text-[#4E5B7A] hover:text-[#1A237E]"
               >
                 Skip
               </button>
@@ -227,18 +233,18 @@ export default function OnboardingPage() {
 
           {step === 3 && (
             <>
-              <h1 className="text-2xl font-bold text-white">First job fit</h1>
-              <p className="text-gray-300">Paste a real job description to get apply / stretch / skip.</p>
+              <h1 className="text-2xl font-bold text-[#1A237E]">First job fit</h1>
+              <p className="text-[#4E5B7A]">Paste a real job description to get apply / stretch / skip.</p>
               <Link
                 href="/dashboard/job-fit"
-                className="block text-center rounded-lg bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-500"
+                className="block text-center rounded-lg bg-[#26A69A] py-3 font-semibold text-white transition hover:bg-[#1f8f85]"
               >
                 Open Job fit
               </Link>
               <button
                 type="button"
                 onClick={() => setStep(4)}
-                className="w-full rounded-lg bg-white/10 py-3 font-semibold text-white hover:bg-white/20"
+                className="w-full rounded-lg border border-black/[0.08] bg-[#F7FAFA] py-3 font-semibold text-[#1A237E] transition hover:bg-[#EEF7F6]"
               >
                 Next
               </button>
@@ -247,16 +253,16 @@ export default function OnboardingPage() {
 
           {step === 4 && (
             <>
-              <h1 className="text-2xl font-bold text-white">Wrap up</h1>
-              <p className="text-gray-300">
-                From a saved job, use <strong className="text-white">Tailor</strong> to generate bullets and cover
+              <h1 className="text-2xl font-bold text-[#1A237E]">Wrap up</h1>
+              <p className="text-[#4E5B7A]">
+                From a saved job, use <strong className="text-[#1A237E]">Tailor</strong> to generate bullets and cover
                 letters, then export. Mark onboarding complete when you&apos;re ready.
               </p>
               <button
                 type="button"
                 disabled={saving}
                 onClick={markComplete}
-                className="w-full rounded-lg bg-violet-600 py-3 font-semibold text-white hover:bg-violet-500 disabled:opacity-50"
+                className="w-full rounded-lg bg-[#26A69A] py-3 font-semibold text-white transition hover:bg-[#1f8f85] disabled:opacity-50"
               >
                 {saving ? "Saving…" : "Mark onboarding complete"}
               </button>

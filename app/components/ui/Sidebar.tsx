@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
 type NavItem = {
@@ -16,13 +17,17 @@ type NavGroup = {
   items: NavItem[];
 };
 
+function isGroupItemActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 const navGroups: NavGroup[] = [
   {
     title: "Profile foundations",
     items: [
       {
         name: "Build your profile",
-        href: "/dashboard/profile",
+        href: "/dashboard/onboarding",
         icon: (
           <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-7 8a7 7 0 0 1 14 0" strokeLinecap="round" strokeLinejoin="round" />
         ),
@@ -107,6 +112,32 @@ const navGroups: NavGroup[] = [
 export function Sidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
+    navGroups.reduce<Record<string, boolean>>((acc, group, index) => {
+      acc[group.title] =
+        index === 0 || group.items.some((item) => isGroupItemActive(pathname, item.href));
+      return acc;
+    }, {})
+  );
+
+  useEffect(() => {
+    const activeGroup = navGroups.find((group) =>
+      group.items.some((item) => isGroupItemActive(pathname, item.href))
+    );
+
+    if (!activeGroup) {
+      return;
+    }
+
+    setOpenGroups((current) =>
+      current[activeGroup.title]
+        ? current
+        : {
+            ...current,
+            [activeGroup.title]: true,
+          }
+    );
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen bg-[#E0F2F1]">
@@ -122,12 +153,36 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
         <div className="flex-1 overflow-y-auto px-4 py-2">
           {navGroups.map((group) => (
             <div key={group.title} className="mb-6">
-              <h3 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-[#757575]">
-                {group.title}
-              </h3>
-              <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenGroups((current) => ({
+                    ...current,
+                    [group.title]: !current[group.title],
+                  }))
+                }
+                className="mb-2 flex w-full items-center justify-between rounded-lg px-2 py-1 text-left text-xs font-semibold uppercase tracking-wider text-[#757575] transition-colors hover:bg-black/[0.04] hover:text-[#1A237E]"
+                aria-expanded={openGroups[group.title]}
+              >
+                <span>{group.title}</span>
+                <svg
+                  aria-hidden="true"
+                  className="h-4 w-4 text-[#757575]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  {openGroups[group.title] ? (
+                    <path d="m18 15-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  ) : (
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  )}
+                </svg>
+              </button>
+              <div className={openGroups[group.title] ? "space-y-1" : "hidden"}>
                 {group.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = isGroupItemActive(pathname, item.href);
                   return (
                     <Link
                       key={item.name}
@@ -173,19 +228,6 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Update Details
-              </Link>
-              <Link
-                href="/dashboard/onboarding"
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                  pathname === "/dashboard/onboarding"
-                    ? "bg-[#26A69A]/10 text-[#1A237E]"
-                    : "text-[#757575] hover:bg-black/[0.04] hover:text-[#1A237E]"
-                }`}
-              >
-                <svg className="h-4 w-4 text-[#757575]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h4l2-6 2 12 2-6h4" />
-                </svg>
-                Activation Path
               </Link>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
