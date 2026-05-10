@@ -77,7 +77,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">5. Data Export</h2>
               <p>
-                You can request an export of your account data, including approved profile facts and generated assets. For V1, contact privacy@cvscan.com.au from the email address on your account and we will provide a machine-readable export after verifying the request.
+                You can request an export of your account data, including approved profile facts and generated assets. For V1, contact support@aicvscan.com from the email address on your account and we will provide a machine-readable export after verifying the request.
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function PrivacyPolicyPage() {
                 <Link href="/delete-account" className="text-[#26A69A] hover:text-[#2bbbad] underline">
                   cvscan.com.au/delete-account
                 </Link>{" "}
-                or by emailing <a href="mailto:privacy@cvscan.com.au" className="text-[#26A69A] hover:text-[#2bbbad] underline">privacy@cvscan.com.au</a>.
+                or by emailing <a href="mailto:support@aicvscan.com" className="text-[#26A69A] hover:text-[#2bbbad] underline">support@aicvscan.com</a>.
               </p>
               <p className="mt-2">
                 Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies. Uploaded documents (e.g., resumes) are stored in strictly isolated storage buckets exclusively accessible by your authenticated user ID via Row Level Security, and they are fully expunged upon account deletion.
@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">Contact Us</h2>
               <p>
-                If you have any questions about this Privacy Policy, please contact us at privacy@cvscan.com.au.
+                If you have any questions about this Privacy Policy, please contact us at support@aicvscan.com.
               </p>
             </div>
           </section>

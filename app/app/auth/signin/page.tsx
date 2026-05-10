@@ -1,8 +1,9 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { APP_NAME } from "@/lib/branding";
 
@@ -13,6 +14,23 @@ export default function SignIn() {
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+
+  const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "nextauth.message") {
+        router.push("/dashboard");
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [status, router]);
 
   const handleMagicLink = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,7 +51,7 @@ export default function SignIn() {
     const result = await signIn("email", {
       email,
       redirect: false,
-      callbackUrl: "/dashboard",
+      callbackUrl: "/auth/success",
     });
 
     if (result?.error) {
