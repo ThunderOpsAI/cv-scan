@@ -1,28 +1,45 @@
-# CVScan - AI Career Coach
+# CVScan
 
-CVScan is a Next.js application that helps users scan and analyze CVs/resumes. It provides ATS scoring, keyword optimization, cover letter generation, and more.
+CVScan now follows the standard project layout for this workspace.
 
-## Tech Stack
-- **Frontend**: Next.js 15+ (App Router), TailwindCSS, React
-- **Backend**: Supabase (Database, Auth, Edge Functions)
-- **AI**: Google Gemini API
-- **Emails**: Resend
-- **Payments**: Stripe
+## Structure
 
-## Getting Started
+```text
+cv-scan/
+├── app/                  # runnable Next.js codebase
+├── docs/                 # product, system, and reference docs
+├── contracts/            # JSON schemas for agent-readable project metadata
+├── agents/               # project-specific agent/tooling config
+├── data/                 # local test data and artifacts
+├── scripts/              # automation and pipeline scripts
+├── tasks.json            # active project work
+├── decisions.json        # architectural/product decisions
+├── patterns.json         # reusable project patterns
+└── README.md
+```
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables: Copy `.env.local` and fill in the values.
-4. Run the development server: `npm run dev`
-5. Open [http://localhost:3000](http://localhost:3000)
+## Public Beta Mode
 
-## Features
-- **ATS Scanner**: Score your resume against job descriptions.
-- **Metric Mining**: Quantify your achievements with AI help.
-- **Job Discovery**: Find matched jobs automatically.
-- **Interview Prep**: Practice with an AI interviewer.
-- **Application Tracker**: Manage your job search in one place.
+**This branch is running in public beta mode.**
 
-## Documentation
-Check the `docs/` directory for detailed specifications and guides.
+- No authentication or login is required.
+- All features are open and free to use.
+- Payments and credits are disabled.
+
+## Running The App
+
+The application itself lives in [`app/`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/app).
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+## Core Docs
+
+- [`docs/PRD.md`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/docs/PRD.md)
+- [`docs/SRS.md`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/docs/SRS.md)
+- [`docs/architecture.md`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/docs/architecture.md)
+
+Older planning and build notes were preserved in [`docs/`](/Users/thunderopsai/Documents/Workspace/01_Projects/cv-scan/docs).

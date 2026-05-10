@@ -1,0 +1,5 @@
+app/app/api/auth/[...nextauth]/route.ts
+app/app/api/resume/ocr/route.ts
+app/app/api/jobs/ocr/route.ts
+app/app/api/stripe/webhook/route.ts
+app/app/api/debug/auth-check/route.ts
