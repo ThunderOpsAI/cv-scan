@@ -57,8 +57,8 @@ function BuyCreditsContent() {
 
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
-        <div className="text-sm text-slate-200">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-[#E0F2F1]">
+        <div className="text-sm text-[#757575]">Loading...</div>
       </div>
     );
   }
@@ -66,20 +66,19 @@ function BuyCreditsContent() {
   if (!session) return null;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+    <main className="min-h-screen bg-[#E0F2F1]">
       <nav className="container mx-auto flex items-center justify-between px-4 py-5">
-        <Link href="/dashboard" className="flex items-center gap-2 text-xl font-semibold tracking-tight text-white group">
-          <div className="relative h-8 w-8 overflow-hidden rounded-lg border border-white/[0.14] shadow-sm transition-transform duration-300 group-hover:scale-105">
-            <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
+        <Link href="/dashboard" className="flex items-center gap-2 group">
+          <div className="relative h-16 w-56 transition-transform duration-300 group-hover:scale-105">
+            <Image src="/AI_CV_Scan_Logo.png" alt="AICVScan Logo" fill className="object-contain" priority />
           </div>
-          {APP_NAME}
         </Link>
         <div className="flex items-center gap-4 text-sm">
-          <div className="text-white">
-            <span className="text-slate-400">Credits:</span>{" "}
-            <span className="font-semibold text-cyan-300">{session.user.credits}</span>
+          <div className="text-[#1A237E]">
+            <span className="text-[#757575]">Credits:</span>{" "}
+            <span className="font-semibold text-[#26A69A]">{session.user.credits}</span>
           </div>
-          <Link href="/dashboard" className="text-slate-300 transition-colors hover:text-white">
+          <Link href="/dashboard" className="text-[#757575] transition-colors hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -88,20 +87,20 @@ function BuyCreditsContent() {
       <section className="container mx-auto px-4 pb-16 pt-10">
         <div className="mx-auto max-w-5xl">
           {searchParams.get("payment") === "success" && (
-            <div className="mb-6 rounded-3xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+            <div className="mb-6 rounded-3xl border border-[#26A69A]/20 bg-[#26A69A]/10 px-4 py-3 text-sm text-[#1A237E]">
               Payment successful. Your credits have been added and we&apos;re sending you back to the dashboard.
             </div>
           )}
 
           {searchParams.get("payment") === "cancelled" && (
-            <div className="mb-6 rounded-3xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
+            <div className="mb-6 rounded-3xl border border-amber-400/20 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Payment cancelled. You can pick a package and try again whenever you&apos;re ready.
             </div>
           )}
 
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">Choose more credits</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-300 md:text-base">
+            <h1 className="text-4xl font-semibold tracking-tight text-[#1A237E] md:text-5xl">Choose more credits</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-[#757575] md:text-base">
               Same pricing system as the homepage, with secure Stripe checkout and no subscription lock-in.
             </p>
           </div>
@@ -111,34 +110,34 @@ function BuyCreditsContent() {
               <div
                 key={plan.id}
                 className={`rounded-[2rem] border p-6 backdrop-blur ${
-                  plan.popular ? "border-cyan-400/30 bg-cyan-400/10" : "border-white/10 bg-white/6"
+                  plan.popular ? "border-[#26A69A]/30 bg-[#26A69A]/10" : "border-black/[0.06] bg-white/40"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{plan.name}</h2>
-                    <p className="mt-2 text-sm text-slate-400">{plan.description}</p>
+                    <h2 className="text-xl font-semibold text-[#1A237E]">{plan.name}</h2>
+                    <p className="mt-2 text-sm text-[#757575]">{plan.description}</p>
                   </div>
                   {plan.popular && (
-                    <span className="rounded-full bg-cyan-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-950">
+                    <span className="rounded-full bg-[#26A69A] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
                       Best value
                     </span>
                   )}
                 </div>
 
-                <div className="mt-6 text-4xl font-semibold text-white">${plan.price.toFixed(2)}</div>
-                <div className="mt-1 text-sm text-cyan-200">{plan.credits} credits</div>
+                <div className="mt-6 text-4xl font-semibold text-[#1A237E]">${plan.price.toFixed(2)}</div>
+                <div className="mt-1 text-sm text-[#26A69A]">{plan.credits} credits</div>
 
                 {plan.offerLabel && (
-                  <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs font-medium text-amber-100">
+                  <div className="mt-5 rounded-2xl border border-[#26A69A]/20 bg-[#26A69A]/10 px-3 py-2 text-xs font-medium text-[#1A237E]">
                     {plan.offerLabel}
                   </div>
                 )}
 
-                <ul className="mt-6 space-y-3 text-sm text-slate-300">
+                <ul className="mt-6 space-y-3 text-sm text-[#757575]">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
-                      <span className="text-cyan-200">•</span>
+                      <span className="text-[#26A69A]">•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -149,8 +148,8 @@ function BuyCreditsContent() {
                   disabled={loading !== null}
                   className={`mt-8 w-full rounded-full px-5 py-3 text-sm font-semibold transition ${
                     plan.popular
-                      ? "bg-cyan-400 text-slate-950 hover:bg-cyan-300"
-                      : "border border-white/15 bg-white/6 text-white hover:bg-white/12"
+                      ? "bg-[#26A69A] text-white hover:bg-[#2bbbad]"
+                      : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                   } ${loading === plan.id ? "cursor-not-allowed opacity-60" : ""}`}
                 >
                   {loading === plan.id ? "Processing..." : plan.cta}
@@ -159,21 +158,21 @@ function BuyCreditsContent() {
             ))}
           </div>
 
-          <div className="mt-8 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <h2 className="text-2xl font-semibold text-white">Before you buy</h2>
+          <div className="mt-8 rounded-[2rem] border border-black/[0.06] bg-white/40 p-6 backdrop-blur">
+            <h2 className="text-2xl font-semibold text-[#1A237E]">Before you buy</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-slate-950/35 p-5 text-sm text-slate-300">
+              <div className="rounded-3xl border border-black/[0.06] bg-[#F0EEF0]/50 p-5 text-sm text-[#757575]">
                 Credits are used only when you run paid actions like ATS scans beyond the free allowance, cover letters,
                 writing generation, or interview replies.
               </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/35 p-5 text-sm text-slate-300">
+              <div className="rounded-3xl border border-black/[0.06] bg-[#F0EEF0]/50 p-5 text-sm text-[#757575]">
                 Checkout is handled by Stripe, credits do not expire, and launch pricing currently highlights a 50%
                 discount for the first 200 users on the Popular Pack.
               </div>
             </div>
           </div>
 
-          <div className="mt-8 text-center text-sm text-slate-400">
+          <div className="mt-8 text-center text-sm text-[#757575]">
             New accounts in {APP_NAME} still start with 3 free credits.
           </div>
         </div>
@@ -186,8 +185,8 @@ export default function BuyCredits() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
-          <div className="text-sm text-slate-200">Loading...</div>
+        <div className="flex min-h-screen items-center justify-center bg-[#E0F2F1]">
+          <div className="text-sm text-[#757575]">Loading...</div>
         </div>
       }
     >

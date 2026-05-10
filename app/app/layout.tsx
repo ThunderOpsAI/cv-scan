@@ -45,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${outfit.variable} ${ibmPlexMono.variable} bg-[hsl(var(--app-bg))] font-sans text-white antialiased`}
+        className={`${outfit.variable} ${ibmPlexMono.variable} bg-[#E0F2F1] font-sans text-[#1A237E] antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

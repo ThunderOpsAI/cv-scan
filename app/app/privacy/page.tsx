@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata = {
   title: "Privacy Policy | AICVScan",
@@ -7,25 +8,27 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-[#E0F2F1]">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="relative h-16 w-56 transition-transform duration-300 group-hover:scale-105">
+            <Image src="/AI_CV_Scan_Logo.png" alt="AICVScan Logo" fill className="object-contain" priority />
+          </div>
         </Link>
-        <Link href="/trust" className="text-gray-300 hover:text-white transition-colors">
+        <Link href="/trust" className="text-[#757575] hover:text-[#1A237E] transition-colors">
           Trust & Security Center
         </Link>
       </nav>
 
       <main className="container mx-auto px-4 py-16 max-w-4xl">
-        <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-white/10 text-gray-300">
-          <h1 className="text-4xl font-bold text-white mb-6">Privacy Policy</h1>
+        <div className="bg-white/40 backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-black/[0.06] text-[#757575]">
+          <h1 className="text-4xl font-bold text-[#1A237E] mb-6">Privacy Policy</h1>
           <p className="mb-8">Last Updated: April 2026</p>
 
           <section className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">1. Information We Collect</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">1. Information We Collect</h2>
               <p>
                 We collect information that you directly provide to us when you use the platform, build your profile, upload your resume, or communicate with us. This includes:
               </p>
@@ -40,7 +43,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">2. How We Use Your Data</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">2. How We Use Your Data</h2>
               <p>
                 We use the information we collect to operate, test, and improve CVScan. Specifically to:
               </p>
@@ -53,7 +56,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">3. Artificial Intelligence & Sub-Processors</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">3. Artificial Intelligence &amp; Sub-Processors</h2>
               <p>
                 CVScan uses third-party AI models such as Google Gemini and OpenAI to provide core functionality.
                 When you use generation tools, the relevant approved profile facts, job details, and prompt instructions are sent to these providers to generate the requested content.
@@ -65,38 +68,38 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">4. Data Sharing</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">4. Data Sharing</h2>
               <p>
                 We do not sell your personal data. We may share your data with third-party vendors, consultants, and service providers who need access to such information to carry out work on our behalf (e.g., Stripe for payment processing, Supabase for hosting).
               </p>
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">5. Data Export</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">5. Data Export</h2>
               <p>
                 You can request an export of your account data, including approved profile facts and generated assets. For V1, contact privacy@cvscan.com.au from the email address on your account and we will provide a machine-readable export after verifying the request.
               </p>
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">6. Data Retention &amp; Deletion</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">6. Data Retention &amp; Deletion</h2>
               <p>
-                You own your data. You can delete your account and all associated data at any time directly through your account profile within the app (<strong>Dashboard → Profile → Delete Account</strong>). If you no longer have access to the app, you may request deletion without logging in at{" "}
-                <Link href="/delete-account" className="text-blue-400 hover:text-blue-300 underline">
+                You own your data. You can delete your account and all associated data at any time directly through your account profile within the app (<strong className="text-[#1A237E]">Dashboard → Profile → Delete Account</strong>). If you no longer have access to the app, you may request deletion without logging in at{" "}
+                <Link href="/delete-account" className="text-[#26A69A] hover:text-[#2bbbad] underline">
                   cvscan.com.au/delete-account
                 </Link>{" "}
-                or by emailing <a href="mailto:privacy@cvscan.com.au" className="text-blue-400 hover:text-blue-300 underline">privacy@cvscan.com.au</a>.
+                or by emailing <a href="mailto:privacy@cvscan.com.au" className="text-[#26A69A] hover:text-[#2bbbad] underline">privacy@cvscan.com.au</a>.
               </p>
               <p className="mt-2">
                 Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies. Uploaded documents (e.g., resumes) are stored in strictly isolated storage buckets exclusively accessible by your authenticated user ID via Row Level Security, and they are fully expunged upon account deletion.
               </p>
               <p className="mt-2">
-                <strong className="text-white">Note on billing records:</strong> Stripe billing records related to completed transactions (transaction metadata only — no resume or application content) may be retained for up to 7 years in compliance with financial regulations and cannot be deleted on demand.
+                <strong className="text-[#1A237E]">Note on billing records:</strong> Stripe billing records related to completed transactions (transaction metadata only — no resume or application content) may be retained for up to 7 years in compliance with financial regulations and cannot be deleted on demand.
               </p>
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-3">Contact Us</h2>
+              <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">Contact Us</h2>
               <p>
                 If you have any questions about this Privacy Policy, please contact us at privacy@cvscan.com.au.
               </p>

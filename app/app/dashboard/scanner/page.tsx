@@ -21,9 +21,9 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 80) return "text-emerald-300";
-  if (score >= 60) return "text-amber-300";
-  return "text-rose-300";
+  if (score >= 80) return "text-emerald-600";
+  if (score >= 60) return "text-amber-600";
+  return "text-rose-600";
 }
 
 function getScoreBar(score: number) {
@@ -157,18 +157,18 @@ export default function ScannerPage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.14),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(129,140,248,0.12),transparent_18%),linear-gradient(180deg,#060b15_0%,#081120_45%,#050a14_100%)]">
+    <div className="min-h-screen bg-[#E0F2F1]">
       <nav className="container mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="flex items-center gap-3 text-white">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.14] bg-white/[0.06]">
-            <span className="bg-[linear-gradient(135deg,#7dd3fc,#c4b5fd)] bg-clip-text text-lg font-semibold text-transparent">CV</span>
+        <Link href="/dashboard" className="flex items-center gap-3 text-[#1A237E]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-black/[0.06] bg-[#F0EEF0]">
+            <span className="text-lg font-semibold text-[#1A237E]">CV</span>
           </div>
           <div>
             <div className="text-lg font-semibold tracking-[-0.03em]">CVScan</div>
-            <div className="text-xs text-slate-400">magic scan</div>
+            <div className="text-xs text-[#757575]">magic scan</div>
           </div>
         </Link>
-        <Link href="/dashboard" className="text-sm text-slate-300 transition hover:text-white">
+        <Link href="/dashboard" className="text-sm text-[#757575] transition hover:text-[#1A237E]">
           Back to dashboard
         </Link>
       </nav>
@@ -176,27 +176,27 @@ export default function ScannerPage() {
       <div className="container mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6 lg:px-8">
         <div className="mx-auto space-y-8">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-            <div className="flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 shadow-[0_30px_80px_rgba(2,8,23,0.32)] backdrop-blur-xl sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-5 rounded-[2rem] border border-black/[0.06] bg-white/40 p-7 shadow-[0_30px_80px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-8 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="eyebrow">ATS scanner</p>
-                <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
+                <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-[#1A237E] sm:text-5xl">
                   Scan a role like it matters.
                 </h1>
-                <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
+                <p className="mt-4 max-w-3xl text-base leading-8 text-[#757575]">
                   Drop in a screenshot or paste the description. CVScan will surface the exact keywords, gaps, and profile signals that deserve your attention next.
                 </p>
               </div>
 
-              <div className="grid gap-3 rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-slate-200 sm:min-w-[18rem]">
+              <div className="grid gap-3 rounded-[1.5rem] border border-black/[0.06] bg-[#F0EEF0]/50 px-5 py-4 text-sm text-[#1A237E] sm:min-w-[18rem]">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-400">Free scans today</span>
-                  <span className="font-semibold text-white">
+                  <span className="text-[#757575]">Free scans today</span>
+                  <span className="font-semibold text-[#1A237E]">
                     {freeScansRemaining !== null ? freeScansRemaining : "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-400">Live sync</span>
-                  <span className="rounded-full border border-cyan-300/16 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
+                  <span className="text-[#757575]">Live sync</span>
+                  <span className="rounded-full border border-[#26A69A]/16 bg-[#26A69A]/10 px-3 py-1 text-xs text-[#26A69A]">
                     {uploading ? "Phone capture active" : "Ready for Android capture"}
                   </span>
                 </div>
@@ -206,19 +206,19 @@ export default function ScannerPage() {
 
           <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr]">
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.06 }}>
-              <div className="scan-dropzone rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_30px_80px_rgba(2,8,23,0.3)] backdrop-blur-xl sm:p-8">
-                <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-white/[0.03] p-5 sm:p-6">
+              <div className="scan-dropzone rounded-[2rem] border border-black/[0.06] bg-white/40 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-8">
+                <div className="rounded-[1.6rem] border border-dashed border-black/[0.06] bg-[#F0EEF0]/30 p-5 sm:p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <p className="eyebrow">Input</p>
-                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
+                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#1A237E]">
                         Paste a job ad or scan it with your phone
                       </h2>
-                      <p className="mt-3 max-w-xl text-sm leading-7 text-slate-300">
+                      <p className="mt-3 max-w-xl text-sm leading-7 text-[#757575]">
                         The camera input is tuned for mobile capture, with clearer states and a direct OCR handoff into the scanner.
                       </p>
                     </div>
-                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-slate-300">
+                    <div className="rounded-full border border-black/[0.06] bg-white/40 px-3 py-1 text-xs text-[#757575]">
                       Android Chrome friendly
                     </div>
                   </div>

@@ -10,12 +10,12 @@ type GlassCardProps = {
 };
 
 const ACCENT_STYLES: Record<GlassCardAccent, string> = {
-  amber: "before:from-amber-400/[0.28] before:to-orange-300/[0.08] hover:border-amber-300/[0.35]",
-  blue: "before:from-sky-400/[0.24] before:to-indigo-300/[0.08] hover:border-sky-300/[0.35]",
-  cyan: "before:from-cyan-300/[0.26] before:to-sky-300/10 hover:border-cyan-200/[0.35]",
-  emerald: "before:from-emerald-300/[0.24] before:to-teal-300/10 hover:border-emerald-200/[0.35]",
-  pink: "before:from-pink-300/[0.26] before:to-rose-300/10 hover:border-pink-200/[0.35]",
-  violet: "before:from-violet-300/[0.26] before:to-fuchsia-300/10 hover:border-violet-200/[0.35]",
+  amber: "before:from-[#26A69A]/[0.18] before:to-[#1A237E]/[0.06] hover:border-[#26A69A]/[0.25]",
+  blue: "before:from-[#1A237E]/[0.18] before:to-[#26A69A]/[0.06] hover:border-[#1A237E]/[0.25]",
+  cyan: "before:from-[#26A69A]/[0.20] before:to-[#1A237E]/[0.06] hover:border-[#26A69A]/[0.25]",
+  emerald: "before:from-[#26A69A]/[0.18] before:to-[#26A69A]/[0.08] hover:border-[#26A69A]/[0.25]",
+  pink: "before:from-[#26A69A]/[0.14] before:to-[#1A237E]/[0.06] hover:border-[#26A69A]/[0.20]",
+  violet: "before:from-[#1A237E]/[0.20] before:to-[#26A69A]/[0.06] hover:border-[#1A237E]/[0.25]",
 };
 
 export function GlassCard({
@@ -27,11 +27,11 @@ export function GlassCard({
   return (
     <div
       className={[
-        "glass-card relative overflow-hidden rounded-[1.75rem] border border-white/10",
+        "glass-card relative overflow-hidden rounded-[1.75rem] border border-black/[0.06]",
         "before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r",
         ACCENT_STYLES[accent],
         interactive
-          ? "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.35)]"
+          ? "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(26,35,126,0.08)]"
           : "",
         className,
       ]
@@ -42,3 +42,4 @@ export function GlassCard({
     </div>
   );
 }
+

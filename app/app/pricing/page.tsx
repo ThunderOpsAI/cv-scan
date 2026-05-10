@@ -11,27 +11,26 @@ export const metadata = {
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)]">
+    <main className="min-h-screen bg-[#E0F2F1]">
       <nav className="container mx-auto flex items-center justify-between px-4 py-5">
-        <Link href="/" className="flex items-center gap-2 text-xl font-semibold tracking-tight text-white group">
-          <div className="relative h-8 w-8 overflow-hidden rounded-lg border border-white/[0.14] shadow-sm transition-transform duration-300 group-hover:scale-105">
-            <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="relative h-16 w-56 transition-transform duration-300 group-hover:scale-105">
+            <Image src="/AI_CV_Scan_Logo.png" alt="AICVScan Logo" fill className="object-contain" priority />
           </div>
-          {APP_NAME}
         </Link>
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/trust" className="text-slate-300 transition-colors hover:text-white">
+          <Link href="/trust" className="text-[#757575] transition-colors hover:text-[#1A237E]">
             Trust
           </Link>
-          <Link href="/auth/signin" className="rounded-full bg-cyan-400 px-4 py-2 font-semibold text-slate-950 transition hover:bg-cyan-300">
+          <Link href="/auth/signin" className="rounded-full bg-[#26A69A] px-4 py-2 font-semibold text-white transition hover:bg-[#2bbbad]">
             Get started
           </Link>
         </div>
       </nav>
 
       <section className="container mx-auto px-4 pb-16 pt-10 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">Simple pricing, clear value</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-300 md:text-base">
+        <h1 className="text-4xl font-semibold tracking-tight text-[#1A237E] md:text-5xl">Simple pricing, clear value</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-[#757575] md:text-base">
           Credits never expire. Use them for ATS scans, tailored writing, and interview prep when you actually need them.
         </p>
       </section>
@@ -42,34 +41,34 @@ export default function PricingPage() {
             <div
               key={plan.id}
               className={`rounded-[2rem] border p-6 backdrop-blur ${
-                plan.popular ? "border-cyan-400/30 bg-cyan-400/10" : "border-white/10 bg-white/6"
+                plan.popular ? "border-[#26A69A]/30 bg-[#26A69A]/10" : "border-black/[0.06] bg-white/40"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">{plan.name}</h2>
-                  <p className="mt-2 text-sm text-slate-400">{plan.description}</p>
+                  <h2 className="text-xl font-semibold text-[#1A237E]">{plan.name}</h2>
+                  <p className="mt-2 text-sm text-[#757575]">{plan.description}</p>
                 </div>
                 {plan.popular ? (
-                  <span className="rounded-full bg-cyan-300 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-950">
+                  <span className="rounded-full bg-[#26A69A] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
                     Best value
                   </span>
                 ) : null}
               </div>
 
-              <div className="mt-6 text-4xl font-semibold text-white">${plan.price.toFixed(2)}</div>
-              <div className="mt-1 text-sm text-cyan-200">{plan.credits} credits</div>
+              <div className="mt-6 text-4xl font-semibold text-[#1A237E]">${plan.price.toFixed(2)}</div>
+              <div className="mt-1 text-sm text-[#26A69A]">{plan.credits} credits</div>
 
               {plan.offerLabel ? (
-                <div className="mt-5 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[13px] font-medium text-cyan-200">
+                <div className="mt-5 inline-flex items-center rounded-full border border-[#26A69A]/20 bg-[#26A69A]/10 px-3 py-1 text-[13px] font-medium text-[#1A237E]">
                   ✨ {plan.offerLabel}
                 </div>
               ) : null}
 
-              <ul className="mt-6 space-y-3 text-sm text-slate-300">
+              <ul className="mt-6 space-y-3 text-sm text-[#757575]">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2">
-                    <span className="text-cyan-200">•</span>
+                    <span className="text-[#26A69A]">•</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -79,8 +78,8 @@ export default function PricingPage() {
                 href="/auth/signin"
                 className={`mt-8 inline-flex w-full justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
                   plan.popular
-                    ? "bg-cyan-400 text-slate-950 hover:bg-cyan-300"
-                    : "border border-white/15 bg-white/6 text-white hover:bg-white/12"
+                    ? "bg-[#26A69A] text-white hover:bg-[#2bbbad]"
+                    : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                 }`}
               >
                 {plan.cta}

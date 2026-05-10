@@ -28,14 +28,14 @@ function getButtonClasses(variant: Variant, size: Size, className: string) {
 
   const variantClasses =
     variant === "primary"
-      ? "bg-[linear-gradient(135deg,rgba(56,189,248,0.96),rgba(59,130,246,0.92),rgba(129,140,248,0.88))] text-slate-950 shadow-[0_20px_48px_rgba(56,189,248,0.24)] hover:shadow-[0_24px_54px_rgba(56,189,248,0.34)]"
+      ? "bg-[#26A69A] text-white shadow-[0_20px_48px_rgba(38,166,154,0.24)] hover:bg-[#2bbbad] hover:shadow-[0_24px_54px_rgba(38,166,154,0.34)]"
       : variant === "secondary"
-        ? "bg-white/[0.08] text-white ring-1 ring-white/[0.14] hover:bg-white/[0.12]"
-        : "bg-transparent text-slate-200 hover:bg-white/[0.06]";
+        ? "bg-[#1A237E]/[0.08] text-[#1A237E] ring-1 ring-[#1A237E]/[0.14] hover:bg-[#1A237E]/[0.12]"
+        : "bg-transparent text-[#1A237E] hover:bg-[#1A237E]/[0.06]";
 
   return [
     "group inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-[-0.01em]",
-    "transition-all duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60",
+    "transition-all duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#26A69A]/60",
     sizeClasses,
     variantClasses,
     className,

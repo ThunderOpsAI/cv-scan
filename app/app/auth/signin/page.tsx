@@ -47,29 +47,28 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_#081120_0%,_#0f172a_46%,_#081120_100%)] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#E0F2F1] px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-semibold tracking-tight text-white group">
-            <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-white/[0.14] shadow-[0_18px_44px_rgba(2,8,23,0.32)] transition-transform duration-300 group-hover:scale-105">
-              <Image src="/logo.png" alt="CVScan Logo" fill className="object-cover" />
+          <Link href="/" className="inline-flex justify-center group">
+            <div className="relative h-24 w-80 transition-transform duration-300 group-hover:scale-105">
+              <Image src="/AI_CV_Scan_Logo.png" alt="AICVScan Logo" fill className="object-contain" priority />
             </div>
-            {APP_NAME}
           </Link>
-          <p className="mt-3 text-sm text-slate-400">Secure magic-link access only. No passwords to remember.</p>
+          <p className="mt-3 text-sm text-[#757575]">Secure magic-link access only. No passwords to remember.</p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-7 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+        <div className="rounded-3xl border border-black/[0.06] bg-white/50 p-7 shadow-2xl shadow-[#1A237E]/5 backdrop-blur">
           {emailSent ? (
             <div className="space-y-4 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cyan-400/15 text-cyan-300">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#26A69A]/15 text-[#26A69A]">
                 OK
               </div>
-              <h1 className="text-2xl font-semibold text-white">Check your inbox</h1>
-              <p className="text-sm text-slate-300">
-                We sent a secure sign-in link to <span className="font-semibold text-white">{email}</span>.
+              <h1 className="text-2xl font-semibold text-[#1A237E]">Check your inbox</h1>
+              <p className="text-sm text-[#757575]">
+                We sent a secure sign-in link to <span className="font-semibold text-[#1A237E]">{email}</span>.
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[#757575]">
                 Open the email on this device to continue into {APP_NAME}. The link expires automatically for safety.
               </p>
               <button
@@ -77,7 +76,7 @@ export default function SignIn() {
                   setEmailSent(false);
                   setEmail("");
                 }}
-                className="w-full rounded-full border border-white/15 bg-white/6 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
+                className="w-full rounded-full border border-black/[0.06] bg-white/40 px-5 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-white/60"
               >
                 Use a different email
               </button>
@@ -85,14 +84,14 @@ export default function SignIn() {
           ) : (
             <form onSubmit={handleMagicLink} className="space-y-5">
               <div>
-                <h1 className="text-2xl font-semibold text-white">Sign in</h1>
-                <p className="mt-2 text-sm text-slate-400">
+                <h1 className="text-2xl font-semibold text-[#1A237E]">Sign in</h1>
+                <p className="mt-2 text-sm text-[#757575]">
                   Enter your email and we&apos;ll send you a one-time sign-in link.
                 </p>
               </div>
 
               <div>
-                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-200">
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-[#1A237E]">
                   Email address
                 </label>
                 <input
@@ -102,11 +101,11 @@ export default function SignIn() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+                  className="w-full rounded-2xl border border-black/[0.08] bg-white/60 px-4 py-3 text-sm text-[#1A237E] placeholder:text-[#757575]/60 focus:border-[#26A69A] focus:outline-none"
                 />
               </div>
 
-              <label className="flex items-start gap-3 rounded-2xl border border-white/8 bg-slate-950/35 p-4">
+              <label className="flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4">
                 <input
                   type="checkbox"
                   checked={consent}
@@ -114,43 +113,43 @@ export default function SignIn() {
                     setConsent(e.target.checked);
                     if (e.target.checked) setError("");
                   }}
-                  className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
+                  className="mt-1 h-4 w-4 rounded border-black/20 bg-white text-[#26A69A] focus:ring-[#26A69A]"
                 />
-                <span className="text-xs leading-5 text-slate-400">
-                  I agree to the <Link href="/terms" className="text-cyan-300 hover:text-cyan-200">Terms</Link> and{" "}
-                  <Link href="/privacy" className="text-cyan-300 hover:text-cyan-200">Privacy Policy</Link>.
+                <span className="text-xs leading-5 text-[#757575]">
+                  I agree to the <Link href="/terms" className="text-[#26A69A] hover:text-[#2bbbad]">Terms</Link> and{" "}
+                  <Link href="/privacy" className="text-[#26A69A] hover:text-[#2bbbad]">Privacy Policy</Link>.
                 </span>
               </label>
 
-              <label className="flex items-start gap-3 rounded-2xl border border-white/8 bg-slate-950/35 p-4">
+              <label className="flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4">
                 <input
                   type="checkbox"
                   checked={marketingOptIn}
                   onChange={(e) => setMarketingOptIn(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
+                  className="mt-1 h-4 w-4 rounded border-black/20 bg-white text-[#26A69A] focus:ring-[#26A69A]"
                 />
-                <span className="text-xs leading-5 text-slate-400">
+                <span className="text-xs leading-5 text-[#757575]">
                   I&apos;d like to receive product updates, tips, and occasional promotional emails from {APP_NAME}. You can unsubscribe at any time.
                 </span>
               </label>
 
-              {error && <p className="text-sm text-rose-300">{error}</p>}
+              {error && <p className="text-sm text-rose-500">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-cyan-900 disabled:text-slate-300"
+                className="w-full rounded-full bg-[#26A69A] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2bbbad] disabled:cursor-not-allowed disabled:bg-[#26A69A]/40 disabled:text-white/60"
               >
                 {loading ? "Sending link..." : "Email me a magic link"}
               </button>
 
-              <p className="text-center text-xs text-slate-500">New accounts start with 3 free credits.</p>
+              <p className="text-center text-xs text-[#757575]">New accounts start with 3 free credits.</p>
             </form>
           )}
         </div>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-slate-400 transition-colors hover:text-white">
+          <Link href="/" className="text-sm text-[#757575] transition-colors hover:text-[#1A237E]">
             Back to home
           </Link>
         </div>
