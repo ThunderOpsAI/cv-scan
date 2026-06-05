@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
   image TEXT,
   credits INTEGER DEFAULT 3 NOT NULL, -- Free credits on signup
   stripe_customer_id TEXT UNIQUE,
+  hashed_password TEXT,
   terms_accepted_at TIMESTAMPTZ,
   privacy_accepted_at TIMESTAMPTZ,
   consent_version TEXT DEFAULT '2026-04-12',

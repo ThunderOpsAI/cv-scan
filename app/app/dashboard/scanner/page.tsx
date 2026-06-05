@@ -227,7 +227,6 @@ export default function ScannerPage() {
                     <input
                       type="file"
                       accept="image/*,.pdf"
-                      capture="environment"
                       onChange={handleFileChange}
                       disabled={uploading}
                       aria-label="Upload file or take a photo"

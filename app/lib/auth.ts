@@ -3,8 +3,12 @@ import type { SendVerificationRequestParams } from "next-auth/providers/email";
 import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
 import { buildConsentFields } from "@/lib/auth/consent";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import {
   hasEmailAuthEnv,
+  hasGoogleAuthEnv,
   hasSupabaseServerEnv,
   nextAuthSecret,
   sessionTokenCookieName,
@@ -23,14 +27,57 @@ type UserCreditsRow = {
 
 type ConsentFields = ReturnType<typeof buildConsentFields>;
 
-type UserConsentUpdate = (values: ConsentFields) => {
-  eq(column: "id", value: string): PromiseLike<{ error: unknown | null }>;
-};
 
 const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;
 
-const providers: NextAuthOptions["providers"] = [];
+const providers: NextAuthOptions["providers"] = [
+  CredentialsProvider({
+    id: "credentials",
+    name: "Credentials",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      if (!credentials?.email || !credentials?.password) {
+        throw new Error("Missing email or password");
+      }
+      
+      const supabase = createClient();
+      const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", credentials.email)
+        .single();
+        
+      if (!user || !user.hashed_password) {
+        throw new Error("Invalid credentials");
+      }
+      
+      const isPasswordValid = await bcrypt.compare(credentials.password, user.hashed_password);
+      if (!isPasswordValid) {
+        throw new Error("Invalid credentials");
+      }
+      
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+      };
+    },
+  }),
+];
+
+if (hasGoogleAuthEnv) {
+  providers.push(
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    })
+  );
+}
 
 if (hasEmailAuthEnv) {
   providers.push(
