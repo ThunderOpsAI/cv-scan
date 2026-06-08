@@ -94,20 +94,20 @@ export default function StarStoriesPage() {
 
     if (status === "loading" || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-xl">Loading...</div>
+            <div className=" flex items-center justify-center">
+                <div className="text-[#1A237E] text-xl">Loading...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="">
             <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-                <Link href="/dashboard" className="text-2xl font-bold text-white">
-                    <span className="text-blue-400">CV</span>Scan
+                <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+                    <span className="text-[#26A69A]">CV</span>Scan
                 </Link>
                 <div className="flex items-center gap-4">
-                    <Link href="/dashboard/profile" className="text-gray-300 hover:text-white">
+                    <Link href="/dashboard/profile" className="text-[#607086] hover:text-[#1A237E]">
                         Profile
                     </Link>
                 </div>
@@ -117,8 +117,8 @@ export default function StarStoriesPage() {
                 <div className="max-w-4xl mx-auto">
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h1 className="text-4xl font-bold text-white mb-2">STAR Stories</h1>
-                            <p className="text-gray-400">Structure your interview answers with the STAR method</p>
+                            <h1 className="text-4xl font-bold text-[#1A237E] mb-2">STAR Stories</h1>
+                            <p className="text-[#607086]/80">Structure your interview answers with the STAR method</p>
                         </div>
                         {!showForm && (
                             <button
@@ -127,7 +127,7 @@ export default function StarStoriesPage() {
                                     setEditing(null);
                                     setShowForm(true);
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg"
                             >
                                 Add Story
                             </button>
@@ -136,89 +136,89 @@ export default function StarStoriesPage() {
 
                     {/* Story Form */}
                     {showForm && (
-                        <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-                            <h3 className="text-xl font-bold text-white mb-6">
+                        <form onSubmit={handleSubmit} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
+                            <h3 className="text-xl font-bold text-[#1A237E] mb-6">
                                 {editing ? "Edit Story" : "Add Story"}
                             </h3>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-white mb-2">Title *</label>
+                                    <label className="block text-[#1A237E] mb-2">Title *</label>
                                     <input
                                         type="text"
                                         value={formData.title}
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         placeholder="e.g., Solving a Critical Production Bug"
                                         required
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-white mb-2">Situation *</label>
-                                    <p className="text-gray-400 text-xs mb-2">Describe the context within which you performed a job or faced a challenge.</p>
+                                    <label className="block text-[#1A237E] mb-2">Situation *</label>
+                                    <p className="text-[#607086]/80 text-xs mb-2">Describe the context within which you performed a job or faced a challenge.</p>
                                     <textarea
                                         value={formData.situation}
                                         onChange={(e) => setFormData({ ...formData, situation: e.target.value })}
                                         rows={3}
                                         placeholder="e.g., During the peak holiday season, our servers started crashing due to high traffic..."
                                         required
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-white mb-2">Task *</label>
-                                    <p className="text-gray-400 text-xs mb-2">Describe your responsibility in that situation.</p>
+                                    <label className="block text-[#1A237E] mb-2">Task *</label>
+                                    <p className="text-[#607086]/80 text-xs mb-2">Describe your responsibility in that situation.</p>
                                     <textarea
                                         value={formData.task}
                                         onChange={(e) => setFormData({ ...formData, task: e.target.value })}
                                         rows={3}
                                         placeholder="e.g., My task was to identify the bottleneck and optimize the database queries..."
                                         required
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-white mb-2">Action *</label>
-                                    <p className="text-gray-400 text-xs mb-2">Describe how you completed the task or endeavored to meet the challenge.</p>
+                                    <label className="block text-[#1A237E] mb-2">Action *</label>
+                                    <p className="text-[#607086]/80 text-xs mb-2">Describe how you completed the task or endeavored to meet the challenge.</p>
                                     <textarea
                                         value={formData.action}
                                         onChange={(e) => setFormData({ ...formData, action: e.target.value })}
                                         rows={3}
                                         placeholder="e.g., I implemented Redis caching for frequently accessed data and indexed key columns..."
                                         required
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-white mb-2">Result *</label>
-                                    <p className="text-gray-400 text-xs mb-2">Explain the outcomes or results generated by the action taken.</p>
+                                    <label className="block text-[#1A237E] mb-2">Result *</label>
+                                    <p className="text-[#607086]/80 text-xs mb-2">Explain the outcomes or results generated by the action taken.</p>
                                     <textarea
                                         value={formData.result}
                                         onChange={(e) => setFormData({ ...formData, result: e.target.value })}
                                         rows={3}
                                         placeholder="e.g., Server load decreased by 40% and we handled 2x more traffic without downtime..."
                                         required
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-white mb-2">Tags</label>
+                                    <label className="block text-[#1A237E] mb-2">Tags</label>
                                     <input
                                         type="text"
                                         value={formData.tags}
                                         onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                         placeholder="e.g., leadership, technical, problem-solving (comma separated)"
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                                     />
                                 </div>
 
                                 <div className="flex gap-4 pt-4">
-                                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg">
                                         {editing ? "Update" : "Add"} Story
                                     </button>
                                     <button
@@ -228,7 +228,7 @@ export default function StarStoriesPage() {
                                             setEditing(null);
                                             resetForm();
                                         }}
-                                        className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                                        className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg"
                                     >
                                         Cancel
                                     </button>
@@ -239,11 +239,11 @@ export default function StarStoriesPage() {
 
                     {/* Stories List */}
                     {stories.length === 0 ? (
-                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-                            <p className="text-gray-400 mb-4">No STAR stories added yet</p>
+                        <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
+                            <p className="text-[#607086]/80 mb-4">No STAR stories added yet</p>
                             <button
                                 onClick={() => setShowForm(true)}
-                                className="text-blue-400 hover:text-blue-300"
+                                className="text-[#26A69A] hover:text-[#26A69A]"
                             >
                                 Create your first story →
                             </button>
@@ -251,13 +251,13 @@ export default function StarStoriesPage() {
                     ) : (
                         <div className="space-y-6">
                             {stories.map((story) => (
-                                <div key={story.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 hover:border-blue-500/30 transition-colors">
+                                <div key={story.id} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] hover:border-blue-500/30 transition-colors">
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
-                                            <h3 className="text-2xl font-bold text-white">{story.title}</h3>
+                                            <h3 className="text-2xl font-bold text-[#1A237E]">{story.title}</h3>
                                             <div className="flex gap-2 mt-2">
                                                 {story.tags?.map((tag) => (
-                                                    <span key={tag} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-500/30">
+                                                    <span key={tag} className="bg-blue-500/20 text-[#26A69A] px-3 py-1 rounded-full text-xs border border-blue-500/30">
                                                         {tag}
                                                     </span>
                                                 ))}
@@ -277,13 +277,13 @@ export default function StarStoriesPage() {
                                                     });
                                                     setShowForm(true);
                                                 }}
-                                                className="text-blue-400 hover:text-blue-300 text-sm px-3 py-1 bg-white/5 rounded-lg border border-white/10"
+                                                className="text-[#26A69A] hover:text-[#26A69A] text-sm px-3 py-1 bg-white/40 rounded-lg border border-white/10"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(story.id)}
-                                                className="text-red-400 hover:text-red-300 text-sm px-3 py-1 bg-white/5 rounded-lg border border-white/10"
+                                                className="text-red-400 hover:text-red-300 text-sm px-3 py-1 bg-white/40 rounded-lg border border-white/10"
                                             >
                                                 Delete
                                             </button>
@@ -292,23 +292,23 @@ export default function StarStoriesPage() {
 
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
-                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                                                <h4 className="text-blue-400 font-bold text-sm mb-1 uppercase tracking-wider">Situation</h4>
-                                                <p className="text-gray-300 text-sm">{story.situation}</p>
+                                            <div className="bg-white/40 p-4 rounded-xl border border-white/10">
+                                                <h4 className="text-[#26A69A] font-bold text-sm mb-1 uppercase tracking-wider">Situation</h4>
+                                                <p className="text-[#607086] text-sm">{story.situation}</p>
                                             </div>
-                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                                                <h4 className="text-blue-400 font-bold text-sm mb-1 uppercase tracking-wider">Task</h4>
-                                                <p className="text-gray-300 text-sm">{story.task}</p>
+                                            <div className="bg-white/40 p-4 rounded-xl border border-white/10">
+                                                <h4 className="text-[#26A69A] font-bold text-sm mb-1 uppercase tracking-wider">Task</h4>
+                                                <p className="text-[#607086] text-sm">{story.task}</p>
                                             </div>
                                         </div>
                                         <div className="space-y-4">
-                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                            <div className="bg-white/40 p-4 rounded-xl border border-white/10">
                                                 <h4 className="text-green-400 font-bold text-sm mb-1 uppercase tracking-wider">Action</h4>
-                                                <p className="text-gray-300 text-sm">{story.action}</p>
+                                                <p className="text-[#607086] text-sm">{story.action}</p>
                                             </div>
-                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                            <div className="bg-white/40 p-4 rounded-xl border border-white/10">
                                                 <h4 className="text-green-400 font-bold text-sm mb-1 uppercase tracking-wider">Result</h4>
-                                                <p className="text-gray-300 text-sm">{story.result}</p>
+                                                <p className="text-[#607086] text-sm">{story.result}</p>
                                             </div>
                                         </div>
                                     </div>

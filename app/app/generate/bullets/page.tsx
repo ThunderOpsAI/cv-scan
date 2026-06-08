@@ -71,8 +71,8 @@ export default function GenerateBullets() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -82,17 +82,17 @@ export default function GenerateBullets() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
 
           <Link
             href="/dashboard"
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-[#607086] hover:text-[#1A237E] transition-colors"
           >
             Dashboard
           </Link>
@@ -103,14 +103,14 @@ export default function GenerateBullets() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Generate Resume Bullets</h1>
-            <p className="text-gray-400">
+            <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Generate Resume Bullets</h1>
+            <p className="text-[#607086]/80">
               Create ATS-optimized resume bullets from approved career facts
             </p>
 
-            <p className="mt-2 text-gray-400 text-sm">
+            <p className="mt-2 text-[#607086]/80 text-sm">
               Need to add facts first?{" "}
-              <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">
+              <Link href="/dashboard/profile/facts" className="text-[#26A69A] hover:text-blue-200">
                 Open Career Memory
               </Link>
             </p>
@@ -118,8 +118,8 @@ export default function GenerateBullets() {
 
           {/* Input Form */}
           <form onSubmit={handleGenerate} className="mb-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-              <label htmlFor="jobDuty" className="block text-white font-semibold mb-3">
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
+              <label htmlFor="jobDuty" className="block text-[#1A237E] font-semibold mb-3">
                 What should these bullets focus on?
               </label>
               <textarea
@@ -127,10 +127,10 @@ export default function GenerateBullets() {
                 value={jobDuty}
                 onChange={(e) => setJobDuty(e.target.value)}
                 placeholder="Example: Focus on product analytics, stakeholder leadership, or customer support impact"
-                className="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[120px]"
+                className="w-full bg-white/40 border border-black/[0.06] rounded-xl p-4 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[120px]"
                 disabled={loading}
               />
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-[#607086]/80 text-sm mt-2">
                 This guides the generation, but only approved facts can be used as evidence.
               </p>
 
@@ -143,7 +143,7 @@ export default function GenerateBullets() {
               <button
                 type="submit"
                 disabled={loading || !jobDuty.trim()}
-                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Generating..." : "Generate Bullet Points"}
               </button>
@@ -153,8 +153,8 @@ export default function GenerateBullets() {
           {/* Results */}
           {bullets.length > 0 && (
             <div className="space-y-6">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <h2 className="text-2xl font-bold text-white mb-4">Your Resume Bullets</h2>
+              <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
+                <h2 className="text-2xl font-bold text-[#1A237E] mb-4">Your Resume Bullets</h2>
                 <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
                   <p className="text-blue-200 text-sm leading-relaxed">
                     <strong>AI-generated drafts:</strong> These bullets cite approved Career Memory facts.
@@ -171,7 +171,7 @@ export default function GenerateBullets() {
                     </ul>
                   </div>
                 )}
-                <p className="text-gray-400 mb-6">
+                <p className="text-[#607086]/80 mb-6">
                   Click any bullet point to copy it to your clipboard
                 </p>
                 <div className="space-y-4">
@@ -179,13 +179,13 @@ export default function GenerateBullets() {
                     <div
                       key={index}
                       onClick={() => copyBullet(bullet)}
-                      className="bg-white/5 border border-white/20 rounded-xl p-4 hover:bg-white/10 cursor-pointer transition-all group"
+                      className="bg-white/40 border border-black/[0.06] rounded-xl p-4 hover:bg-white/60 cursor-pointer transition-all group"
                     >
                       <div className="flex items-start gap-3">
-                        <span className="text-blue-400 font-bold">•</span>
-                        <p className="text-white flex-1">{bullet}</p>
+                        <span className="text-[#26A69A] font-bold">•</span>
+                        <p className="text-[#1A237E] flex-1">{bullet}</p>
                         <svg
-                          className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors flex-shrink-0"
+                          className="w-5 h-5 text-[#607086]/80 group-hover:text-[#26A69A] transition-colors flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -208,7 +208,7 @@ export default function GenerateBullets() {
                     setBullets([]);
                     setUngroundableNotes([]);
                   }}
-                  className="mt-6 w-full bg-white/10 hover:bg-white/20 text-white py-3 px-6 rounded-xl font-semibold transition-all border border-white/20"
+                  className="mt-6 w-full bg-white/60 hover:bg-white/20 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all border border-black/[0.06]"
                 >
                   Generate Another
                 </button>
@@ -225,9 +225,9 @@ export default function GenerateBullets() {
           )}
 
           {/* Tips */}
-          <div className="mt-8 bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white font-semibold mb-3">Tips for best results:</h3>
-            <ul className="space-y-2 text-gray-300 text-sm">
+          <div className="mt-8 bg-white/40 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06]">
+            <h3 className="text-[#1A237E] font-semibold mb-3">Tips for best results:</h3>
+            <ul className="space-y-2 text-[#607086] text-sm">
               <li>- Approve accurate resume facts in Career Memory first</li>
               <li>- Add exact metrics before asking for metric-heavy bullets</li>
               <li>- Mention the role or theme you want the approved facts tailored toward</li>

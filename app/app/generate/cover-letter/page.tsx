@@ -124,8 +124,8 @@ export default function GenerateCoverLetter() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -135,17 +135,17 @@ export default function GenerateCoverLetter() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
 
           <Link
             href="/dashboard"
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-[#607086] hover:text-[#1A237E] transition-colors"
           >
             Dashboard
           </Link>
@@ -156,14 +156,14 @@ export default function GenerateCoverLetter() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Generate Cover Letter</h1>
-            <p className="text-gray-400">
+            <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Generate Cover Letter</h1>
+            <p className="text-[#607086]/80">
               Create a professional cover letter using only approved career facts
             </p>
 
-            <p className="mt-2 text-gray-400 text-sm">
+            <p className="mt-2 text-[#607086]/80 text-sm">
               Need to add facts first?{" "}
-              <Link href="/dashboard/profile/facts" className="text-blue-300 hover:text-blue-200">
+              <Link href="/dashboard/profile/facts" className="text-[#26A69A] hover:text-blue-200">
                 Open Career Memory
               </Link>
             </p>
@@ -174,8 +174,8 @@ export default function GenerateCoverLetter() {
               {/* Input Form */}
               <form onSubmit={handleGenerate} className="mb-8 space-y-6">
                 {/* Job Description Input */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                  <label htmlFor="jobDescription" className="block text-white font-semibold mb-3">
+                <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06]">
+                  <label htmlFor="jobDescription" className="block text-[#1A237E] font-semibold mb-3">
                     Job Description
                   </label>
                   <textarea
@@ -183,7 +183,7 @@ export default function GenerateCoverLetter() {
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     placeholder="Paste the full job description here..."
-                    className="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[150px]"
+                    className="w-full bg-white/40 border border-black/[0.06] rounded-xl p-4 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500 min-h-[150px]"
                     disabled={loading}
                   />
                 </div>
@@ -197,7 +197,7 @@ export default function GenerateCoverLetter() {
                 <button
                   type="submit"
                   disabled={loading || !jobDescription.trim()}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Generating..." : "Generate Cover Letter"}
                 </button>
@@ -206,7 +206,7 @@ export default function GenerateCoverLetter() {
               {/* Results */}
               {coverLetter && (
                 <div className="space-y-6">
-                  <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
+                  <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
                     <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
                       <p className="text-blue-200 text-sm leading-relaxed">
                         <strong>AI-generated draft:</strong> Candidate claims cite approved Career Memory
@@ -214,9 +214,9 @@ export default function GenerateCoverLetter() {
                       </p>
                     </div>
                     {evidence && (
-                      <div className="mb-6 p-4 bg-white/5 border border-white/15 rounded-xl">
-                        <p className="text-white text-sm font-semibold">Evidence check</p>
-                        <p className="text-gray-300 text-sm mt-1">
+                      <div className="mb-6 p-4 bg-white/40 border border-white/15 rounded-xl">
+                        <p className="text-[#1A237E] text-sm font-semibold">Evidence check</p>
+                        <p className="text-[#607086] text-sm mt-1">
                           {evidence.valid_fact_ids.length} approved fact
                           {evidence.valid_fact_ids.length === 1 ? "" : "s"} cited.
                         </p>
@@ -230,7 +230,7 @@ export default function GenerateCoverLetter() {
                       </div>
                     )}
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold text-white">Result</h2>
+                      <h2 className="text-2xl font-bold text-[#1A237E]">Result</h2>
                       <div className="flex items-center gap-3">
                         {saveMessage && (
                           <span className="text-green-400 text-sm font-medium">{saveMessage}</span>
@@ -238,7 +238,7 @@ export default function GenerateCoverLetter() {
                         <button
                           onClick={copyCoverLetter}
                           disabled={!coverHasEvidenceTags}
-                          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-semibold transition-all border border-white/20"
+                          className="flex items-center gap-2 bg-white/60 hover:bg-white/20 text-[#1A237E] px-4 py-2 rounded-lg font-semibold transition-all border border-black/[0.06]"
                         >
                           Copy
                         </button>
@@ -246,8 +246,8 @@ export default function GenerateCoverLetter() {
                           onClick={saveCoverLetter}
                           disabled={saved || !coverHasEvidenceTags}
                           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${saved
-                              ? "bg-green-600 text-white cursor-default"
-                              : "bg-blue-600 hover:bg-blue-700 text-white"
+                              ? "bg-green-600 text-[#1A237E] cursor-default"
+                              : "bg-blue-600 hover:bg-blue-700 text-[#1A237E]"
                             }`}
                         >
                           {saved ? "✓ Saved" : "Save"}
@@ -255,8 +255,8 @@ export default function GenerateCoverLetter() {
                       </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/20 rounded-xl p-6">
-                      <div className="text-white whitespace-pre-wrap font-serif leading-relaxed">
+                    <div className="bg-white/40 border border-black/[0.06] rounded-xl p-6">
+                      <div className="text-[#1A237E] whitespace-pre-wrap font-serif leading-relaxed">
                         {coverLetter}
                       </div>
                     </div>
@@ -275,29 +275,29 @@ export default function GenerateCoverLetter() {
 
             {/* Sidebar History */}
             <div className="lg:col-span-1">
-              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/20 sticky top-4">
-                <h3 className="text-white font-bold mb-4 text-lg">History</h3>
+              <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06] sticky top-4">
+                <h3 className="text-[#1A237E] font-bold mb-4 text-lg">History</h3>
                 {history.length === 0 ? (
-                  <p className="text-gray-400 text-sm">No saved letters yet.</p>
+                  <p className="text-[#607086]/80 text-sm">No saved letters yet.</p>
                 ) : (
                   <div className="space-y-4">
                     {history.map((item) => (
                       <div
                         key={item.id}
-                        className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-blue-500/50 cursor-pointer transition-all"
+                        className="bg-white/40 p-4 rounded-xl border border-white/10 hover:border-[#26A69A]/30 cursor-pointer transition-all"
                         onClick={() => {
                           setCoverLetter(item.output);
                           setJobDescription(item.input.job_description || "");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
                       >
-                        <div className="text-xs text-gray-400 mb-2">
+                        <div className="text-xs text-[#607086]/80 mb-2">
                           {new Date(item.created_at).toLocaleDateString()}
                         </div>
-                        <p className="text-white text-sm line-clamp-2 mb-2 font-medium">
+                        <p className="text-[#1A237E] text-sm line-clamp-2 mb-2 font-medium">
                           {item.input.job_description?.substring(0, 100) || "No description"}...
                         </p>
-                        <div className="text-blue-400 text-xs mt-2 flex items-center gap-1">
+                        <div className="text-[#26A69A] text-xs mt-2 flex items-center gap-1">
                           Load <span className="text-lg">→</span>
                         </div>
                       </div>

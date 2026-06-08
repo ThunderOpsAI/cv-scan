@@ -113,11 +113,11 @@ export default function CopilotPage() {
   return (
     <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <nav className="container mx-auto flex flex-none items-center justify-between gap-4 px-4 py-4 sm:py-6">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -127,10 +127,10 @@ export default function CopilotPage() {
         <div className="mx-auto flex min-h-0 w-full max-w-7xl">
           <div className="grid min-h-0 w-full grid-rows-[auto_minmax(0,1fr)] gap-4 md:grid-cols-4 md:grid-rows-1 md:gap-6">
             {/* Sidebar */}
-            <div className="max-h-44 overflow-y-auto rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-lg md:col-span-1 md:max-h-none">
+            <div className="max-h-44 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-lg md:col-span-1 md:max-h-none">
               <button
                 onClick={startNewConversation}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg mb-4"
               >
                 New Chat
               </button>
@@ -142,12 +142,12 @@ export default function CopilotPage() {
                     onClick={() => loadConversation(conv.id)}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                       currentConversation === conv.id
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-300 hover:bg-white/10"
+                        ? "bg-blue-600 text-[#1A237E]"
+                        : "text-[#607086] hover:bg-white/60"
                     }`}
                   >
                     <div className="truncate text-sm">{conv.title}</div>
-                    <div className="text-xs text-gray-400 mt-1">
+                    <div className="text-xs text-[#607086]/80 mt-1">
                       {new Date(conv.last_message_at).toLocaleDateString()}
                     </div>
                   </button>
@@ -156,17 +156,17 @@ export default function CopilotPage() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-lg md:col-span-3">
+            <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-lg md:col-span-3">
               {/* Messages */}
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
                 {messages.length === 0 && !currentConversation && (
                   <div className="flex items-center justify-center h-full text-center">
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-2">Job Search Copilot</h2>
-                      <p className="text-gray-400">
+                      <h2 className="text-2xl font-bold text-[#1A237E] mb-2">Job Search Copilot</h2>
+                      <p className="text-[#607086]/80">
                         Ask me anything about your job search, resume, or interview prep
                       </p>
-                      <div className="mt-6 text-sm text-gray-400">
+                      <div className="mt-6 text-sm text-[#607086]/80">
                         <p>Try asking:</p>
                         <ul className="mt-2 space-y-1">
                           <li>• "Help me tailor my resume for a software engineer role"</li>
@@ -181,9 +181,9 @@ export default function CopilotPage() {
                 {loading && (
                   <div className="flex justify-center">
                     <div className="w-full max-w-2xl animate-pulse space-y-3">
-                      <div className="h-20 w-3/4 rounded-2xl bg-white/10" />
-                      <div className="ml-auto h-16 w-1/2 rounded-2xl bg-white/10" />
-                      <div className="h-24 w-2/3 rounded-2xl bg-white/10" />
+                      <div className="h-20 w-3/4 rounded-2xl bg-white/60" />
+                      <div className="ml-auto h-16 w-1/2 rounded-2xl bg-white/60" />
+                      <div className="h-24 w-2/3 rounded-2xl bg-white/60" />
                     </div>
                   </div>
                 )}
@@ -196,7 +196,7 @@ export default function CopilotPage() {
                     <div
                       className={`max-w-[90%] rounded-lg px-4 py-2 sm:max-w-[80%] ${
                         msg.role === "user"
-                          ? "bg-blue-600 text-white"
+                          ? "bg-blue-600 text-[#1A237E]"
                           : "bg-white/20 text-gray-100"
                       }`}
                     >
@@ -222,7 +222,7 @@ export default function CopilotPage() {
               </div>
 
               {/* Input */}
-              <form onSubmit={sendMessage} className="flex-none border-t border-white/20 p-4">
+              <form onSubmit={sendMessage} className="flex-none border-t border-black/[0.06] p-4">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -230,12 +230,12 @@ export default function CopilotPage() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me anything..."
                     disabled={sending}
-                    className="min-w-0 flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    className="min-w-0 flex-1 px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || sending}
-                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
+                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
                   >
                     Send
                   </button>

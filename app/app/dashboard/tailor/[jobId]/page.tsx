@@ -249,7 +249,7 @@ function TailorInner() {
 
   if (status === "loading" || (status === "authenticated" && !job && !loadError)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 flex items-center justify-center text-white">
+      <div className=" flex items-center justify-center text-[#1A237E]">
         Loading…
       </div>
     );
@@ -259,9 +259,9 @@ function TailorInner() {
 
   if (loadError || !job) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 p-8 text-white">
+      <div className=" p-8 text-[#1A237E]">
         <p>{loadError || "Job not found"}</p>
-        <Link href="/dashboard/job-fit" className="text-blue-400 underline mt-4 inline-block">
+        <Link href="/dashboard/job-fit" className="text-[#26A69A] underline mt-4 inline-block">
           Back to job fit
         </Link>
       </div>
@@ -273,16 +273,16 @@ function TailorInner() {
   const coverHasEvidenceTags = /\[fact:[a-f0-9-]{8,36}\]/i.test(coverLetter);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
+    <div className="">
       <nav className="container mx-auto px-4 py-6 flex flex-wrap justify-between items-center gap-4">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
           <span className="text-indigo-400">CV</span>Scan
         </Link>
         <div className="flex gap-4 text-sm">
-          <Link href={`/dashboard/job-fit`} className="text-gray-300 hover:text-white">
+          <Link href={`/dashboard/job-fit`} className="text-[#607086] hover:text-[#1A237E]">
             Job fit
           </Link>
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -302,14 +302,14 @@ function TailorInner() {
         )}
 
         <header className="space-y-3">
-          <h1 className="text-3xl font-bold text-white">Tailor application</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-[#1A237E]">Tailor application</h1>
+          <p className="text-[#607086]/80 mt-1">
             {job.title} · {job.company}
           </p>
           <p className="text-sm text-amber-100/90 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3">
             This page charges credits per generation: bullets {CREDIT_COSTS.tailoredBullets}, cover letter{" "}
             {CREDIT_COSTS.coverLetter}, follow-up {CREDIT_COSTS.followUp}. You have{" "}
-            <span className="font-semibold text-white">{session.user.credits}</span> credits.{" "}
+            <span className="font-semibold text-[#1A237E]">{session.user.credits}</span> credits.{" "}
             <Link href="/buy-credits" className="underline text-amber-200 hover:text-amber-100">
               Buy credits
             </Link>
@@ -317,7 +317,7 @@ function TailorInner() {
         </header>
 
         {msg && (
-          <div className="rounded-lg border border-white/20 bg-white/5 p-3 text-gray-200 text-sm">{msg}</div>
+          <div className="rounded-lg border border-black/[0.06] bg-white/40 p-3 text-gray-200 text-sm">{msg}</div>
         )}
 
         <section className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-blue-100 text-sm">
@@ -326,9 +326,9 @@ function TailorInner() {
           gap notes and are not exported as experience.
         </section>
 
-        <section className="bg-white/10 border border-white/20 rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white">Tailored bullets</h2>
-          <p className="text-gray-400 text-sm">
+        <section className="bg-white/60 border border-black/[0.06] rounded-xl p-6 space-y-4">
+          <h2 className="text-xl font-semibold text-[#1A237E]">Tailored bullets</h2>
+          <p className="text-[#607086]/80 text-sm">
             Generate from approved facts, then review each line. Edit text, accept or reject, then save — nothing
             is stored until you click Save.
           </p>
@@ -336,7 +336,7 @@ function TailorInner() {
             type="button"
             disabled={!!busy}
             onClick={runBullets}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-[#1A237E] font-medium hover:bg-indigo-500 disabled:opacity-50"
           >
             {busy === "bullets" ? "Generating…" : "Generate tailored bullets (1 credit)"}
           </button>
@@ -345,7 +345,7 @@ function TailorInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-200 border-collapse">
                 <thead>
-                  <tr className="border-b border-white/20">
+                  <tr className="border-b border-black/[0.06]">
                     <th className="py-2 pr-4">Original (fact)</th>
                     <th className="py-2 pr-4">Tailored</th>
                     <th className="py-2">Actions</th>
@@ -354,10 +354,10 @@ function TailorInner() {
                 <tbody>
                   {bulletEvidence.items.map((row) => (
                     <tr key={row.fact_id} className="border-b border-white/10 align-top">
-                      <td className="py-3 pr-4 max-w-[200px] text-gray-300">{row.original}</td>
+                      <td className="py-3 pr-4 max-w-[200px] text-[#607086]">{row.original}</td>
                       <td className="py-3 pr-4">
                         <textarea
-                          className="w-full min-h-[72px] bg-slate-950/80 border border-white/20 rounded p-2 text-white text-sm"
+                          className="w-full min-h-[72px] bg-slate-950/80 border border-black/[0.06] rounded p-2 text-[#1A237E] text-sm"
                           value={itemDrafts[row.fact_id] ?? row.tailored}
                           onChange={(e) =>
                             setItemDrafts((d) => ({ ...d, [row.fact_id]: e.target.value }))
@@ -413,7 +413,7 @@ function TailorInner() {
               type="button"
               disabled={!!busy || !bulletEvidence}
               onClick={saveBulletsAsset}
-              className="rounded-lg bg-green-700 px-4 py-2 text-white text-sm disabled:opacity-50"
+              className="rounded-lg bg-green-700 px-4 py-2 text-[#1A237E] text-sm disabled:opacity-50"
             >
               Save tailored bullets
             </button>
@@ -426,7 +426,7 @@ function TailorInner() {
                     .map((i) => `• ${itemDrafts[i.fact_id] ?? i.tailored}`);
                   downloadText(`bullets-${job.company.slice(0, 20)}.txt`, lines.join("\n"));
                 }}
-                className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
               >
                 Download .txt
               </button>
@@ -434,9 +434,9 @@ function TailorInner() {
           </div>
         </section>
 
-        <section className="bg-white/10 border border-white/20 rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white">Cover letter</h2>
-          <p className="text-gray-400 text-sm">
+        <section className="bg-white/60 border border-black/[0.06] rounded-xl p-6 space-y-4">
+          <h2 className="text-xl font-semibold text-[#1A237E]">Cover letter</h2>
+          <p className="text-[#607086]/80 text-sm">
             Candidate-specific claims must keep evidence tags until you have reviewed them. Downloads and
             copies remove the tags from the exported text after review.
           </p>
@@ -444,21 +444,21 @@ function TailorInner() {
             type="button"
             disabled={!!busy}
             onClick={runCover}
-            className="rounded-lg bg-purple-600 px-4 py-2 text-white font-medium hover:bg-purple-500 disabled:opacity-50"
+            className="rounded-lg bg-purple-600 px-4 py-2 text-[#1A237E] font-medium hover:bg-purple-500 disabled:opacity-50"
           >
             {busy === "cover" ? "Generating…" : "Generate cover letter (2 credits)"}
           </button>
           {coverLetter && (
             <>
               <textarea
-                className="w-full min-h-[220px] bg-slate-950/80 border border-white/20 rounded p-3 text-white text-sm"
+                className="w-full min-h-[220px] bg-slate-950/80 border border-black/[0.06] rounded p-3 text-[#1A237E] text-sm"
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
               />
               {coverEvidenceData && (
-                <div className="rounded-lg border border-white/15 bg-white/5 p-4 text-sm">
-                  <p className="font-semibold text-white">Evidence check</p>
-                  <p className="text-gray-300 mt-1">
+                <div className="rounded-lg border border-white/15 bg-white/40 p-4 text-sm">
+                  <p className="font-semibold text-[#1A237E]">Evidence check</p>
+                  <p className="text-[#607086] mt-1">
                     {coverEvidenceData.valid_fact_ids.length} approved fact
                     {coverEvidenceData.valid_fact_ids.length === 1 ? "" : "s"} cited.
                   </p>
@@ -476,7 +476,7 @@ function TailorInner() {
                   type="button"
                   onClick={saveCoverAsset}
                   disabled={!!busy || !coverHasEvidenceTags}
-                  className="rounded-lg bg-green-700 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-green-700 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Save cover letter
                 </button>
@@ -486,7 +486,7 @@ function TailorInner() {
                     downloadText(`cover-${job.company.slice(0, 20)}.txt`, exportCleanCover)
                   }
                   disabled={!coverHasEvidenceTags}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Download .txt
                 </button>
@@ -497,7 +497,7 @@ function TailorInner() {
                     setMsg("Cover letter copied to clipboard.");
                   }}
                   disabled={!coverHasEvidenceTags}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Copy
                 </button>
@@ -516,7 +516,7 @@ function TailorInner() {
                     ).catch((e) => setMsg(String(e)))
                   }
                   disabled={!coverHasEvidenceTags}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Download PDF
                 </button>
@@ -535,7 +535,7 @@ function TailorInner() {
                     ).catch((e) => setMsg(String(e)))
                   }
                   disabled={!coverHasEvidenceTags}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Download DOCX
                 </button>
@@ -544,12 +544,12 @@ function TailorInner() {
           )}
         </section>
 
-        <section className="bg-white/10 border border-white/20 rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-white">Follow-up email draft</h2>
-          <label className="block text-gray-400 text-sm">Date applied</label>
+        <section className="bg-white/60 border border-black/[0.06] rounded-xl p-6 space-y-4">
+          <h2 className="text-xl font-semibold text-[#1A237E]">Follow-up email draft</h2>
+          <label className="block text-[#607086]/80 text-sm">Date applied</label>
           <input
             type="date"
-            className="bg-slate-950 border border-white/20 rounded px-3 py-2 text-white"
+            className="bg-slate-950 border border-black/[0.06] rounded px-3 py-2 text-[#1A237E]"
             value={appliedAt}
             onChange={(e) => setAppliedAt(e.target.value)}
           />
@@ -557,14 +557,14 @@ function TailorInner() {
             type="button"
             disabled={!!busy}
             onClick={runFollowUp}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-white font-medium disabled:opacity-50"
+            className="rounded-lg bg-amber-600 px-4 py-2 text-[#1A237E] font-medium disabled:opacity-50"
           >
             {busy === "followup" ? "Generating…" : "Generate follow-up draft (1 credit)"}
           </button>
           {followUpDraft && (
             <>
               <textarea
-                className="w-full min-h-[160px] bg-slate-950/80 border border-white/20 rounded p-3 text-white text-sm"
+                className="w-full min-h-[160px] bg-slate-950/80 border border-black/[0.06] rounded p-3 text-[#1A237E] text-sm"
                 value={followUpDraft}
                 onChange={(e) => setFollowUpDraft(e.target.value)}
               />
@@ -572,7 +572,7 @@ function TailorInner() {
                 <button
                   type="button"
                   onClick={saveFollowUpAsset}
-                  className="rounded-lg bg-green-700 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-green-700 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Save draft
                 </button>
@@ -582,7 +582,7 @@ function TailorInner() {
                     void navigator.clipboard.writeText(followUpDraft);
                     setMsg("Copied to clipboard.");
                   }}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-white text-sm"
+                  className="rounded-lg bg-white/60 px-4 py-2 text-[#1A237E] text-sm"
                 >
                   Copy
                 </button>
@@ -591,9 +591,9 @@ function TailorInner() {
           )}
         </section>
 
-        <section className="bg-white/5 border border-white/15 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-2">Application pack</h2>
-          <p className="text-gray-400 text-sm mb-3">
+        <section className="bg-white/40 border border-white/15 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-[#1A237E] mb-2">Application pack</h2>
+          <p className="text-[#607086]/80 text-sm mb-3">
             Zip: job description plus any assets you saved for this job from this page.
           </p>
           <button
@@ -605,7 +605,7 @@ function TailorInner() {
                 `pack-${job.company}.zip`
               ).catch((e) => setMsg(String(e)))
             }
-            className="rounded-lg bg-slate-700 px-4 py-2 text-white text-sm"
+            className="rounded-lg bg-slate-700 px-4 py-2 text-[#1A237E] text-sm"
           >
             Download .zip pack
           </button>
@@ -619,7 +619,7 @@ export default function TailorJobPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="min-h-screen bg-[#F8FCFC] flex items-center justify-center text-[#1A237E]">
           Loading…
         </div>
       }

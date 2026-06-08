@@ -134,40 +134,28 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
-            Dashboard
-          </Link>
-        </div>
-      </nav>
-
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-6">
             {/* Sidebar - Saved Searches */}
             <div className="md:col-span-1">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 mb-4">
-                <h3 className="text-white font-bold mb-3">Saved Searches</h3>
+              <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-4 border border-black/[0.06] mb-4">
+                <h3 className="text-[#1A237E] font-bold mb-3">Saved Searches</h3>
                 {savedSearches.length === 0 ? (
-                  <p className="text-gray-400 text-sm">No saved searches yet</p>
+                  <p className="text-[#607086]/80 text-sm">No saved searches yet</p>
                 ) : (
                   <div className="space-y-2">
                     {savedSearches.map((search) => (
                       <div
                         key={search.id}
-                        className="bg-white/5 rounded-lg p-2 group"
+                        className="bg-white/40 rounded-lg p-2 group"
                       >
                         <button
                           onClick={() => loadSavedSearch(search)}
                           className="w-full text-left"
                         >
-                          <div className="text-white text-sm font-medium">{search.name}</div>
-                          <div className="text-gray-400 text-xs mt-1">
+                          <div className="text-[#1A237E] text-sm font-medium">{search.name}</div>
+                          <div className="text-[#607086]/80 text-xs mt-1">
                             {search.query_params.keywords || "All jobs"}
                           </div>
                         </button>
@@ -187,29 +175,29 @@ export default function JobsPage() {
             {/* Main Content */}
             <div className="md:col-span-3">
               {/* Search Form */}
-              <form onSubmit={searchJobs} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Discover Jobs</h2>
+              <form onSubmit={searchJobs} className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06] mb-6">
+                <h2 className="text-2xl font-bold text-[#1A237E] mb-4">Discover Jobs</h2>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     value={keywords}
                     onChange={(e) => setKeywords(e.target.value)}
                     placeholder="Job title, skills, or keywords"
-                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    className="px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Location (city, state, or country)"
-                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    className="px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 transition-colors"
+                    className="bg-[#26A69A] hover:bg-[#168579] text-white px-6 py-2 rounded-lg disabled:opacity-50 transition-colors"
                   >
                     {loading ? "Searching..." : "Search Jobs"}
                   </button>
@@ -217,7 +205,7 @@ export default function JobsPage() {
                     <button
                       type="button"
                       onClick={() => setShowSaveSearch(true)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="bg-white border border-black/[0.08] hover:bg-gray-50 text-[#1A237E] px-4 py-2 rounded-lg transition-colors"
                     >
                       Save Search
                     </button>
@@ -231,29 +219,29 @@ export default function JobsPage() {
                   {Array.from({ length: 3 }).map((_, index) => (
                     <div
                       key={index}
-                      className="animate-pulse rounded-2xl border border-white/20 bg-white/10 p-6"
+                      className="animate-pulse rounded-2xl border border-black/[0.06] bg-white/60 p-6"
                     >
                       <div className="mb-4 flex items-start justify-between gap-4">
                         <div className="flex-1 space-y-2">
-                          <div className="h-7 w-3/5 rounded-lg bg-white/10" />
-                          <div className="h-5 w-2/5 rounded-lg bg-white/10" />
-                          <div className="h-4 w-1/3 rounded-lg bg-white/10" />
+                          <div className="h-7 w-3/5 rounded-lg bg-white/60" />
+                          <div className="h-5 w-2/5 rounded-lg bg-white/60" />
+                          <div className="h-4 w-1/3 rounded-lg bg-white/60" />
                         </div>
-                        <div className="h-14 w-16 rounded-2xl bg-white/10" />
+                        <div className="h-14 w-16 rounded-2xl bg-white/60" />
                       </div>
-                      <div className="mb-3 h-4 w-1/4 rounded-lg bg-white/10" />
-                      <div className="mb-2 h-4 w-full rounded-lg bg-white/10" />
-                      <div className="mb-2 h-4 w-11/12 rounded-lg bg-white/10" />
-                      <div className="mb-4 h-4 w-2/3 rounded-lg bg-white/10" />
-                      <div className="text-sm text-blue-300">
+                      <div className="mb-3 h-4 w-1/4 rounded-lg bg-white/60" />
+                      <div className="mb-2 h-4 w-full rounded-lg bg-white/60" />
+                      <div className="mb-2 h-4 w-11/12 rounded-lg bg-white/60" />
+                      <div className="mb-4 h-4 w-2/3 rounded-lg bg-white/60" />
+                      <div className="text-sm text-[#26A69A]">
                         Discovering jobs and calculating match scores...
                       </div>
                     </div>
                   ))}
                 </div>
               ) : jobs.length === 0 ? (
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-                  <p className="text-gray-300 mb-2">No jobs found yet.</p>
+                <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
+                  <p className="text-[#607086] mb-2">No jobs found yet.</p>
                   <p className="text-gray-500 text-sm">
                     Try broadening your search
                     {broaderSuggestion ? (
@@ -272,14 +260,14 @@ export default function JobsPage() {
                   {jobs.map((job) => (
                     <div
                       key={job.id}
-                      className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-blue-500/50 transition-all"
+                      className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-1">{job.title}</h3>
-                          <p className="text-blue-400 text-lg">{job.company}</p>
+                          <h3 className="text-xl font-bold text-[#1A237E] mb-1">{job.title}</h3>
+                          <p className="text-[#26A69A] text-lg">{job.company}</p>
                           {job.location && (
-                            <p className="text-gray-400 text-sm">{job.location}</p>
+                            <p className="text-[#607086]/80 text-sm">{job.location}</p>
                           )}
                         </div>
                         {job.match_score !== undefined && (
@@ -287,33 +275,33 @@ export default function JobsPage() {
                             <div className="text-3xl font-bold text-green-400">
                               {job.match_score}%
                             </div>
-                            <div className="text-xs text-gray-400">Match</div>
+                            <div className="text-xs text-[#607086]/80">Match</div>
                           </div>
                         )}
                       </div>
 
                       {job.salary_min && job.salary_max && (
-                        <p className="text-gray-300 text-sm mb-2">
+                        <p className="text-[#607086] text-sm mb-2">
                           ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
                         </p>
                       )}
 
                       {job.description && (
-                        <p className="text-gray-300 text-sm mb-3 line-clamp-3">
+                        <p className="text-[#607086] text-sm mb-3 line-clamp-3">
                           {job.description}
                         </p>
                       )}
 
                       {job.match_reasons && job.match_reasons.length > 0 && (
                         <div className="mb-3">
-                          <p className="text-gray-400 text-xs font-semibold mb-1">
+                          <p className="text-[#607086]/80 text-xs font-semibold mb-1">
                             Why this matches:
                           </p>
                           <div className="flex flex-wrap gap-2">
                             {job.match_reasons.slice(0, 3).map((reason, i) => (
                               <span
                                 key={i}
-                                className="bg-blue-600/30 text-blue-300 text-xs px-2 py-1 rounded"
+                                className="bg-[#26A69A]/10 text-[#26A69A] text-xs px-2 py-1 rounded"
                               >
                                 {reason.type}: {reason.value}
                               </span>
@@ -327,12 +315,12 @@ export default function JobsPage() {
                           href={job.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                          className="bg-[#26A69A] hover:bg-[#168579] text-white px-4 py-2 rounded-lg text-sm transition-colors"
                         >
                           View Job
                         </a>
                         {job.posted_at && (
-                          <span className="text-gray-400 text-sm flex items-center">
+                          <span className="text-[#607086]/80 text-sm flex items-center">
                             Posted {new Date(job.posted_at).toLocaleDateString()}
                           </span>
                         )}
@@ -349,19 +337,19 @@ export default function JobsPage() {
       {/* Save Search Modal */}
       {showSaveSearch && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-blue-500/50">
-            <h3 className="text-2xl font-bold text-white mb-4">Save Search</h3>
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full border border-black/[0.06] shadow-xl">
+            <h3 className="text-2xl font-bold text-[#1A237E] mb-4">Save Search</h3>
             <input
               type="text"
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               placeholder="Search name"
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white mb-4"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] mb-4"
             />
             <div className="flex gap-4">
               <button
                 onClick={saveSearch}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                className="bg-[#26A69A] hover:bg-[#168579] text-white px-6 py-2 rounded-lg"
               >
                 Save
               </button>
@@ -370,7 +358,7 @@ export default function JobsPage() {
                   setShowSaveSearch(false);
                   setSearchName("");
                 }}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                className="bg-gray-200 hover:bg-gray-300 text-[#1A237E] px-6 py-2 rounded-lg"
               >
                 Cancel
               </button>

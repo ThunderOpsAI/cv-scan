@@ -253,37 +253,33 @@ export default function ScannerPage() {
                       </div>
 
                       <div className="flex flex-col gap-3 sm:flex-row mt-2">
-                        <div className="relative flex-1">
+                        <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 px-4 py-3 text-sm font-semibold text-[#168579] transition hover:bg-[#26A69A]/20 cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           <input
                             type="file"
                             accept="image/*"
                             capture="environment"
                             onChange={handleFileChange}
                             disabled={uploading}
-                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                            className="hidden"
                             title="Take photo"
                           />
-                          <div className="flex items-center justify-center gap-2 rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 px-4 py-3 text-sm font-semibold text-[#168579] transition hover:bg-[#26A69A]/20">
-                            <Camera className="h-4 w-4" />
-                            <span>Take Photo</span>
-                          </div>
-                        </div>
+                          <Camera className="h-4 w-4" />
+                          <span>Take Photo</span>
+                        </label>
 
-                        <div className="relative flex-1">
+                        <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06] cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           <input
                             type="file"
                             accept="image/*,.pdf"
                             onChange={handleFileChange}
                             disabled={uploading}
-                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                            className="hidden"
                             data-testid="job-ad-upload-input"
                             title="Upload file"
                           />
-                          <div className="flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06]">
-                            <Upload className="h-4 w-4" />
-                            <span>Upload File</span>
-                          </div>
-                        </div>
+                          <Upload className="h-4 w-4" />
+                          <span>Upload File</span>
+                        </label>
                       </div>
 
                       <div className="grid gap-2 rounded-2xl border border-black/[0.06] bg-[#F7FAFA] p-4 text-xs text-[#607086]">

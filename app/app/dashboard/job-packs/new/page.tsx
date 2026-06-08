@@ -147,8 +147,8 @@ function NewJobPackContent() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -156,46 +156,36 @@ function NewJobPackContent() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/job-packs" className="text-gray-300 hover:text-white">
-            ← Back to Job Packs
-          </Link>
-        </div>
-      </nav>
+    <div className="">
+
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Create Job Pack</h1>
-            <p className="text-gray-400">
+            <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Create Job Pack</h1>
+            <p className="text-[#607086]/80">
               Generate a tailored resume, cover letter, and ATS analysis
             </p>
           </div>
 
           {/* Loading State */}
           {loading && (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mb-4"></div>
-                <h3 className="text-xl font-bold text-white mb-2">Creating Your Job Pack</h3>
-                <p className="text-blue-400 animate-pulse">{loadingStep}</p>
+                <h3 className="text-xl font-bold text-[#1A237E] mb-2">Creating Your Job Pack</h3>
+                <p className="text-[#26A69A] animate-pulse">{loadingStep}</p>
               </div>
             </div>
           )}
 
           {/* Form */}
           {!loading && (
-            <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <form onSubmit={handleSubmit} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
               <div className="space-y-6">
                 <div>
-                  <label className="block text-white font-semibold mb-2">
+                  <label className="block text-[#1A237E] font-semibold mb-2">
                     Upload job ad screenshot
                   </label>
                   <input
@@ -204,48 +194,48 @@ function NewJobPackContent() {
                     capture="environment"
                     onChange={handleJobAdImageUpload}
                     disabled={ocrLoading}
-                    className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700 disabled:opacity-60"
+                    className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700 disabled:opacity-60"
                   />
-                  <p className="mt-2 text-sm text-gray-400">
+                  <p className="mt-2 text-sm text-[#607086]/80">
                     Take a clear screenshot or photo. CVScan will fill the fields below for review.
                   </p>
                   {ocrLoading && (
-                    <p className="mt-2 text-sm text-blue-300">Reading job ad screenshot...</p>
+                    <p className="mt-2 text-sm text-[#26A69A]">Reading job ad screenshot...</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Job Title *</label>
+                  <label className="block text-[#1A237E] font-semibold mb-2">Job Title *</label>
                   <input
                     type="text"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                     placeholder="e.g., Senior Product Manager"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     data-testid="job-title-input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Company *</label>
+                  <label className="block text-[#1A237E] font-semibold mb-2">Company *</label>
                   <input
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     placeholder="e.g., Stripe"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     data-testid="company-input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Job Description *</label>
+                  <label className="block text-[#1A237E] font-semibold mb-2">Job Description *</label>
                   <textarea
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     rows={12}
                     placeholder="Paste the full job description here..."
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+                    className="w-full px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
                     data-testid="job-description-input"
                   />
                 </div>
@@ -257,8 +247,8 @@ function NewJobPackContent() {
                 )}
 
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                  <h4 className="text-white font-semibold mb-2">What you'll get:</h4>
-                  <ul className="text-gray-300 space-y-1 text-sm">
+                  <h4 className="text-[#1A237E] font-semibold mb-2">What you'll get:</h4>
+                  <ul className="text-[#607086] space-y-1 text-sm">
                     <li>✓ Tailored resume optimized for this role</li>
                     <li>✓ Custom cover letter</li>
                     <li>✓ ATS compatibility score</li>
@@ -271,7 +261,7 @@ function NewJobPackContent() {
                 <button
                   type="submit"
                   disabled={ocrLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all"
+                  className="w-full bg-[#26A69A] hover:bg-[#168579] disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all"
                   data-testid="create-job-pack-submit"
                 >
                   Generate Job Pack
@@ -288,8 +278,8 @@ function NewJobPackContent() {
 export default function NewJobPackPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     }>
       <NewJobPackContent />

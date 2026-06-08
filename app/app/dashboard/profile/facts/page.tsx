@@ -388,8 +388,8 @@ export default function ProfileFactsPage() {
 
   if (status === "loading" || loadingFacts) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -399,16 +399,16 @@ export default function ProfileFactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/profile" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard/profile" className="text-[#607086] hover:text-[#1A237E]">
             Profile
           </Link>
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -417,11 +417,11 @@ export default function ProfileFactsPage() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto space-y-8">
           <header>
-            <p className="text-blue-300 text-sm font-semibold uppercase tracking-wide">
+            <p className="text-[#26A69A] text-sm font-semibold uppercase tracking-wide">
               Approved facts only
             </p>
-            <h1 className="text-4xl font-bold text-white mt-2">Career Memory</h1>
-            <p className="text-gray-300 mt-3 max-w-3xl">
+            <h1 className="text-4xl font-bold text-[#1A237E] mt-2">Career Memory</h1>
+            <p className="text-[#607086] mt-3 max-w-3xl">
               Import a resume, review the extracted facts, and approve only what is accurate.
               Not approved means not saved and not used by generation.
             </p>
@@ -441,8 +441,8 @@ export default function ProfileFactsPage() {
 
           <section className="grid lg:grid-cols-3 gap-8">
             <form onSubmit={importResume} className="lg:col-span-2 space-y-5">
-              <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
-                <label htmlFor="resume-label" className="block text-white font-semibold mb-2">
+              <div className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
+                <label htmlFor="resume-label" className="block text-[#1A237E] font-semibold mb-2">
                   Resume label
                 </label>
                 <input
@@ -450,13 +450,13 @@ export default function ProfileFactsPage() {
                   value={label}
                   onChange={(event) => setLabel(event.target.value)}
                   placeholder="Base resume, April 2026"
-                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white/40 border border-black/[0.06] rounded-lg p-3 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   disabled={importing}
                 />
               </div>
 
-              <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
-                <label htmlFor="resume-upload" className="block text-white font-semibold mb-2">
+              <div className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
+                <label htmlFor="resume-upload" className="block text-[#1A237E] font-semibold mb-2">
                   Upload resume text
                 </label>
                 <input
@@ -464,16 +464,16 @@ export default function ProfileFactsPage() {
                   type="file"
                   accept=".txt,.md,.rtf,.csv,.pdf,.docx"
                   onChange={handleFileUpload}
-                  className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700"
+                  className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700"
                   disabled={importing}
                 />
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-[#607086]/80 text-sm mt-2">
                   Upload TXT, PDF, or DOCX resumes. Paste the resume text below if the extracted text looks wrong.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
-                <label htmlFor="resume-image-upload" className="block text-white font-semibold mb-2">
+              <div className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
+                <label htmlFor="resume-image-upload" className="block text-[#1A237E] font-semibold mb-2">
                   Photo or screenshot of resume
                 </label>
                 <input
@@ -482,19 +482,19 @@ export default function ProfileFactsPage() {
                   accept="image/*"
                   capture="environment"
                   onChange={handleResumeImageUpload}
-                  className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700"
+                  className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700"
                   disabled={importing || ocrLoading}
                 />
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-[#607086]/80 text-sm mt-2">
                   Take a clear photo or upload a screenshot. CVScan will read it and fill the resume content box for review.
                 </p>
                 {ocrLoading && (
-                  <p className="text-blue-300 text-sm mt-3">Reading resume image...</p>
+                  <p className="text-[#26A69A] text-sm mt-3">Reading resume image...</p>
                 )}
               </div>
 
-              <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
-                <label htmlFor="resume-content" className="block text-white font-semibold mb-2">
+              <div className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
+                <label htmlFor="resume-content" className="block text-[#1A237E] font-semibold mb-2">
                   Resume content
                 </label>
                 <textarea
@@ -502,38 +502,38 @@ export default function ProfileFactsPage() {
                   value={resumeText}
                   onChange={(event) => setResumeText(event.target.value)}
                   placeholder="Paste your resume text here..."
-                  className="min-h-[260px] w-full bg-white/5 border border-white/20 rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="min-h-[260px] w-full bg-white/40 border border-black/[0.06] rounded-lg p-4 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   disabled={importing}
                 />
                 <button
                   type="submit"
                   disabled={importing || resumeText.trim().length < 50}
-                  className="mt-5 w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-5 w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-[#1A237E] transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {importing ? "Extracting facts..." : "Extract facts for review"}
                 </button>
               </div>
             </form>
 
-            <aside className="bg-white/5 backdrop-blur-lg rounded-lg p-6 border border-white/20 h-fit">
-              <h2 className="text-xl font-bold text-white mb-3">How it works</h2>
-              <ul className="text-gray-400 text-sm space-y-3 list-disc list-inside">
+            <aside className="bg-white/40 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06] h-fit">
+              <h2 className="text-xl font-bold text-[#1A237E] mb-3">How it works</h2>
+              <ul className="text-[#607086]/80 text-sm space-y-3 list-disc list-inside">
                 <li>Only facts marked for generation power tailoring and ATS scans.</li>
                 <li>Add facts manually anytime — you are responsible for accuracy.</li>
                 <li>Pause a fact to keep it on file but exclude it from generation.</li>
               </ul>
               <div className="mt-6 pt-6 border-t border-white/10">
                 <p className="text-gray-500 text-xs uppercase tracking-wide">Active in generation</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-2xl font-bold text-[#1A237E] mt-1">
                   {memoryFacts.filter((f) => f.is_approved).length}
                 </p>
               </div>
             </aside>
           </section>
 
-          <section className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
-            <h2 className="text-2xl font-bold text-white">Manage saved facts</h2>
-            <p className="text-gray-400 mt-2 max-w-3xl">
+          <section className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
+            <h2 className="text-2xl font-bold text-[#1A237E]">Manage saved facts</h2>
+            <p className="text-[#607086]/80 mt-2 max-w-3xl">
               Add, edit, pause, or delete facts at any time. Paused facts stay in your list but are not used by
               generation.
             </p>
@@ -543,14 +543,14 @@ export default function ProfileFactsPage() {
               className="mt-6 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end"
             >
               <div className="w-full md:w-52">
-                <label htmlFor="manual-fact-type" className="block text-white text-sm font-semibold mb-2">
+                <label htmlFor="manual-fact-type" className="block text-[#1A237E] text-sm font-semibold mb-2">
                   Type
                 </label>
                 <select
                   id="manual-fact-type"
                   value={manualType}
                   onChange={(event) => setManualType(event.target.value as ProfileFactType)}
-                  className="w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] focus:border-blue-500 focus:outline-none"
                   disabled={addingManual}
                 >
                   {FACT_TYPES.map((type) => (
@@ -561,7 +561,7 @@ export default function ProfileFactsPage() {
                 </select>
               </div>
               <div className="flex-1 min-w-[200px]">
-                <label htmlFor="manual-fact-text" className="block text-white text-sm font-semibold mb-2">
+                <label htmlFor="manual-fact-text" className="block text-[#1A237E] text-sm font-semibold mb-2">
                   Fact text
                 </label>
                 <textarea
@@ -569,14 +569,14 @@ export default function ProfileFactsPage() {
                   value={manualText}
                   onChange={(event) => setManualText(event.target.value)}
                   placeholder="e.g. Led a team of five engineers on the payments migration."
-                  className="min-h-[88px] w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                  className="min-h-[88px] w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                   disabled={addingManual}
                 />
               </div>
               <button
                 type="submit"
                 disabled={addingManual || manualText.trim().length < 3}
-                className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 md:shrink-0"
+                className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-[#1A237E] transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 md:shrink-0"
               >
                 {addingManual ? "Adding..." : "Add fact"}
               </button>
@@ -590,18 +590,18 @@ export default function ProfileFactsPage() {
                   <div
                     key={fact.fact_id}
                     className={`rounded-lg border p-4 ${
-                      fact.is_approved ? "border-green-500/40 bg-green-500/5" : "border-white/15 bg-white/5 opacity-90"
+                      fact.is_approved ? "border-green-500/40 bg-green-500/5" : "border-white/15 bg-white/40 opacity-90"
                     }`}
                   >
                     {editingId === fact.fact_id ? (
                       <div className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-[220px_1fr]">
                           <div>
-                            <label className="block text-white text-sm font-semibold mb-2">Fact type</label>
+                            <label className="block text-[#1A237E] text-sm font-semibold mb-2">Fact type</label>
                             <select
                               value={editType}
                               onChange={(event) => setEditType(event.target.value as ProfileFactType)}
-                              className="w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] focus:border-blue-500 focus:outline-none"
                             >
                               {FACT_TYPES.map((type) => (
                                 <option key={type} value={type}>
@@ -611,11 +611,11 @@ export default function ProfileFactsPage() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-white text-sm font-semibold mb-2">Fact text</label>
+                            <label className="block text-[#1A237E] text-sm font-semibold mb-2">Fact text</label>
                             <textarea
                               value={editText}
                               onChange={(event) => setEditText(event.target.value)}
-                              className="min-h-[100px] w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white focus:border-blue-500 focus:outline-none"
+                              className="min-h-[100px] w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] focus:border-blue-500 focus:outline-none"
                             />
                           </div>
                         </div>
@@ -633,14 +633,14 @@ export default function ProfileFactsPage() {
                             type="button"
                             onClick={() => saveEdit(fact.fact_id)}
                             disabled={savingEditId === fact.fact_id || editText.trim().length < 3}
-                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {savingEditId === fact.fact_id ? "Saving..." : "Save changes"}
                           </button>
                           <button
                             type="button"
                             onClick={cancelEdit}
-                            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                            className="rounded-lg bg-white/60 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-white/20"
                           >
                             Cancel
                           </button>
@@ -649,16 +649,16 @@ export default function ProfileFactsPage() {
                     ) : (
                       <>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-blue-300 text-xs font-semibold uppercase">
+                          <span className="text-[#26A69A] text-xs font-semibold uppercase">
                             {FACT_TYPE_LABELS[fact.fact_type]}
                           </span>
                           <span className="text-gray-500 text-xs">·</span>
-                          <span className="text-gray-400 text-xs">{SOURCE_LABELS[fact.source]}</span>
+                          <span className="text-[#607086]/80 text-xs">{SOURCE_LABELS[fact.source]}</span>
                           <span
                             className={`ml-auto text-xs font-semibold uppercase px-2 py-0.5 rounded ${
                               fact.is_approved
                                 ? "bg-green-500/20 text-green-200"
-                                : "bg-gray-600/40 text-gray-300"
+                                : "bg-gray-600/40 text-[#607086]"
                             }`}
                           >
                             {fact.is_approved ? "Active" : "Paused"}
@@ -669,7 +669,7 @@ export default function ProfileFactsPage() {
                           <button
                             type="button"
                             onClick={() => startEdit(fact)}
-                            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                            className="rounded-lg bg-white/60 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-white/20"
                           >
                             Edit
                           </button>
@@ -677,7 +677,7 @@ export default function ProfileFactsPage() {
                             type="button"
                             onClick={() => toggleFactApproved(fact)}
                             disabled={savingEditId === fact.fact_id || deletingId === fact.fact_id}
-                            className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {savingEditId === fact.fact_id
                               ? "Updating..."
@@ -703,11 +703,11 @@ export default function ProfileFactsPage() {
           </section>
 
           {reviewFacts.length > 0 && (
-            <section className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20">
+            <section className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06]">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Review extracted facts</h2>
-                  <p className="text-gray-400 mt-1">
+                  <h2 className="text-2xl font-bold text-[#1A237E]">Review extracted facts</h2>
+                  <p className="text-[#607086]/80 mt-1">
                     Edit the text if needed, approve accurate facts, and reject anything that should not be saved.
                   </p>
                 </div>
@@ -715,7 +715,7 @@ export default function ProfileFactsPage() {
                   type="button"
                   onClick={saveApprovedFacts}
                   disabled={saving || approvedCount === 0}
-                  className="rounded-lg bg-green-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-green-600 px-5 py-3 font-semibold text-[#1A237E] transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Saving..." : `Save ${approvedCount} approved`}
                 </button>
@@ -729,13 +729,13 @@ export default function ProfileFactsPage() {
                       fact.status === "approved"
                         ? "border-green-500/50 bg-green-500/10"
                         : fact.status === "rejected"
-                          ? "border-gray-600 bg-white/5 opacity-70"
-                          : "border-white/20 bg-white/5"
+                          ? "border-gray-600 bg-white/40 opacity-70"
+                          : "border-black/[0.06] bg-white/40"
                     }`}
                   >
                     <div className="grid gap-4 md:grid-cols-[220px_1fr]">
                       <div>
-                        <label className="block text-white text-sm font-semibold mb-2">
+                        <label className="block text-[#1A237E] text-sm font-semibold mb-2">
                           Fact type
                         </label>
                         <select
@@ -746,7 +746,7 @@ export default function ProfileFactsPage() {
                               status: "pending",
                             })
                           }
-                          className="w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white focus:border-blue-500 focus:outline-none"
+                          className="w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] focus:border-blue-500 focus:outline-none"
                         >
                           {FACT_TYPES.map((type) => (
                             <option key={type} value={type}>
@@ -756,7 +756,7 @@ export default function ProfileFactsPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-white text-sm font-semibold mb-2">
+                        <label className="block text-[#1A237E] text-sm font-semibold mb-2">
                           Fact text
                         </label>
                         <textarea
@@ -767,7 +767,7 @@ export default function ProfileFactsPage() {
                               status: "pending",
                             })
                           }
-                          className="min-h-[88px] w-full rounded-lg border border-white/20 bg-slate-950 p-3 text-white focus:border-blue-500 focus:outline-none"
+                          className="min-h-[88px] w-full rounded-lg border border-black/[0.06] bg-slate-950 p-3 text-[#1A237E] focus:border-blue-500 focus:outline-none"
                         />
                       </div>
                     </div>
@@ -775,25 +775,25 @@ export default function ProfileFactsPage() {
                       <button
                         type="button"
                         onClick={() => updateReviewFact(fact.temp_id, { status: "approved" })}
-                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-green-700"
                       >
                         Approve
                       </button>
                       <button
                         type="button"
                         onClick={() => updateReviewFact(fact.temp_id, { status: "pending" })}
-                        className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                        className="rounded-lg bg-white/60 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-white/20"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => updateReviewFact(fact.temp_id, { status: "rejected" })}
-                        className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-600"
+                        className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-gray-600"
                       >
                         Reject
                       </button>
-                      <span className="self-center text-sm text-gray-300">
+                      <span className="self-center text-sm text-[#607086]">
                         Status: {fact.status}
                       </span>
                     </div>

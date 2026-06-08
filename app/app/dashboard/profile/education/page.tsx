@@ -99,20 +99,20 @@ export default function EducationPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/profile" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard/profile" className="text-[#607086] hover:text-[#1A237E]">
             Profile
           </Link>
         </div>
@@ -122,8 +122,8 @@ export default function EducationPage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Education</h1>
-              <p className="text-gray-400">Add your educational background</p>
+              <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Education</h1>
+              <p className="text-[#607086]/80">Add your educational background</p>
             </div>
             {!showForm && (
               <button
@@ -132,7 +132,7 @@ export default function EducationPage() {
                   setEditing(null);
                   setShowForm(true);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg"
               >
                 Add Education
               </button>
@@ -141,81 +141,81 @@ export default function EducationPage() {
 
           {/* Education Form */}
           {showForm && (
-            <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-              <h3 className="text-xl font-bold text-white mb-6">
+            <form onSubmit={handleSubmit} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
+              <h3 className="text-xl font-bold text-[#1A237E] mb-6">
                 {editing ? "Edit Education" : "Add Education"}
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-white mb-2">Institution *</label>
+                  <label className="block text-[#1A237E] mb-2">Institution *</label>
                   <input
                     type="text"
                     value={formData.institution}
                     onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                   />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">Degree *</label>
+                    <label className="block text-[#1A237E] mb-2">Degree *</label>
                     <input
                       type="text"
                       value={formData.degree}
                       onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
                       placeholder="e.g., Bachelor of Science"
                       required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">Field of Study</label>
+                    <label className="block text-[#1A237E] mb-2">Field of Study</label>
                     <input
                       type="text"
                       value={formData.field_of_study}
                       onChange={(e) => setFormData({ ...formData, field_of_study: e.target.value })}
                       placeholder="e.g., Computer Science"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Location</label>
+                  <label className="block text-[#1A237E] mb-2">Location</label>
                   <input
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                   />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">Start Date *</label>
+                    <label className="block text-[#1A237E] mb-2">Start Date *</label>
                     <input
                       type="date"
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                       required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">End Date</label>
+                    <label className="block text-[#1A237E] mb-2">End Date</label>
                     <input
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">GPA</label>
+                    <label className="block text-[#1A237E] mb-2">GPA</label>
                     <input
                       type="number"
                       step="0.01"
@@ -224,34 +224,34 @@ export default function EducationPage() {
                       value={formData.gpa}
                       onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
                       placeholder="e.g., 3.85"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">Honors</label>
+                    <label className="block text-[#1A237E] mb-2">Honors</label>
                     <input
                       type="text"
                       value={formData.honors}
                       onChange={(e) => setFormData({ ...formData, honors: e.target.value })}
                       placeholder="e.g., Summa Cum Laude"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Description</label>
+                  <label className="block text-[#1A237E] mb-2">Description</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
                     placeholder="Relevant coursework, achievements, etc."
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                   />
                 </div>
 
                 <div className="flex gap-4">
-                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg">
                     {editing ? "Update" : "Add"} Education
                   </button>
                   <button
@@ -261,7 +261,7 @@ export default function EducationPage() {
                       setEditing(null);
                       resetForm();
                     }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                    className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg"
                   >
                     Cancel
                   </button>
@@ -272,11 +272,11 @@ export default function EducationPage() {
 
           {/* Education List */}
           {education.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-              <p className="text-gray-400 mb-4">No education added yet</p>
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
+              <p className="text-[#607086]/80 mb-4">No education added yet</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="text-blue-400 hover:text-blue-300"
+                className="text-[#26A69A] hover:text-[#26A69A]"
               >
                 Add your first education →
               </button>
@@ -284,28 +284,28 @@ export default function EducationPage() {
           ) : (
             <div className="space-y-6">
               {education.map((edu) => (
-                <div key={edu.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <div key={edu.id} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-white">{edu.degree}</h3>
-                      <p className="text-blue-400 text-lg">{edu.institution}</p>
+                      <h3 className="text-2xl font-bold text-[#1A237E]">{edu.degree}</h3>
+                      <p className="text-[#26A69A] text-lg">{edu.institution}</p>
                       {edu.field_of_study && (
-                        <p className="text-gray-300 mt-1">{edu.field_of_study}</p>
+                        <p className="text-[#607086] mt-1">{edu.field_of_study}</p>
                       )}
-                      {edu.location && <p className="text-gray-400">{edu.location}</p>}
-                      <p className="text-gray-400 text-sm mt-1">
+                      {edu.location && <p className="text-[#607086]/80">{edu.location}</p>}
+                      <p className="text-[#607086]/80 text-sm mt-1">
                         {new Date(edu.start_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })} -{" "}
                         {edu.end_date ? new Date(edu.end_date).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Present"}
                       </p>
 
                       {edu.gpa && (
-                        <p className="text-gray-300 mt-3">GPA: {edu.gpa}</p>
+                        <p className="text-[#607086] mt-3">GPA: {edu.gpa}</p>
                       )}
                       {edu.honors && (
                         <p className="text-green-400 mt-1">{edu.honors}</p>
                       )}
                       {edu.description && (
-                        <p className="text-gray-300 mt-3">{edu.description}</p>
+                        <p className="text-[#607086] mt-3">{edu.description}</p>
                       )}
                     </div>
 
@@ -326,7 +326,7 @@ export default function EducationPage() {
                           });
                           setShowForm(true);
                         }}
-                        className="text-blue-400 hover:text-blue-300"
+                        className="text-[#26A69A] hover:text-[#26A69A]"
                       >
                         Edit
                       </button>

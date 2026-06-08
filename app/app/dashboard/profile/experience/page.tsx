@@ -185,20 +185,20 @@ export default function ExperiencePage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/profile" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard/profile" className="text-[#607086] hover:text-[#1A237E]">
             Profile
           </Link>
         </div>
@@ -208,8 +208,8 @@ export default function ExperiencePage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Work Experience</h1>
-              <p className="text-gray-400">Add your professional history with metrics</p>
+              <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Work Experience</h1>
+              <p className="text-[#607086]/80">Add your professional history with metrics</p>
             </div>
             {!showExpForm && (
               <button
@@ -218,7 +218,7 @@ export default function ExperiencePage() {
                   setEditingExp(null);
                   setShowExpForm(true);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg"
               >
                 Add Experience
               </button>
@@ -227,68 +227,68 @@ export default function ExperiencePage() {
 
           {/* Experience Form */}
           {showExpForm && (
-            <form onSubmit={handleExpSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-              <h3 className="text-xl font-bold text-white mb-6">
+            <form onSubmit={handleExpSubmit} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
+              <h3 className="text-xl font-bold text-[#1A237E] mb-6">
                 {editingExp ? "Edit Experience" : "Add Experience"}
               </h3>
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">Company *</label>
+                    <label className="block text-[#1A237E] mb-2">Company *</label>
                     <input
                       type="text"
                       value={expFormData.company}
                       onChange={(e) => setExpFormData({ ...expFormData, company: e.target.value })}
                       required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">Job Title *</label>
+                    <label className="block text-[#1A237E] mb-2">Job Title *</label>
                     <input
                       type="text"
                       value={expFormData.title}
                       onChange={(e) => setExpFormData({ ...expFormData, title: e.target.value })}
                       required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Location</label>
+                  <label className="block text-[#1A237E] mb-2">Location</label>
                   <input
                     type="text"
                     value={expFormData.location}
                     onChange={(e) => setExpFormData({ ...expFormData, location: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                   />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white mb-2">Start Date *</label>
+                    <label className="block text-[#1A237E] mb-2">Start Date *</label>
                     <input
                       type="date"
                       value={expFormData.start_date}
                       onChange={(e) => setExpFormData({ ...expFormData, start_date: e.target.value })}
                       required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                     />
                   </div>
                   <div>
-                    <label className="block text-white mb-2">End Date</label>
+                    <label className="block text-[#1A237E] mb-2">End Date</label>
                     <input
                       type="date"
                       value={expFormData.end_date}
                       onChange={(e) => setExpFormData({ ...expFormData, end_date: e.target.value })}
                       disabled={expFormData.is_current}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white disabled:opacity-50"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] disabled:opacity-50"
                     />
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 text-white">
+                <label className="flex items-center gap-2 text-[#1A237E]">
                   <input
                     type="checkbox"
                     checked={expFormData.is_current}
@@ -299,7 +299,7 @@ export default function ExperiencePage() {
                 </label>
 
                 <div className="flex gap-4">
-                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg">
                     {editingExp ? "Update" : "Add"} Experience
                   </button>
                   <button
@@ -309,7 +309,7 @@ export default function ExperiencePage() {
                       setEditingExp(null);
                       resetExpForm();
                     }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                    className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg"
                   >
                     Cancel
                   </button>
@@ -320,11 +320,11 @@ export default function ExperiencePage() {
 
           {/* Experiences List */}
           {experiences.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-              <p className="text-gray-400 mb-4">No experience added yet</p>
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
+              <p className="text-[#607086]/80 mb-4">No experience added yet</p>
               <button
                 onClick={() => setShowExpForm(true)}
-                className="text-blue-400 hover:text-blue-300"
+                className="text-[#26A69A] hover:text-[#26A69A]"
               >
                 Add your first experience →
               </button>
@@ -332,13 +332,13 @@ export default function ExperiencePage() {
           ) : (
             <div className="space-y-6">
               {experiences.map((exp) => (
-                <div key={exp.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <div key={exp.id} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-2xl font-bold text-white">{exp.title}</h3>
-                      <p className="text-blue-400 text-lg">{exp.company}</p>
-                      {exp.location && <p className="text-gray-400">{exp.location}</p>}
-                      <p className="text-gray-400 text-sm mt-1">
+                      <h3 className="text-2xl font-bold text-[#1A237E]">{exp.title}</h3>
+                      <p className="text-[#26A69A] text-lg">{exp.company}</p>
+                      {exp.location && <p className="text-[#607086]/80">{exp.location}</p>}
+                      <p className="text-[#607086]/80 text-sm mt-1">
                         {new Date(exp.start_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })} -{" "}
                         {exp.is_current ? "Present" : new Date(exp.end_date!).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                       </p>
@@ -358,7 +358,7 @@ export default function ExperiencePage() {
                           });
                           setShowExpForm(true);
                         }}
-                        className="text-blue-400 hover:text-blue-300"
+                        className="text-[#26A69A] hover:text-[#26A69A]"
                       >
                         Edit
                       </button>
@@ -374,10 +374,10 @@ export default function ExperiencePage() {
                   {/* Bullets */}
                   <div className="mt-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-white font-semibold">Achievements & Responsibilities</h4>
+                      <h4 className="text-[#1A237E] font-semibold">Achievements & Responsibilities</h4>
                       <button
                         onClick={() => setShowBulletForm(exp.id)}
-                        className="text-sm text-blue-400 hover:text-blue-300"
+                        className="text-sm text-[#26A69A] hover:text-[#26A69A]"
                       >
                         + Add Bullet
                       </button>
@@ -390,11 +390,11 @@ export default function ExperiencePage() {
                           value={bulletContent}
                           onChange={(e) => setBulletContent(e.target.value)}
                           placeholder="Enter bullet point..."
-                          className="flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                          className="flex-1 px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                         />
                         <button
                           onClick={() => handleAddBullet(exp.id, true)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                          className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg"
                         >
                           Add (Manual)
                         </button>
@@ -403,7 +403,7 @@ export default function ExperiencePage() {
                             setShowBulletForm(null);
                             setBulletContent("");
                           }}
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg"
+                          className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-4 py-2 rounded-lg"
                         >
                           Cancel
                         </button>
@@ -413,9 +413,9 @@ export default function ExperiencePage() {
                     <ul className="space-y-3">
                       {bullets[exp.id]?.map((bullet) => (
                         <li key={bullet.id} className="flex gap-3 group">
-                          <span className="text-blue-400 mt-1">•</span>
+                          <span className="text-[#26A69A] mt-1">•</span>
                           <div className="flex-1">
-                            <p className="text-gray-300">{bullet.content}</p>
+                            <p className="text-[#607086]">{bullet.content}</p>
                             {bullet.manual && (
                               <span className="text-xs text-yellow-400 block mt-1">manually added — not from your verified profile</span>
                             )}
@@ -427,7 +427,7 @@ export default function ExperiencePage() {
                             {!bullet.mined_metrics && (
                               <button
                                 onClick={() => startMetricMining(bullet, exp)}
-                                className="text-xs text-blue-400 hover:text-blue-300"
+                                className="text-xs text-[#26A69A] hover:text-[#26A69A]"
                               >
                                 Mine Metrics
                               </button>
@@ -451,14 +451,14 @@ export default function ExperiencePage() {
           {/* Metric Mining Dialog */}
           {miningBullet && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-slate-900 rounded-2xl p-8 max-w-2xl w-full border border-blue-500/50">
-                <h3 className="text-2xl font-bold text-white mb-4">Metric Mining</h3>
-                <p className="text-gray-400 mb-6">Answer these questions to enhance your bullet with quantifiable metrics:</p>
+              <div className="bg-[#F8FCFC] rounded-2xl p-8 max-w-2xl w-full border border-[#26A69A]/30">
+                <h3 className="text-2xl font-bold text-[#1A237E] mb-4">Metric Mining</h3>
+                <p className="text-[#607086]/80 mb-6">Answer these questions to enhance your bullet with quantifiable metrics:</p>
 
                 <div className="space-y-4 mb-6">
                   {miningBullet.questions.map((question, i) => (
                     <div key={i}>
-                      <label className="block text-white mb-2">{question}</label>
+                      <label className="block text-[#1A237E] mb-2">{question}</label>
                       <input
                         type="text"
                         value={miningBullet.answers[i]}
@@ -467,7 +467,7 @@ export default function ExperiencePage() {
                           newAnswers[i] = e.target.value;
                           setMiningBullet({ ...miningBullet, answers: newAnswers });
                         }}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                        className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
                       />
                     </div>
                   ))}
@@ -481,13 +481,13 @@ export default function ExperiencePage() {
                       )?.id;
                       if (expId) submitMetricAnswers(expId);
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg"
                   >
                     Enhance Bullet
                   </button>
                   <button
                     onClick={() => setMiningBullet(null)}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+                    className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg"
                   >
                     Cancel
                   </button>
