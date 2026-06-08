@@ -13,7 +13,7 @@ import type { ATSScan } from "@/types/job-packs";
 
 const quickActions = [
   { href: "/dashboard/scanner", label: "Scan resume", variant: "primary" as const },
-  { href: "/dashboard/job-fit", label: "Scan job ad", variant: "secondary" as const },
+  { href: "/dashboard/scanner", label: "Scan job ad", variant: "secondary" as const },
   { href: "/generate/cover-letter", label: "New cover letter", variant: "ghost" as const },
 ];
 

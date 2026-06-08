@@ -25,8 +25,6 @@ type UserCreditsRow = {
   plan_tier?: string | null;
 };
 
-type ConsentFields = ReturnType<typeof buildConsentFields>;
-
 
 const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;

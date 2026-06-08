@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import imageCompression from "browser-image-compression";
+import { Camera, Upload, Loader2 } from "lucide-react";
 import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { ScanAnimation } from "@/components/ui/ScanAnimation";
@@ -120,8 +122,19 @@ export default function ScannerPage() {
     setUploading(true);
 
     try {
+      let finalFile = file;
+      // Compress large images from mobile cameras before upload
+      if (file.type.startsWith("image/")) {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        finalFile = await imageCompression(file, options);
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", finalFile);
 
       const res = await fetch("/api/jobs/ocr", {
         method: "POST",
@@ -130,7 +143,7 @@ export default function ScannerPage() {
       const data = (await res.json()) as JobAdOcrResponse;
 
       if (!res.ok) {
-        throw new Error(data.error || "Could not read that screenshot");
+        throw new Error(data.error || "Could not read that file");
       }
 
       setJobDescription(data.text || "");
@@ -224,29 +237,55 @@ export default function ScannerPage() {
                   </div>
 
                   <div className="relative mt-6">
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={handleFileChange}
-                      disabled={uploading}
-                      aria-label="Upload file or take a photo"
-                      className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-                      data-testid="job-ad-upload-input"
-                    />
                     <div className="flex flex-col gap-4 rounded-[1.4rem] border border-black/[0.08] bg-white p-5 shadow-sm transition hover:border-[#26A69A]/30 hover:bg-[#F8FCFC]">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#26A69A]/20 bg-[#26A69A]/10 text-sm font-semibold text-[#26A69A]">
-                          {uploading ? "..." : "CAM"}
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#26A69A]/20 bg-[#26A69A]/10 text-[#26A69A]">
+                          {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
                         </div>
                         <div>
                           <span className="block text-sm font-medium text-[#1A237E]">
                             {jobAdFile ? `Selected: ${jobAdFile.name}` : "Upload file or take a photo"}
                           </span>
                           <span className="mt-1 block text-sm text-[#607086]">
-                            Tap anywhere in this area on Android Chrome to open files or the camera.
+                            Choose to snap a photo or browse your files.
                           </span>
                         </div>
                       </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row mt-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                            title="Take photo"
+                          />
+                          <div className="flex items-center justify-center gap-2 rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 px-4 py-3 text-sm font-semibold text-[#168579] transition hover:bg-[#26A69A]/20">
+                            <Camera className="h-4 w-4" />
+                            <span>Take Photo</span>
+                          </div>
+                        </div>
+
+                        <div className="relative flex-1">
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                            data-testid="job-ad-upload-input"
+                            title="Upload file"
+                          />
+                          <div className="flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06]">
+                            <Upload className="h-4 w-4" />
+                            <span>Upload File</span>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid gap-2 rounded-2xl border border-black/[0.06] bg-[#F7FAFA] p-4 text-xs text-[#607086]">
                         <span>1. Use an image or PDF, or snap a clear photo of the job ad.</span>
                         <span>2. Keep the full description in frame and avoid glare.</span>
