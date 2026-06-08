@@ -53,6 +53,10 @@ const providers: NextAuthOptions["providers"] = [
         throw new Error("Invalid credentials");
       }
       
+      if (!user.emailVerified) {
+        throw new Error("Please verify your email address before signing in. Check your inbox for the verification link.");
+      }
+      
       const isPasswordValid = await bcrypt.compare(credentials.password, user.hashed_password);
       if (!isPasswordValid) {
         throw new Error("Invalid credentials");

@@ -41,7 +41,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
     <main className="relative min-h-screen overflow-hidden bg-[#E0F2F1] text-[#1A237E]">
       <nav className="container relative z-10 mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-24 w-96 transition-transform duration-300 group-hover:scale-105">
+          <div className="relative h-12 w-48 sm:h-16 sm:w-64 md:h-24 md:w-96 transition-transform duration-300 group-hover:scale-105">
             <Image src="/AI_CV_Scan_Logo.png" alt="AICVScan Logo" fill className="object-contain" priority />
           </div>
         </Link>
@@ -64,7 +64,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
           transition={{ duration: 0.5 }}
           className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white/60 px-3 py-1.5 text-xs text-[#1A237E] font-semibold backdrop-blur-sm"
         >
-          Production-ready AI resume review
+          Supercharge your CV
         </motion.div>
 
         <motion.h1
@@ -73,7 +73,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
           transition={{ duration: 0.6, delay: 0.08 }}
           className="mx-auto max-w-3xl text-3xl font-semibold leading-[1.05] tracking-[-0.04em] text-[#1A237E] sm:text-4xl lg:text-5xl"
         >
-          Make every application sharper before it reaches a recruiter.
+          Make every application count before it reaches a recruiter.
         </motion.h1>
 
         <motion.p
@@ -92,7 +92,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
           className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <GradientButton href={accountHref} size="md">
-            {signedIn ? "Continue in dashboard" : "Start with magic link"}
+            {signedIn ? "Continue in dashboard" : "Get started"}
           </GradientButton>
         </motion.div>
       </section>

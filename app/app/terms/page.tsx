@@ -24,37 +24,89 @@ export default function TermsOfServicePage() {
       <main className="container mx-auto max-w-4xl px-4 pb-16 pt-10">
         <div className="rounded-[2rem] border border-black/[0.06] bg-white/40 p-8 text-sm text-[#757575] backdrop-blur md:p-10">
           <h1 className="text-4xl font-semibold tracking-tight text-[#1A237E]">Terms of Service</h1>
-          <p className="mt-3 text-[#757575]/70">Last updated: May 2026</p>
+          <p className="mt-3 text-[#757575]/70">Last updated: June 2026</p>
 
-          <section className="mt-8 space-y-6">
+          <section className="mt-8 space-y-8 text-base">
             <div>
-              <h2 className="text-xl font-semibold text-[#1A237E]">1. Acceptance</h2>
-              <p className="mt-2">
-                By accessing or using {APP_NAME}, you agree to these terms. If you do not agree, do not use the service.
+              <h2 className="text-xl font-semibold text-[#1A237E]">1. Acceptance of Terms</h2>
+              <p className="mt-2 text-[#424242]">
+                By accessing, downloading, or using {APP_NAME} via our website, mobile application, or API, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must not use our service. These terms constitute a legally binding agreement between you and the operators of {APP_NAME}.
               </p>
             </div>
+            
             <div>
-              <h2 className="text-xl font-semibold text-[#1A237E]">2. Service scope</h2>
-              <p className="mt-2">
-                {APP_NAME} provides AI-assisted resume analysis, application prep, and interview practice on a credit-based model.
+              <h2 className="text-xl font-semibold text-[#1A237E]">2. Description of Service</h2>
+              <p className="mt-2 text-[#424242]">
+                {APP_NAME} provides an AI-powered platform for resume analysis, application preparation, and interview practice. The Service operates on a credit-based model where certain actions consume credits. We reserve the right to modify, suspend, or discontinue any aspect of the Service at any time without notice.
               </p>
             </div>
+
             <div>
-              <h2 className="text-xl font-semibold text-[#1A237E]">3. Credits and payments</h2>
-              <p className="mt-2">
-                Paid actions consume credits. Payments are processed by Stripe. Credits do not expire while your account remains active.
+              <h2 className="text-xl font-semibold text-[#1A237E]">3. Account Registration and Security</h2>
+              <p className="mt-2 text-[#424242]">
+                To use certain features, you must register for an account. You agree to provide accurate, current, and complete information during registration. You are responsible for safeguarding your password and for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.
               </p>
             </div>
+
             <div>
-              <h2 className="text-xl font-semibold text-[#1A237E]">4. AI output</h2>
-              <p className="mt-2">
-                AI outputs may contain errors or weak suggestions. You are responsible for reviewing and validating any material before using it in a job application.
+              <h2 className="text-xl font-semibold text-[#1A237E]">4. Credits, Billing, and Payments</h2>
+              <p className="mt-2 text-[#424242]">
+                <strong>4.1. Credit System:</strong> Paid features consume credits. Credits are purchased via secure third-party payment processors (e.g., Stripe, Google Play Billing).<br/><br/>
+                <strong>4.2. Non-Refundable:</strong> All purchases are final and non-refundable, except as required by applicable law or specific platform policies (such as Google Play refund policies).<br/><br/>
+                <strong>4.3. Expiration:</strong> Purchased credits do not expire as long as your account remains active. We reserve the right to close inactive accounts after 24 months of no login activity.
               </p>
             </div>
+
             <div>
-              <h2 className="text-xl font-semibold text-[#1A237E]">5. Acceptable use</h2>
-              <p className="mt-2">
-                Do not use {APP_NAME} to create fraudulent or misleading content, abuse the credit system, or interfere with platform operations.
+              <h2 className="text-xl font-semibold text-[#1A237E]">5. AI Output Disclaimer and Limitations</h2>
+              <p className="mt-2 text-[#424242]">
+                {APP_NAME} utilizes advanced artificial intelligence models to generate suggestions, resume content, and interview feedback. 
+                <strong> You acknowledge and agree that:</strong>
+              </p>
+              <ul className="mt-2 list-disc pl-5 text-[#424242] space-y-1">
+                <li>AI outputs may contain errors, inaccuracies, or hallucinations.</li>
+                <li>You are solely responsible for reviewing, verifying, and validating any material generated by the AI before using it in a real job application or professional setting.</li>
+                <li>{APP_NAME} is not liable for any employment outcomes, rejections, or missed opportunities resulting from the use of our Service.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#1A237E]">6. Acceptable Use Policy</h2>
+              <p className="mt-2 text-[#424242]">
+                You agree not to use the Service to:
+              </p>
+              <ul className="mt-2 list-disc pl-5 text-[#424242] space-y-1">
+                <li>Create fraudulent, misleading, or deceptive resumes or applications.</li>
+                <li>Upload sensitive personal data (e.g., Social Security numbers, banking details) that is not relevant to a job application.</li>
+                <li>Attempt to reverse-engineer, scrape, or extract the underlying AI prompts or source code.</li>
+                <li>Abuse the credit system or exploit any bugs to gain unauthorized access.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#1A237E]">7. User Content and License</h2>
+              <p className="mt-2 text-[#424242]">
+                You retain all ownership rights to the resumes, cover letters, and text you upload ("User Content"). By uploading content, you grant {APP_NAME} a worldwide, non-exclusive license to process, store, and transmit your content solely for the purpose of providing the Service to you. We do not sell your personal data to third parties.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#1A237E]">8. Limitation of Liability</h2>
+              <p className="mt-2 text-[#424242]">
+                To the maximum extent permitted by law, {APP_NAME} and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or employment opportunities, arising from your use of or inability to use the Service.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#1A237E]">9. Modifications to Terms</h2>
+              <p className="mt-2 text-[#424242]">
+                We reserve the right to modify these Terms at any time. We will notify users of significant changes via email or an in-app notification. Continued use of the Service after changes constitutes acceptance of the new Terms.
+              </p>
+            </div>
+            
+            <div className="pt-6 border-t border-black/10">
+              <p className="text-sm text-[#757575]">
+                If you have any questions about these Terms, please contact support via the dashboard.
               </p>
             </div>
           </section>

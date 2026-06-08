@@ -2,15 +2,16 @@
 
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { FormEvent, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { APP_NAME } from "@/lib/branding";
 
-export default function SignIn() {
+function SignInContent() {
   const [authMode, setAuthMode] = useState<"signin" | "register" | "magic-link">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [consent, setConsent] = useState(false);
@@ -19,7 +20,17 @@ export default function SignIn() {
   const [emailSent, setEmailSent] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { status } = useSession();
+
+  const isVerified = searchParams.get("verified") === "true";
+  const urlError = searchParams.get("error");
+
+  useEffect(() => {
+    if (urlError) {
+      setError(urlError.replace(/\+/g, " "));
+    }
+  }, [urlError]);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -74,6 +85,14 @@ export default function SignIn() {
     setError("");
 
     if (authMode === "register") {
+      // Frontend strong password check
+      const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!strongPasswordRegex.test(password)) {
+        setError("Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch("/api/auth/register", {
           method: "POST",
@@ -162,6 +181,12 @@ export default function SignIn() {
             </div>
           ) : (
             <div className="space-y-5">
+              {isVerified && (
+                <div className="rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 p-4 text-center">
+                  <p className="text-sm font-semibold text-[#1A237E]">Email verified successfully!</p>
+                  <p className="text-xs text-[#1A237E]/70">You can now sign in below.</p>
+                </div>
+              )}
               <div>
                 <h1 className="text-2xl font-semibold text-[#1A237E]">
                   {authMode === "signin" ? "Sign in" : authMode === "register" ? "Create an account" : "Magic Link Sign In"}
@@ -213,15 +238,28 @@ export default function SignIn() {
                     <label htmlFor="password" className="mb-2 block text-sm font-semibold text-[#1A237E]">
                       Password
                     </label>
-                    <input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      className="w-full rounded-2xl border border-black/[0.08] bg-white/60 px-4 py-3 text-sm text-[#1A237E] placeholder:text-[#757575]/60 focus:border-[#26A69A] focus:outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                        className="w-full rounded-2xl border border-black/[0.08] bg-white/60 px-4 py-3 text-sm text-[#1A237E] placeholder:text-[#757575]/60 focus:border-[#26A69A] focus:outline-none pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757575] hover:text-[#1A237E]"
+                      >
+                        {showPassword ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -241,19 +279,17 @@ export default function SignIn() {
                   </span>
                 </label>
 
-                {authMode === "register" && (
-                  <label className="flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4">
-                    <input
-                      type="checkbox"
-                      checked={marketingOptIn}
-                      onChange={(e) => setMarketingOptIn(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-black/20 bg-white text-[#26A69A] focus:ring-[#26A69A]"
-                    />
-                    <span className="text-xs leading-5 text-[#757575]">
-                      I&apos;d like to receive product updates, tips, and promotional emails from {APP_NAME}.
-                    </span>
-                  </label>
-                )}
+                <label className="flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4">
+                  <input
+                    type="checkbox"
+                    checked={marketingOptIn}
+                    onChange={(e) => setMarketingOptIn(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-black/20 bg-white text-[#26A69A] focus:ring-[#26A69A]"
+                  />
+                  <span className="text-xs leading-5 text-[#757575]">
+                    I&apos;d like to receive product updates, tips, and promotional emails from {APP_NAME}.
+                  </span>
+                </label>
 
                 {error && <p className="text-sm text-rose-500">{error}</p>}
 
@@ -321,5 +357,13 @@ export default function SignIn() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#E0F2F1]" />}>
+      <SignInContent />
+    </Suspense>
   );
 }
