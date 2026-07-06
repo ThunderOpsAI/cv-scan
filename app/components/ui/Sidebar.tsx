@@ -113,9 +113,8 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    navGroups.reduce<Record<string, boolean>>((acc, group, index) => {
-      acc[group.title] =
-        index === 0 || group.items.some((item) => isGroupItemActive(pathname, item.href));
+    navGroups.reduce<Record<string, boolean>>((acc, group) => {
+      acc[group.title] = group.items.some((item) => isGroupItemActive(pathname, item.href));
       return acc;
     }, {})
   );
@@ -126,6 +125,12 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
     );
 
     if (!activeGroup) {
+      setOpenGroups(
+        navGroups.reduce<Record<string, boolean>>((acc, group) => {
+          acc[group.title] = false;
+          return acc;
+        }, {})
+      );
       return;
     }
 
