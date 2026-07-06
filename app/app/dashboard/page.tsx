@@ -258,6 +258,7 @@ function DashboardContent() {
             transition={{ duration: 0.45, delay: 0.2 }}
             className="flex flex-col h-full"
           >
+            {insightCards.length > 0 && <div className="h-[72px] hidden lg:block" />}
             <GlassCard accent="blue" className="p-6 sm:p-7 h-auto">
               <div className="flex flex-col gap-4">
                 <div>
