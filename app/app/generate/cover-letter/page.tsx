@@ -135,25 +135,9 @@ export default function GenerateCoverLetter() {
   }
 
   return (
-    <div className="">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
-          <span className="text-[#26A69A]">CV</span>Scan
-        </Link>
-        <div className="flex items-center gap-4">
-
-          <Link
-            href="/dashboard"
-            className="text-[#607086] hover:text-[#1A237E] transition-colors"
-          >
-            Dashboard
-          </Link>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-[#E0F2F1]">
       {/* Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Generate Cover Letter</h1>
@@ -189,7 +173,7 @@ export default function GenerateCoverLetter() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-4 rounded-xl">
+                  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
                     {error}
                   </div>
                 )}
@@ -197,7 +181,7 @@ export default function GenerateCoverLetter() {
                 <button
                   type="submit"
                   disabled={loading || !jobDescription.trim()}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#26A69A] hover:bg-[#1A237E] text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Generating..." : "Generate Cover Letter"}
                 </button>
@@ -207,8 +191,8 @@ export default function GenerateCoverLetter() {
               {coverLetter && (
                 <div className="space-y-6">
                   <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] mb-8">
-                    <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
-                      <p className="text-blue-200 text-sm leading-relaxed">
+                    <div className="mb-6 p-4 bg-[#E0F2F1] border border-[#26A69A]/30 rounded-xl flex items-start gap-3">
+                      <p className="text-[#1A237E] text-sm leading-relaxed">
                         <strong>AI-generated draft:</strong> Candidate claims cite approved Career Memory
                         facts. Review the evidence tags before copying or saving.
                       </p>
@@ -221,7 +205,7 @@ export default function GenerateCoverLetter() {
                           {evidence.valid_fact_ids.length === 1 ? "" : "s"} cited.
                         </p>
                         {evidence.missing_grounding_notes.length > 0 && (
-                          <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
+                          <ul className="mt-2 list-disc list-inside text-amber-700 text-sm">
                             {evidence.missing_grounding_notes.map((note, index) => (
                               <li key={index}>{note}</li>
                             ))}
@@ -238,7 +222,7 @@ export default function GenerateCoverLetter() {
                         <button
                           onClick={copyCoverLetter}
                           disabled={!coverHasEvidenceTags}
-                          className="flex items-center gap-2 bg-white/60 hover:bg-white/20 text-[#1A237E] px-4 py-2 rounded-lg font-semibold transition-all border border-black/[0.06]"
+                          className="flex items-center gap-2 bg-white/80 hover:bg-white text-[#1A237E] px-4 py-2 rounded-lg font-semibold transition-all border border-black/[0.06]"
                         >
                           Copy
                         </button>

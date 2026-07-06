@@ -111,26 +111,16 @@ export default function CopilotPage() {
   }
 
   return (
-    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <nav className="container mx-auto flex flex-none items-center justify-between gap-4 px-4 py-4 sm:py-6">
-        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
-          <span className="text-[#26A69A]">CV</span>Scan
-        </Link>
-        <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
-          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
-            Dashboard
-          </Link>
-        </div>
-      </nav>
+    <div className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-[#E0F2F1]">
 
-      <main className="container mx-auto flex min-h-0 flex-1 px-4 pb-4 pt-2 sm:pb-6 md:py-8">
+      <main className="container mx-auto flex min-h-0 flex-1 px-4 pb-4 pt-4 sm:pb-6">
         <div className="mx-auto flex min-h-0 w-full max-w-7xl">
           <div className="grid min-h-0 w-full grid-rows-[auto_minmax(0,1fr)] gap-4 md:grid-cols-4 md:grid-rows-1 md:gap-6">
             {/* Sidebar */}
-            <div className="max-h-44 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white/60 p-4 backdrop-blur-lg md:col-span-1 md:max-h-none">
+          <div className="max-h-44 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white/60 p-4 md:col-span-1 md:max-h-none">
               <button
                 onClick={startNewConversation}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg mb-4"
+                className="w-full bg-[#26A69A] hover:bg-[#1A237E] text-white px-4 py-2 rounded-lg mb-4 font-semibold transition-colors"
               >
                 New Chat
               </button>
@@ -142,12 +132,12 @@ export default function CopilotPage() {
                     onClick={() => loadConversation(conv.id)}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                       currentConversation === conv.id
-                        ? "bg-blue-600 text-[#1A237E]"
-                        : "text-[#607086] hover:bg-white/60"
+                        ? "bg-[#26A69A]/20 text-[#1A237E] font-medium"
+                        : "text-[#757575] hover:bg-black/[0.04]"
                     }`}
                   >
                     <div className="truncate text-sm">{conv.title}</div>
-                    <div className="text-xs text-[#607086]/80 mt-1">
+                    <div className="text-xs text-[#757575] mt-1">
                       {new Date(conv.last_message_at).toLocaleDateString()}
                     </div>
                   </button>
@@ -156,7 +146,7 @@ export default function CopilotPage() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-lg md:col-span-3">
+            <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 md:col-span-3">
               {/* Messages */}
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
                 {messages.length === 0 && !currentConversation && (
@@ -196,8 +186,8 @@ export default function CopilotPage() {
                     <div
                       className={`max-w-[90%] rounded-lg px-4 py-2 sm:max-w-[80%] ${
                         msg.role === "user"
-                          ? "bg-blue-600 text-[#1A237E]"
-                          : "bg-white/20 text-gray-100"
+                          ? "bg-[#1A237E] text-white"
+                          : "bg-white/80 border border-black/[0.06] text-[#1A237E]"
                       }`}
                     >
                       <div className="whitespace-pre-wrap break-words">{msg.content}</div>
@@ -210,11 +200,11 @@ export default function CopilotPage() {
 
                 {sending && (
                   <div className="flex justify-start">
-                    <div className="bg-white/20 text-gray-100 rounded-lg px-4 py-2">
+                    <div className="bg-white/80 border border-black/[0.06] text-[#1A237E] rounded-lg px-4 py-2">
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                        <div className="w-2 h-2 bg-[#26A69A] rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-[#26A69A] rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-2 h-2 bg-[#26A69A] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                       </div>
                     </div>
                   </div>
@@ -224,18 +214,18 @@ export default function CopilotPage() {
               {/* Input */}
               <form onSubmit={sendMessage} className="flex-none border-t border-black/[0.06] p-4">
                 <div className="flex gap-2">
-                  <input
+                <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me anything..."
                     disabled={sending}
-                    className="min-w-0 flex-1 px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    className="min-w-0 flex-1 px-4 py-3 bg-white/60 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-[#757575] focus:outline-none focus:border-[#26A69A] disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || sending}
-                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
+                    className="shrink-0 bg-[#26A69A] hover:bg-[#1A237E] text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
                   >
                     Send
                   </button>

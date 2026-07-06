@@ -82,25 +82,9 @@ export default function GenerateBullets() {
   }
 
   return (
-    <div className="">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
-          <span className="text-[#26A69A]">CV</span>Scan
-        </Link>
-        <div className="flex items-center gap-4">
-
-          <Link
-            href="/dashboard"
-            className="text-[#607086] hover:text-[#1A237E] transition-colors"
-          >
-            Dashboard
-          </Link>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-[#E0F2F1]">
       {/* Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Generate Resume Bullets</h1>
@@ -135,7 +119,7 @@ export default function GenerateBullets() {
               </p>
 
               {error && (
-                <div className="mt-4 bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl">
+                <div className="mt-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl">
                   {error}
                 </div>
               )}
@@ -143,7 +127,7 @@ export default function GenerateBullets() {
               <button
                 type="submit"
                 disabled={loading || !jobDuty.trim()}
-                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-6 w-full bg-[#26A69A] hover:bg-[#1A237E] text-white py-3 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Generating..." : "Generate Bullet Points"}
               </button>
@@ -155,16 +139,16 @@ export default function GenerateBullets() {
             <div className="space-y-6">
               <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
                 <h2 className="text-2xl font-bold text-[#1A237E] mb-4">Your Resume Bullets</h2>
-                <div className="mb-6 p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex items-start gap-3">
-                  <p className="text-blue-200 text-sm leading-relaxed">
+                <div className="mb-6 p-4 bg-[#E0F2F1] border border-[#26A69A]/30 rounded-xl flex items-start gap-3">
+                  <p className="text-[#1A237E] text-sm leading-relaxed">
                     <strong>AI-generated drafts:</strong> These bullets cite approved Career Memory facts.
                     Keep the evidence tag visible while reviewing, then verify every claim before using it.
                   </p>
                 </div>
                 {ungroundableNotes.length > 0 && (
                   <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                    <p className="text-amber-100 text-sm font-semibold">Unsupported requests were withheld</p>
-                    <ul className="mt-2 list-disc list-inside text-amber-200 text-sm">
+                    <li className="text-amber-800 text-sm font-semibold">Unsupported requests were withheld</li>
+                    <ul className="mt-2 list-disc list-inside text-amber-700 text-sm">
                       {ungroundableNotes.map((note, index) => (
                         <li key={index}>{note}</li>
                       ))}
@@ -208,7 +192,7 @@ export default function GenerateBullets() {
                     setBullets([]);
                     setUngroundableNotes([]);
                   }}
-                  className="mt-6 w-full bg-white/60 hover:bg-white/20 text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all border border-black/[0.06]"
+                  className="mt-6 w-full bg-white/80 hover:bg-white text-[#1A237E] py-3 px-6 rounded-xl font-semibold transition-all border border-black/[0.06]"
                 >
                   Generate Another
                 </button>
