@@ -177,7 +177,7 @@ export default function ScannerPage() {
             <span className="text-lg font-semibold text-[#1A237E]">CV</span>
           </div>
           <div>
-            <div className="text-lg font-semibold tracking-[-0.03em]">CVScan</div>
+            <div className="text-lg font-semibold tracking-[-0.03em]">AI CV Scan</div>
             <div className="text-xs text-[#757575]">magic scan</div>
           </div>
         </Link>
@@ -196,7 +196,7 @@ export default function ScannerPage() {
                   Scan a role like it matters.
                 </h1>
                 <p className="mt-4 max-w-3xl text-base leading-8 text-[#757575]">
-                  Drop in a screenshot or paste the description. CVScan will surface the exact keywords, gaps, and profile signals that deserve your attention next.
+                  Drop in a screenshot or paste the description. AI CV Scan will surface the exact keywords, gaps, and profile signals that deserve your attention next.
                 </p>
               </div>
 

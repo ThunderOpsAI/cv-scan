@@ -434,6 +434,8 @@ SET search_path = public
 AS $$
   SELECT COALESCE(SUM(amount), 0)::INT FROM credit_ledger WHERE user_id = p_user_id;
 $$;
+REVOKE EXECUTE ON FUNCTION get_credit_balance(UUID) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION get_credit_balance(UUID) FROM anon, authenticated;
 
 -- Debit credits: ledger row + legacy credit_transactions; optional idempotent reference_id
 CREATE OR REPLACE FUNCTION deduct_credits(
@@ -498,6 +500,8 @@ BEGIN
   RETURN QUERY SELECT TRUE, v_new, NULL::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+REVOKE EXECUTE ON FUNCTION deduct_credits(UUID, INTEGER, TEXT, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION deduct_credits(UUID, INTEGER, TEXT, TEXT) FROM anon, authenticated;
 
 -- Add credits (purchases / bonuses): idempotent when p_reference_id repeats
 CREATE OR REPLACE FUNCTION add_credits(
@@ -559,6 +563,8 @@ BEGIN
   RETURN QUERY SELECT TRUE, v_new, NULL::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+REVOKE EXECUTE ON FUNCTION add_credits(UUID, INTEGER, TEXT, TEXT, JSONB, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION add_credits(UUID, INTEGER, TEXT, TEXT, JSONB, TEXT) FROM anon, authenticated;
 
 -- Phase 3.3 — subscription columns on existing databases (no-op when already present)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_tier TEXT DEFAULT 'free';

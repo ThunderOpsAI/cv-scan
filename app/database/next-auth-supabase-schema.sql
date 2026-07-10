@@ -44,6 +44,10 @@ ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE verification_tokens ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Deny all" ON accounts FOR ALL USING (false);
+CREATE POLICY "Deny all" ON sessions FOR ALL USING (false);
+CREATE POLICY "Deny all" ON verification_tokens FOR ALL USING (false);
+
 -- Normalize older quoted camelCase columns to the lowercase names used by
 -- the custom adapter. Supabase/Postgres lowercases unquoted identifiers, and
 -- the app queries userid, provideraccountid, and sessiontoken directly.

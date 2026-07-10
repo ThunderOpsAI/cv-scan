@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
-import { deductCredits } from "@/lib/supabase/credits";
+import { deductCredits, addCredits } from "@/lib/supabase/credits";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import {
   generateTailoredBulletsForJob,
@@ -58,15 +58,18 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const { data: userRow } = await (supabase as any)
-      .from("users")
-      .select("credits")
-      .eq("id", session.user.id)
-      .single();
+    const referenceId = debitReferenceFromRequest(req, `tailor-bullets:${params.jobId}`);
 
-    if (!userRow || userRow.credits < CREDIT_COST) {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Tailored bullets: ${job.title}`,
+      p_reference_id: referenceId,
+    });
+
+    if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(
-        { error: "Insufficient credits for tailored bullets." },
+        { error: deductResult?.[0]?.error_message || "Insufficient credits for tailored bullets." },
         { status: 402 }
       );
     }
@@ -74,42 +77,52 @@ export async function POST(
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
     if (!profile) {
+      await addCredits(supabase as never, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Missing profile facts",
+        p_reference_id: `refund-profile-${referenceId}`,
+      });
       return NextResponse.json(
         { error: "Approve profile facts in Career Memory before tailoring." },
         { status: 400 }
       );
     }
 
-    const evidence = await generateTailoredBulletsForJob(
-      profile,
-      job.raw_description,
-      job.title,
-      job.company
-    );
+    let evidence;
 
-    if (evidence.items.filter((item) => item.grounded).length === 0) {
-      return NextResponse.json(
-        {
-          error: groundingErrorMessage("bullets"),
-          evidence,
-          evidence_json: summarizeEvidenceForStorage(evidence),
-        },
-        { status: 422 }
+    try {
+      evidence = await generateTailoredBulletsForJob(
+        profile,
+        job.raw_description,
+        job.title,
+        job.company
       );
-    }
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
-      p_user_id: session.user.id,
-      p_amount: CREDIT_COST,
-      p_description: `Tailored bullets: ${job.title}`,
-      p_reference_id: debitReferenceFromRequest(req, `tailor-bullets:${params.jobId}`),
-    });
-
-    if (deductError || !deductResult?.[0]?.success) {
-      return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || "Failed to deduct credits" },
-        { status: 500 }
-      );
+      if (evidence.items.filter((item) => item.grounded).length === 0) {
+        await addCredits(supabase as never, {
+          p_user_id: session.user.id,
+          p_amount: CREDIT_COST,
+          p_description: "Refund: Ungrounded bullets",
+          p_reference_id: `refund-ungrounded-${referenceId}`,
+        });
+        return NextResponse.json(
+          {
+            error: groundingErrorMessage("bullets"),
+            evidence,
+            evidence_json: summarizeEvidenceForStorage(evidence),
+          },
+          { status: 422 }
+        );
+      }
+    } catch (err) {
+      await addCredits(supabase as never, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Generation failed",
+        p_reference_id: `refund-error-${referenceId}`,
+      });
+      throw err;
     }
 
     const evidenceRecord = summarizeEvidenceForStorage(evidence);

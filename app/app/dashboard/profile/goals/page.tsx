@@ -101,7 +101,7 @@ export default function SmartGoalsPage() {
         <div className="">
             <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
                 <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
-                    <span className="text-[#26A69A]">CV</span>Scan
+                    <span className="text-[#26A69A]">AI CV</span> Scan
                 </Link>
                 <div className="flex items-center gap-4">
                     <Link href="/dashboard/profile" className="text-[#607086] hover:text-[#1A237E]">
@@ -124,7 +124,7 @@ export default function SmartGoalsPage() {
                                     setEditing(null);
                                     setShowForm(true);
                                 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg"
+                                className="bg-[#26A69A] hover:bg-[#1f8f85] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                             >
                                 Add Goal
                             </button>
@@ -221,7 +221,7 @@ export default function SmartGoalsPage() {
                                 </div>
 
                                 <div className="flex gap-4 pt-4">
-                                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg">
+                                    <button type="submit" className="bg-[#26A69A] hover:bg-[#1f8f85] text-white px-6 py-2 rounded-lg font-semibold transition-colors">
                                         {editing ? "Update" : "Add"} Goal
                                     </button>
                                     <button
@@ -231,7 +231,7 @@ export default function SmartGoalsPage() {
                                             setEditing(null);
                                             resetForm();
                                         }}
-                                        className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg"
+                                        className="bg-[#757575] hover:bg-[#616161] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -254,7 +254,7 @@ export default function SmartGoalsPage() {
                     ) : (
                         <div className="space-y-6">
                             {goals.map((goal) => (
-                                <div key={goal.id} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
+                                <div key={goal.id} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] hover:border-[#26A69A]/60 hover:shadow-md transition-all">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <div className="flex items-center gap-3">

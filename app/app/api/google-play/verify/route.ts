@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import {
   type GooglePlayVerificationPayload,
   hasGooglePlayServiceAccount,
@@ -23,6 +26,11 @@ function isVerificationPayload(value: unknown): value is GooglePlayVerificationP
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json().catch(() => null);
 
   if (!isVerificationPayload(body)) {
@@ -57,6 +65,32 @@ export async function POST(request: NextRequest) {
 
   try {
     const verification = await verifyGooglePlayPurchase(body);
+
+    if (verification.verified && verification.purchaseType === "product") {
+      // Determine credit amount from productId (e.g., 'credits_10', 'credits_50')
+      const match = verification.productId.match(/credits?_?(\d+)/i);
+      const amount = match ? parseInt(match[1], 10) : 0;
+
+      if (amount > 0) {
+        const supabase = createClient();
+        const { data: rpcResult, error: rpcError } = await (supabase.rpc as any)("add_credits", {
+          p_user_id: session.user.id,
+          p_amount: amount,
+          p_type: "purchase",
+          p_description: `Google Play purchase: ${verification.productId}`,
+          p_metadata: {
+            google_play_order_id: verification.orderId,
+            google_play_purchase_token: verification.purchaseToken,
+          },
+          p_reference_id: `googleplay:${verification.orderId || verification.purchaseToken}`,
+        });
+
+        if (rpcError || !rpcResult?.[0]?.success) {
+          console.error("Failed to add credits from Google Play:", rpcError || rpcResult?.[0]?.error_message);
+          return NextResponse.json({ error: "Failed to fulfill purchase credits" }, { status: 500 });
+        }
+      }
+    }
 
     return NextResponse.json(
       {

@@ -15,6 +15,17 @@ function BuyCreditsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
+  const [isAndroidWebView, setIsAndroidWebView] = useState(false);
+
+  useEffect(() => {
+    // Detect Android WebView to hide Stripe (Google Play Policy)
+    const ua = navigator.userAgent;
+    const isAndroid = /Android/i.test(ua);
+    const isWebView = /wv|WebView/i.test(ua);
+    if (isAndroid && isWebView) {
+      setIsAndroidWebView(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -87,14 +98,28 @@ function BuyCreditsContent() {
       <section className="container mx-auto px-4 pb-16 pt-10">
         <div className="mx-auto max-w-5xl">
           {searchParams.get("payment") === "success" && (
-            <div className="mb-6 rounded-3xl border border-[#26A69A]/20 bg-[#26A69A]/10 px-4 py-3 text-sm text-[#1A237E]">
-              Payment successful. Your credits have been added and we&apos;re sending you back to the dashboard.
+            <div className="mb-6 flex items-center gap-3 rounded-3xl border-2 border-emerald-500 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-base font-bold">✓</div>
+              <div>
+                <p className="font-semibold">Payment successful</p>
+                <p className="mt-0.5 text-emerald-700">Your credits have been added and we&apos;re sending you back to the dashboard.</p>
+              </div>
             </div>
           )}
 
           {searchParams.get("payment") === "cancelled" && (
             <div className="mb-6 rounded-3xl border border-amber-400/20 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Payment cancelled. You can pick a package and try again whenever you&apos;re ready.
+            </div>
+          )}
+
+          {isAndroidWebView && (
+            <div className="mb-8 rounded-3xl border border-amber-400/20 bg-amber-50 px-6 py-5 text-center text-amber-900 shadow-sm">
+              <p className="font-semibold text-lg mb-2">Purchasing currently unavailable in the app</p>
+              <p className="text-sm">
+                Due to Google Play Billing policies, we cannot process payments directly in the app at this time. 
+                Please visit <span className="font-semibold">aievscan.com</span> in your phone&apos;s standard browser or on a desktop to purchase credits.
+              </p>
             </div>
           )}
 
@@ -145,14 +170,16 @@ function BuyCreditsContent() {
 
                 <button
                   onClick={() => handlePurchase(plan.id)}
-                  disabled={loading !== null}
+                  disabled={loading !== null || isAndroidWebView}
                   className={`mt-8 w-full rounded-full px-5 py-3 text-sm font-semibold transition ${
-                    plan.popular
+                    isAndroidWebView
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : plan.popular
                       ? "bg-[#26A69A] text-white hover:bg-[#2bbbad]"
                       : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                   } ${loading === plan.id ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  {loading === plan.id ? "Processing..." : plan.cta}
+                  {isAndroidWebView ? "Unavailable in App" : loading === plan.id ? "Processing..." : plan.cta}
                 </button>
               </div>
             ))}

@@ -256,10 +256,9 @@ function DashboardContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.2 }}
-            className="flex flex-col h-full"
+            className="flex flex-col h-full justify-end"
           >
-            {insightCards.length > 0 && <div className="h-[72px] hidden lg:block" />}
-            <GlassCard accent="blue" className="p-6 sm:p-7 h-auto">
+            <GlassCard accent="blue" className="p-6 sm:p-7">
               <div className="flex flex-col gap-4">
                 <div>
                   <p className="eyebrow">Billing</p>

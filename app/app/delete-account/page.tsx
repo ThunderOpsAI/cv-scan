@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Delete Your Account | CVScan",
+  title: "Delete Your Account | AI CV Scan",
   description:
-    "Request deletion of your CVScan account and all associated personal data. No app download required.",
+    "Request deletion of your AI CV Scan account and all associated personal data. No app download required.",
   robots: "noindex, nofollow", // avoid search indexing of deletion URL
 };
 
@@ -14,7 +14,7 @@ export default function DeleteAccountPage() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-[#1A237E]">
-          <span className="text-[#26A69A]">CV</span>Scan
+          <span className="text-[#26A69A]">AI CV</span> Scan
         </Link>
         <Link
           href="/privacy"
@@ -45,7 +45,7 @@ export default function DeleteAccountPage() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-[#1A237E] mb-3">
-              Delete Your CVScan Account
+              Delete Your AI CV Scan Account
             </h1>
             <p className="text-[#607086]/80 leading-relaxed">
               You can request deletion of your account and all associated data
@@ -74,10 +74,10 @@ export default function DeleteAccountPage() {
             </h2>
             <p className="text-sm text-[#607086] mb-3">
               The fastest way to delete your account and data is directly inside
-              the CVScan app:
+              the AI CV Scan app:
             </p>
             <ol className="text-sm text-[#607086]/80 space-y-1 list-decimal pl-5">
-              <li>Open CVScan on your device</li>
+              <li>Open AI CV Scan on your device</li>
               <li>Tap <strong className="text-gray-200">Dashboard → Profile</strong></li>
               <li>Scroll to <strong className="text-gray-200">Data Export & Deletion</strong></li>
               <li>Tap <strong className="text-gray-200">Delete Account</strong> and confirm</li>
@@ -112,7 +112,7 @@ export default function DeleteAccountPage() {
               from the email address associated with your account:
             </p>
             <a
-              href="mailto:privacy@cvscan.com.au?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20CVScan%20account%20and%20all%20associated%20data.%20My%20registered%20email%20address%20is%3A%20%5Byour%20email%20here%5D"
+              href="mailto:privacy@cvscan.com.au?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20AI%20CV%20Scan%20account%20and%20all%20associated%20data.%20My%20registered%20email%20address%20is%3A%20%5Byour%20email%20here%5D"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/60 hover:bg-white/15 border border-black/[0.06] text-[#1A237E] text-sm font-medium transition-colors"
             >
               <svg

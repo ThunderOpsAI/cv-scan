@@ -197,7 +197,7 @@ function NewJobPackContent() {
                     className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700 disabled:opacity-60"
                   />
                   <p className="mt-2 text-sm text-[#607086]/80">
-                    Take a clear screenshot or photo. CVScan will fill the fields below for review.
+                    Take a clear screenshot or photo. AI CV Scan will fill the fields below for review.
                   </p>
                   {ocrLoading && (
                     <p className="mt-2 text-sm text-[#26A69A]">Reading job ad screenshot...</p>

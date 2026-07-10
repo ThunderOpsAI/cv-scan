@@ -486,7 +486,7 @@ export default function ProfileFactsPage() {
                   disabled={importing || ocrLoading}
                 />
                 <p className="text-[#607086]/80 text-sm mt-2">
-                  Take a clear photo or upload a screenshot. CVScan will read it and fill the resume content box for review.
+                  Take a clear photo or upload a screenshot. AI CV Scan will read it and fill the resume content box for review.
                 </p>
                 {ocrLoading && (
                   <p className="text-[#26A69A] text-sm mt-3">Reading resume image...</p>

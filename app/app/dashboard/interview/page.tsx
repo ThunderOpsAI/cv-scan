@@ -194,7 +194,7 @@ export default function InterviewPracticePage() {
               CV
             </span>
           </div>
-          <div className="text-base font-semibold tracking-[-0.03em]">CVScan</div>
+          <div className="text-base font-semibold tracking-[-0.03em]">AI CV Scan</div>
         </Link>
         <Link href="/dashboard" className="text-sm text-slate-400 transition hover:text-white">
           Back to dashboard
