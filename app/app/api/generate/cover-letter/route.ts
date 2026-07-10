@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
-import { deductCredits } from "@/lib/supabase/credits";
+import { deductCredits, addCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { generateCoverLetter as generateGroundedCoverLetter } from "@/lib/ats/tailor";
@@ -70,59 +70,70 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user has enough credits
-    const { data: user } = await supabase
-      .from("users")
-      .select("credits")
-      .eq("id", userId)
-      .single() as { data: { credits: number } | null };
-
-    if (!user || user.credits < CREDIT_COST) {
-      return NextResponse.json(
-        { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
-        { status: 402 }
-      );
-    }
-
-    const coverLetter = await generateGroundedCoverLetter(
-      profile,
-      typeof jobTitle === "string" && jobTitle.trim() ? jobTitle.trim() : "the target role",
-      typeof company === "string" && company.trim() ? company.trim() : "the target company",
-      jobDescription
-    );
-
-    if (coverLetter.length < 100) {
-      return NextResponse.json(
-        { error: "Failed to generate cover letter. Please try again." },
-        { status: 500 }
-      );
-    }
-
-    const evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
-
-    if (evidence.has_ungrounded_claims) {
-      return NextResponse.json(
-        {
-          error: groundingErrorMessage("cover_letter"),
-          evidence,
-        },
-        { status: 422 }
-      );
-    }
+    const referenceId = debitReferenceFromRequest(req, "gen-cover-letter");
 
     // Deduct credits using Supabase function
     const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: userId,
       p_amount: CREDIT_COST,
       p_description: "Generated cover letter",
-      p_reference_id: debitReferenceFromRequest(req, "gen-cover-letter"),
+      p_reference_id: referenceId,
     });
 
     if (deductError || !deductResult?.[0]?.success) {
       console.error("Failed to deduct credit:", deductError);
       return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || "Failed to deduct credit" },
-        { status: 500 }
+        { error: deductResult?.[0]?.error_message || `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+        { status: 402 }
+      );
+    }
+
+    let coverLetter;
+    try {
+      coverLetter = await generateGroundedCoverLetter(
+        profile,
+        typeof jobTitle === "string" && jobTitle.trim() ? jobTitle.trim() : "the target role",
+        typeof company === "string" && company.trim() ? company.trim() : "the target company",
+        jobDescription
+      );
+
+      if (coverLetter.length < 100) {
+        await addCredits(supabase, {
+          p_user_id: userId,
+          p_amount: CREDIT_COST,
+          p_description: "Refund: Generation failed",
+          p_reference_id: `refund-short-${referenceId}`,
+        });
+        return NextResponse.json(
+          { error: "Failed to generate cover letter. Please try again." },
+          { status: 500 }
+        );
+      }
+    } catch (err) {
+      await addCredits(supabase, {
+        p_user_id: userId,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Generation failed",
+        p_reference_id: `refund-error-${referenceId}`,
+      });
+      throw err;
+    }
+
+    const evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
+
+    if (evidence.has_ungrounded_claims) {
+      await addCredits(supabase, {
+        p_user_id: userId,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Ungrounded claims",
+        p_reference_id: `refund-ungrounded-${referenceId}`,
+      });
+      return NextResponse.json(
+        {
+          error: groundingErrorMessage("cover_letter"),
+          evidence,
+        },
+        { status: 422 }
       );
     }
 

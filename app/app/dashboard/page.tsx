@@ -13,7 +13,7 @@ import type { ATSScan } from "@/types/job-packs";
 
 const quickActions = [
   { href: "/dashboard/scanner", label: "Scan resume", variant: "primary" as const },
-  { href: "/dashboard/job-fit", label: "Scan job ad", variant: "secondary" as const },
+  { href: "/dashboard/scanner", label: "Scan job ad", variant: "secondary" as const },
   { href: "/generate/cover-letter", label: "New cover letter", variant: "ghost" as const },
 ];
 
@@ -256,9 +256,9 @@ function DashboardContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.2 }}
-            className="flex flex-col h-full"
+            className="flex flex-col h-full justify-end"
           >
-            <GlassCard accent="blue" className="p-6 sm:p-7 h-auto">
+            <GlassCard accent="blue" className="p-6 sm:p-7">
               <div className="flex flex-col gap-4">
                 <div>
                   <p className="eyebrow">Billing</p>

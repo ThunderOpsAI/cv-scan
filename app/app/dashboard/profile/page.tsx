@@ -90,8 +90,8 @@ export default function ProfilePage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -99,14 +99,14 @@ export default function ProfilePage() {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -115,13 +115,13 @@ export default function ProfilePage() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Data Export & Deletion */}
-          <div className="mb-8 p-6 bg-white/5 border border-white/20 rounded-xl">
-            <h2 className="text-2xl font-semibold text-white mb-3">Data Export & Deletion</h2>
-            <p className="text-gray-300 mb-2">
-              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com.au" className="underline text-blue-400">privacy@cvscan.com.au</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
+          <div className="mb-8 p-6 bg-white/40 border border-black/[0.06] rounded-xl">
+            <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">Data Export & Deletion</h2>
+            <p className="text-[#607086] mb-2">
+              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com.au" className="underline text-[#26A69A]">privacy@cvscan.com.au</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
             </p>
             <button
-              className="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
+              className="mb-2 bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg font-semibold"
               onClick={async () => {
                 const [factsRes, assetsRes] = await Promise.all([
                   fetch("/api/profile/facts"),
@@ -143,7 +143,7 @@ export default function ProfilePage() {
             >
               Download Profile Facts & Generated Assets (JSON)
             </button>
-            <p className="text-gray-300 mb-2 mt-4 text-sm border-t border-white/10 pt-4">
+            <p className="text-[#607086] mb-2 mt-4 text-sm border-t border-white/10 pt-4">
               If you wish to permanently delete your account and all associated data, you may delete your account below. This action cannot be undone.
             </p>
             <button
@@ -165,24 +165,24 @@ export default function ProfilePage() {
                   }
                 }
               }}
-              className="mb-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+              className="mb-2 bg-red-600 hover:bg-red-700 text-[#1A237E] px-4 py-2 rounded-lg font-semibold transition-colors"
             >
               Delete Account
             </button>
-            <p className="text-gray-400 text-xs mt-2">
+            <p className="text-[#607086]/80 text-xs mt-2">
               Upon deletion, your data is permanently removed from our active databases and subsequently purged from backups in accordance with standard data retention policies.
             </p>
           </div>
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Your Profile</h1>
-              <p className="text-gray-400">Build your professional profile</p>
+              <h1 className="text-4xl font-bold text-[#1A237E] mb-2">Your Profile</h1>
+              <p className="text-[#607086]/80">Build your professional profile</p>
             </div>
             {profile && !editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg transition-colors"
               >
                 Edit Profile
               </button>
@@ -191,10 +191,10 @@ export default function ProfilePage() {
 
           {/* Profile Strength */}
           {strength && (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-8">
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06] mb-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">Profile Strength</h2>
-                <span className="text-3xl font-bold text-blue-400">
+                <h2 className="text-xl font-bold text-[#1A237E]">Profile Strength</h2>
+                <span className="text-3xl font-bold text-[#26A69A]">
                   {strength.overall_percentage}%
                 </span>
               </div>
@@ -206,9 +206,9 @@ export default function ProfilePage() {
               </div>
               {strength.recommendations.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-semibold">Recommendations:</p>
+                  <p className="text-[#607086]/80 text-sm font-semibold">Recommendations:</p>
                   {strength.recommendations.map((rec, i) => (
-                    <p key={i} className="text-gray-300 text-sm">
+                    <p key={i} className="text-[#607086] text-sm">
                       • {rec}
                     </p>
                   ))}
@@ -219,7 +219,7 @@ export default function ProfilePage() {
 
           {/* Profile Form/View */}
           {editing ? (
-            <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <form onSubmit={handleSubmit} className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
               <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mb-6 flex items-start gap-3">
                 <span className="text-xl">⚠️</span>
                 <div>
@@ -231,98 +231,98 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-white mb-2">Full Name *</label>
+                  <label className="block text-[#1A237E] mb-2">Full Name *</label>
                   <input
                     type="text"
                     value={formData.full_name}
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Professional Headline</label>
+                  <label className="block text-[#1A237E] mb-2">Professional Headline</label>
                   <input
                     type="text"
                     value={formData.headline}
                     onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
                     placeholder="e.g., Senior Software Engineer"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Professional Summary</label>
+                  <label className="block text-[#1A237E] mb-2">Professional Summary</label>
                   <textarea
                     value={formData.summary}
                     onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                     rows={4}
                     placeholder="Brief overview of your experience and expertise..."
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white mb-2">Phone</label>
+                    <label className="block text-[#1A237E] mb-2">Phone</label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-white mb-2">Location</label>
+                    <label className="block text-[#1A237E] mb-2">Location</label>
                     <input
                       type="text"
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       placeholder="City, Country"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">LinkedIn URL</label>
+                  <label className="block text-[#1A237E] mb-2">LinkedIn URL</label>
                   <input
                     type="url"
                     value={formData.linkedin_url}
                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                     placeholder="https://linkedin.com/in/yourprofile"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Portfolio URL</label>
+                  <label className="block text-[#1A237E] mb-2">Portfolio URL</label>
                   <input
                     type="url"
                     value={formData.portfolio_url}
                     onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
                     placeholder="https://yourportfolio.com"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">GitHub URL</label>
+                  <label className="block text-[#1A237E] mb-2">GitHub URL</label>
                   <input
                     type="url"
                     value={formData.github_url}
                     onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
                     placeholder="https://github.com/yourusername"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-2 rounded-lg transition-colors"
                   >
                     Save Profile
                   </button>
@@ -342,7 +342,7 @@ export default function ProfilePage() {
                           github_url: profile.github_url || "",
                         });
                       }}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                      className="bg-gray-600 hover:bg-gray-700 text-[#1A237E] px-6 py-2 rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -351,45 +351,45 @@ export default function ProfilePage() {
               </div>
             </form>
           ) : profile ? (
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06]">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{profile.full_name}</h2>
-                  {profile.headline && <p className="text-blue-400 text-lg">{profile.headline}</p>}
+                  <h2 className="text-2xl font-bold text-[#1A237E]">{profile.full_name}</h2>
+                  {profile.headline && <p className="text-[#26A69A] text-lg">{profile.headline}</p>}
                 </div>
 
                 {profile.summary && (
                   <div>
-                    <h3 className="text-white font-semibold mb-2">Summary</h3>
-                    <p className="text-gray-300">{profile.summary}</p>
+                    <h3 className="text-[#1A237E] font-semibold mb-2">Summary</h3>
+                    <p className="text-[#607086]">{profile.summary}</p>
                   </div>
                 )}
 
                 <div className="grid md:grid-cols-2 gap-6">
                   {profile.phone && (
                     <div>
-                      <h3 className="text-white font-semibold mb-1">Phone</h3>
-                      <p className="text-gray-300">{profile.phone}</p>
+                      <h3 className="text-[#1A237E] font-semibold mb-1">Phone</h3>
+                      <p className="text-[#607086]">{profile.phone}</p>
                     </div>
                   )}
                   {profile.location && (
                     <div>
-                      <h3 className="text-white font-semibold mb-1">Location</h3>
-                      <p className="text-gray-300">{profile.location}</p>
+                      <h3 className="text-[#1A237E] font-semibold mb-1">Location</h3>
+                      <p className="text-[#607086]">{profile.location}</p>
                     </div>
                   )}
                 </div>
 
                 {(profile.linkedin_url || profile.portfolio_url || profile.github_url) && (
                   <div>
-                    <h3 className="text-white font-semibold mb-2">Links</h3>
+                    <h3 className="text-[#1A237E] font-semibold mb-2">Links</h3>
                     <div className="space-y-2">
                       {profile.linkedin_url && (
                         <a
                           href={profile.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-blue-400 hover:text-blue-300"
+                          className="block text-[#26A69A] hover:text-[#26A69A]"
                         >
                           LinkedIn →
                         </a>
@@ -399,7 +399,7 @@ export default function ProfilePage() {
                           href={profile.portfolio_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-blue-400 hover:text-blue-300"
+                          className="block text-[#26A69A] hover:text-[#26A69A]"
                         >
                           Portfolio →
                         </a>
@@ -409,7 +409,7 @@ export default function ProfilePage() {
                           href={profile.github_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-blue-400 hover:text-blue-300"
+                          className="block text-[#26A69A] hover:text-[#26A69A]"
                         >
                           GitHub →
                         </a>
@@ -425,56 +425,56 @@ export default function ProfilePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             <Link
               href="/dashboard/profile/facts"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
-              <div className="text-xs font-semibold uppercase tracking-wide text-blue-300 mb-3">Approved facts</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Career Memory</h3>
-              <p className="text-gray-400 text-sm">Import your resume and approve facts before generation uses them</p>
+              <div className="text-xs font-semibold uppercase tracking-wide text-[#26A69A] mb-3">Approved facts</div>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">Career Memory</h3>
+              <p className="text-[#607086]/80 text-sm">Import your resume and approve facts before generation uses them</p>
             </Link>
 
             <Link
               href="/dashboard/profile/experience"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
               <div className="text-2xl mb-2">💼</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Experience</h3>
-              <p className="text-gray-400 text-sm">Add your work history</p>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">Experience</h3>
+              <p className="text-[#607086]/80 text-sm">Add your work history</p>
             </Link>
 
             <Link
               href="/dashboard/profile/education"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
               <div className="text-2xl mb-2">🎓</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Education</h3>
-              <p className="text-gray-400 text-sm">Add your degrees</p>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">Education</h3>
+              <p className="text-[#607086]/80 text-sm">Add your degrees</p>
             </Link>
 
             <Link
               href="/dashboard/profile/skills"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
               <div className="text-2xl mb-2">⚡</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Skills</h3>
-              <p className="text-gray-400 text-sm">List your expertise</p>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">Skills</h3>
+              <p className="text-[#607086]/80 text-sm">List your expertise</p>
             </Link>
 
             <Link
               href="/dashboard/profile/stories"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
               <div className="text-2xl mb-2">🌟</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">STAR Stories</h3>
-              <p className="text-gray-400 text-sm">Build interview answers</p>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">STAR Stories</h3>
+              <p className="text-[#607086]/80 text-sm">Build interview answers</p>
             </Link>
 
             <Link
               href="/dashboard/profile/goals"
-              className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-blue-500/50 transition-all group"
+              className="bg-white/40 backdrop-blur-lg rounded-xl p-6 border border-black/[0.06] hover:border-[#26A69A]/30 transition-all group"
             >
               <div className="text-2xl mb-2">🎯</div>
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">SMART Goals</h3>
-              <p className="text-gray-400 text-sm">Track career goals</p>
+              <h3 className="text-lg font-bold text-[#1A237E] mb-2 group-hover:text-[#26A69A] transition-colors">SMART Goals</h3>
+              <p className="text-[#607086]/80 text-sm">Track career goals</p>
             </Link>
           </div>
         </div>

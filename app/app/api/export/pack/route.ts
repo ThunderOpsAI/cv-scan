@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     zip.file(
       "READ_BEFORE_USE.txt",
       [
-        "CVScan AI-generated application materials require human review before use.",
+        "AI CV Scan AI-generated application materials require human review before use.",
         "Only use claims that are accurate and supported by your approved Career Memory facts.",
         "If a job requirement is not supported by your facts, treat it as a gap rather than adding it as experience.",
       ].join("\n")

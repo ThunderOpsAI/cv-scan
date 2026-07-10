@@ -61,8 +61,8 @@ export default function Library() {
 
     if (status === "loading" || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-xl">Loading...</div>
+            <div className=" flex items-center justify-center">
+                <div className="text-[#1A237E] text-xl">Loading...</div>
             </div>
         );
     }
@@ -72,22 +72,22 @@ export default function Library() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="">
             {/* Navigation */}
             <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-                <Link href="/dashboard" className="text-2xl font-bold text-white">
-                    <span className="text-blue-400">CV</span>Scan
+                <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+                    <span className="text-[#26A69A]">CV</span>Scan
                 </Link>
                 <div className="flex items-center gap-4">
                     <Link
                         href="/generate/cover-letter"
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-[#607086] hover:text-[#1A237E] transition-colors"
                     >
                         Generate
                     </Link>
                     <Link
                         href="/dashboard"
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-[#607086] hover:text-[#1A237E] transition-colors"
                     >
                         Dashboard
                     </Link>
@@ -98,22 +98,22 @@ export default function Library() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-white mb-2">My Library</h1>
-                        <p className="text-gray-400">
+                        <h1 className="text-4xl font-bold text-[#1A237E] mb-2">My Library</h1>
+                        <p className="text-[#607086]/80">
                             All your saved cover letters in one place
                         </p>
                     </div>
 
                     {savedLetters.length === 0 ? (
-                        <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
+                        <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
                             <div className="text-6xl mb-4">📚</div>
-                            <h2 className="text-2xl font-bold text-white mb-2">No saved cover letters yet</h2>
-                            <p className="text-gray-400 mb-6">
+                            <h2 className="text-2xl font-bold text-[#1A237E] mb-2">No saved cover letters yet</h2>
+                            <p className="text-[#607086]/80 mb-6">
                                 Generate a cover letter and click "Save" to add it to your library
                             </p>
                             <Link
                                 href="/generate/cover-letter"
-                                className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all"
+                                className="inline-block bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-6 py-3 rounded-xl font-semibold transition-all"
                             >
                                 Generate Cover Letter
                             </Link>
@@ -125,14 +125,14 @@ export default function Library() {
                                 {savedLetters.map((letter) => (
                                     <div
                                         key={letter.id}
-                                        className={`bg-white/5 backdrop-blur-lg rounded-xl p-4 border transition-all cursor-pointer ${selectedLetter?.id === letter.id
+                                        className={`bg-white/40 backdrop-blur-lg rounded-xl p-4 border transition-all cursor-pointer ${selectedLetter?.id === letter.id
                                                 ? "border-blue-500 ring-2 ring-blue-500/30"
-                                                : "border-white/20 hover:border-blue-500/50"
+                                                : "border-black/[0.06] hover:border-[#26A69A]/30"
                                             }`}
                                         onClick={() => setSelectedLetter(letter)}
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <div className="text-xs text-gray-400">
+                                            <div className="text-xs text-[#607086]/80">
                                                 {new Date(letter.created_at).toLocaleDateString()}
                                             </div>
                                             <button
@@ -145,7 +145,7 @@ export default function Library() {
                                                 Delete
                                             </button>
                                         </div>
-                                        <p className="text-white text-sm line-clamp-3">
+                                        <p className="text-[#1A237E] text-sm line-clamp-3">
                                             {letter.input.job_description?.substring(0, 100) || "No description"}...
                                         </p>
                                     </div>
@@ -155,31 +155,31 @@ export default function Library() {
                             {/* Preview */}
                             <div className="lg:col-span-2">
                                 {selectedLetter ? (
-                                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/20 sticky top-4">
+                                    <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-8 border border-black/[0.06] sticky top-4">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h2 className="text-2xl font-bold text-white">Cover Letter</h2>
+                                            <h2 className="text-2xl font-bold text-[#1A237E]">Cover Letter</h2>
                                             <button
                                                 onClick={() => copyToClipboard(selectedLetter.output)}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                                                className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg font-semibold transition-all"
                                             >
                                                 Copy
                                             </button>
                                         </div>
 
-                                        <div className="bg-white/5 border border-white/20 rounded-xl p-6 mb-6">
-                                            <div className="text-white whitespace-pre-wrap font-serif leading-relaxed">
+                                        <div className="bg-white/40 border border-black/[0.06] rounded-xl p-6 mb-6">
+                                            <div className="text-[#1A237E] whitespace-pre-wrap font-serif leading-relaxed">
                                                 {selectedLetter.output}
                                             </div>
                                         </div>
 
-                                        <div className="text-xs text-gray-400">
+                                        <div className="text-xs text-[#607086]/80">
                                             Saved on {new Date(selectedLetter.created_at).toLocaleString()}
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
+                                    <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-12 border border-black/[0.06] text-center">
                                         <div className="text-4xl mb-4">📄</div>
-                                        <p className="text-gray-400">
+                                        <p className="text-[#607086]/80">
                                             Select a cover letter from the list to view it
                                         </p>
                                     </div>

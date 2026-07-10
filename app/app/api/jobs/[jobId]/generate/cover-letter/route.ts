@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { createClient } from "@/lib/supabase/server";
-import { deductCredits } from "@/lib/supabase/credits";
+import { deductCredits, addCredits } from "@/lib/supabase/credits";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { generateCoverLetter } from "@/lib/ats/tailor";
 import { extractCoverLetterEvidence } from "@/lib/generation/cover-letter-evidence";
@@ -56,15 +56,18 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const { data: userRow } = await (supabase as any)
-      .from("users")
-      .select("credits")
-      .eq("id", session.user.id)
-      .single();
+    const referenceId = debitReferenceFromRequest(req, `tailor-cover:${params.jobId}`);
 
-    if (!userRow || userRow.credits < CREDIT_COST) {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: `Cover letter: ${job.title} @ ${job.company}`,
+      p_reference_id: referenceId,
+    });
+
+    if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(
-        { error: "Insufficient credits for cover letter (requires 2)." },
+        { error: deductResult?.[0]?.error_message || "Insufficient credits for cover letter (requires 2)." },
         { status: 402 }
       );
     }
@@ -72,40 +75,52 @@ export async function POST(
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
     if (!profile) {
+      // Refund if profile is missing
+      await addCredits(supabase as never, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Missing profile facts",
+        p_reference_id: `refund-profile-${referenceId}`,
+      });
       return NextResponse.json(
         { error: "Approve profile facts in Career Memory before generating a cover letter." },
         { status: 400 }
       );
     }
 
-    const coverLetter = await generateCoverLetter(
-      profile,
-      job.title,
-      job.company,
-      job.raw_description
-    );
+    let coverLetter;
+    let evidence;
 
-    const evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
-
-    if (evidence.has_ungrounded_claims) {
-      return NextResponse.json(
-        { error: groundingErrorMessage("cover_letter"), evidence_json: evidence },
-        { status: 422 }
+    try {
+      coverLetter = await generateCoverLetter(
+        profile,
+        job.title,
+        job.company,
+        job.raw_description
       );
-    }
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
-      p_user_id: session.user.id,
-      p_amount: CREDIT_COST,
-      p_description: `Cover letter: ${job.title} @ ${job.company}`,
-      p_reference_id: debitReferenceFromRequest(req, `tailor-cover:${params.jobId}`),
-    });
+      evidence = extractCoverLetterEvidence(coverLetter, profile.approved_facts);
 
-    if (deductError || !deductResult?.[0]?.success) {
-      return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || "Failed to deduct credits" },
-        { status: 500 }
-      );
+      if (evidence.has_ungrounded_claims) {
+        await addCredits(supabase as never, {
+          p_user_id: session.user.id,
+          p_amount: CREDIT_COST,
+          p_description: "Refund: Ungrounded claims in generation",
+          p_reference_id: `refund-ungrounded-${referenceId}`,
+        });
+        return NextResponse.json(
+          { error: groundingErrorMessage("cover_letter"), evidence_json: evidence },
+          { status: 422 }
+        );
+      }
+    } catch (err) {
+      await addCredits(supabase as never, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Generation failed",
+        p_reference_id: `refund-error-${referenceId}`,
+      });
+      throw err;
     }
 
     await emitAnalyticsEvent({

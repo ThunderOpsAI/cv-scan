@@ -11,6 +11,6 @@ export function appTitle(title?: string) {
 export function brandWordmark() {
   return {
     leading: "AI",
-    trailing: "CVScan",
+    trailing: "CV Scan",
   };
 }

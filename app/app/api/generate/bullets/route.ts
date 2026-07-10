@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
 import { gemini } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
-import { deductCredits } from "@/lib/supabase/credits";
+import { deductCredits, addCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { loadProfileForTailoring } from "@/lib/ats/profile-loader";
 import { approvedFactIds, formatApprovedFactsForPrompt } from "@/lib/profile/facts";
@@ -32,16 +32,19 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    // Check if user has enough credits
-    const { data: user } = await (supabase
-      .from("users")
-      .select as any)("credits")
-      .eq("id", session.user.id)
-      .single();
+    const referenceId = debitReferenceFromRequest(req, "gen-bullets");
 
-    if (!user || user.credits < CREDIT_COST) {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      p_user_id: session.user.id,
+      p_amount: CREDIT_COST,
+      p_description: "Generated resume bullets",
+      p_reference_id: referenceId,
+    });
+
+    if (deductError || !deductResult?.[0]?.success) {
+      console.error("Failed to deduct credit:", deductError);
       return NextResponse.json(
-        { error: `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
+        { error: deductResult?.[0]?.error_message || `Insufficient credits. This action costs ${CREDIT_COST} credits.` },
         { status: 402 }
       );
     }
@@ -49,6 +52,12 @@ export async function POST(req: NextRequest) {
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
     if (!profile) {
+      await addCredits(supabase as any, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Missing profile facts",
+        p_reference_id: `refund-profile-${referenceId}`,
+      });
       return NextResponse.json(
         { error: "Import your resume and approve profile facts before generating bullets." },
         { status: 400 }
@@ -80,9 +89,20 @@ Requirements:
 
 Return ONLY the bullet points, one per line, without any numbering or bullet symbols. Each line should be a complete sentence.`;
 
-    const result = await gemini.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    let text;
+    try {
+      const result = await gemini.generateContent(prompt);
+      const response = result.response;
+      text = response.text();
+    } catch (err) {
+      await addCredits(supabase as any, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Generation failed",
+        p_reference_id: `refund-error-${referenceId}`,
+      });
+      throw err;
+    }
 
     // Parse bullets and keep only lines that cite a valid approved profile fact.
     const rawBullets = text
@@ -104,24 +124,15 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     if (bullets.length === 0) {
+      await addCredits(supabase as any, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Ungrounded bullets",
+        p_reference_id: `refund-ungrounded-${referenceId}`,
+      });
       return NextResponse.json(
         { error: groundingErrorMessage("bullets"), ungroundableNotes },
         { status: 422 }
-      );
-    }
-
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
-      p_user_id: session.user.id,
-      p_amount: CREDIT_COST,
-      p_description: "Generated resume bullets",
-      p_reference_id: debitReferenceFromRequest(req, "gen-bullets"),
-    });
-
-    if (deductError || !deductResult?.[0]?.success) {
-      console.error("Failed to deduct credit:", deductError);
-      return NextResponse.json(
-        { error: deductResult?.[0]?.error_message || "Failed to deduct credit" },
-        { status: 500 }
       );
     }
 

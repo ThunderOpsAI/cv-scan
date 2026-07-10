@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-export async function GET() {
-    if (process.env.NODE_ENV === "production") {
+export async function GET(req: Request) {
+    if (process.env.NODE_ENV === "production" && process.env.DEBUG_SECRET !== req.headers.get("x-debug-secret")) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 

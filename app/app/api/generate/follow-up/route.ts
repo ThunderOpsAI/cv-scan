@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { deductCredits } from "@/lib/supabase/credits";
+import { deductCredits, addCredits } from "@/lib/supabase/credits";
 import { debitReferenceFromRequest } from "@/lib/billing/idempotency";
 import { generateFollowUpDraft } from "@/lib/generation/follow-up-draft";
 
@@ -41,17 +41,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Insufficient credits." }, { status: 402 });
     }
 
+    const referenceId = debitReferenceFromRequest(req, "follow-up");
     const { data: deductResult, error: deductError } = await deductCredits(supabase as never, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Follow-up draft: ${jobTitle}`,
-      p_reference_id: debitReferenceFromRequest(req, "follow-up"),
+      p_reference_id: referenceId,
     });
 
     if (deductError || !deductResult?.[0]?.success) {
       return NextResponse.json(
         { error: deductResult?.[0]?.error_message || "Failed to deduct credits" },
-        { status: 500 }
+        { status: 402 }
       );
     }
 
@@ -62,12 +63,23 @@ export async function POST(req: NextRequest) {
           ? userRow.name
           : "Candidate";
 
-    const draft = await generateFollowUpDraft({
-      jobTitle,
-      company,
-      appliedAtIso: appliedAt,
-      candidateName,
-    });
+    let draft;
+    try {
+      draft = await generateFollowUpDraft({
+        jobTitle,
+        company,
+        appliedAtIso: appliedAt,
+        candidateName,
+      });
+    } catch (err) {
+      await addCredits(supabase as never, {
+        p_user_id: session.user.id,
+        p_amount: CREDIT_COST,
+        p_description: "Refund: Generation failed",
+        p_reference_id: `refund-error-${referenceId}`,
+      });
+      throw err;
+    }
 
     return NextResponse.json({
       draft,

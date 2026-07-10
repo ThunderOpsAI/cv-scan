@@ -123,8 +123,8 @@ export default function ApplicationDetailPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -132,14 +132,14 @@ export default function ApplicationDetailPage() {
   if (!session || !application) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/applications" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard/applications" className="text-[#607086] hover:text-[#1A237E]">
             ← Back to Tracker
           </Link>
         </div>
@@ -148,16 +148,16 @@ export default function ApplicationDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-6">
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06] mb-6">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white mb-1">{application.company}</h1>
-                <p className="text-xl text-gray-400 mb-4">{application.title}</p>
+                <h1 className="text-3xl font-bold text-[#1A237E] mb-1">{application.company}</h1>
+                <p className="text-xl text-[#607086]/80 mb-4">{application.title}</p>
                 <div className="flex flex-wrap items-center gap-4">
                   <select
                     value={application.status}
                     onChange={(e) => updateApplication({ status: e.target.value as ApplicationStatus })}
-                    className={`${getStatusColor(application.status)} text-white px-3 py-1 rounded-lg font-medium`}
+                    className={`${getStatusColor(application.status)} text-[#1A237E] px-3 py-1 rounded-lg font-medium`}
                     data-testid="status-select"
                   >
                     {STATUS_OPTIONS.map(s => (
@@ -165,14 +165,14 @@ export default function ApplicationDetailPage() {
                     ))}
                   </select>
                   {application.location && (
-                    <span className="text-gray-400">📍 {application.location}</span>
+                    <span className="text-[#607086]/80">📍 {application.location}</span>
                   )}
                   {application.url && (
                     <a
                       href={application.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300"
+                      className="text-[#26A69A] hover:text-[#26A69A]"
                     >
                       View Job ↗
                     </a>
@@ -183,14 +183,14 @@ export default function ApplicationDetailPage() {
                 {application.job_pack_id && (
                   <Link
                     href={`/dashboard/job-packs/${application.job_pack_id}`}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm"
+                    className="bg-purple-600 hover:bg-purple-700 text-[#1A237E] px-4 py-2 rounded-lg text-sm"
                   >
                     View Job Pack
                   </Link>
                 )}
                 <button
                   onClick={deleteApplication}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
+                  className="bg-red-600 hover:bg-red-700 text-[#1A237E] px-4 py-2 rounded-lg text-sm"
                   data-testid="delete-app-btn"
                 >
                   Delete
@@ -207,8 +207,8 @@ export default function ApplicationDetailPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
                   activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                    ? 'bg-blue-600 text-[#1A237E]'
+                    : 'bg-white/60 text-[#607086] hover:bg-white/20'
                 }`}
                 data-testid={`tab-${tab}`}
               >
@@ -218,26 +218,26 @@ export default function ApplicationDetailPage() {
           </div>
 
           {/* Content */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-black/[0.06]">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-white font-semibold mb-2">Details</h3>
-                    <div className="space-y-2 text-gray-300">
+                    <h3 className="text-[#1A237E] font-semibold mb-2">Details</h3>
+                    <div className="space-y-2 text-[#607086]">
                       <p><span className="text-gray-500">Applied:</span> {formatDate(application.applied_at)}</p>
                       <p><span className="text-gray-500">Source:</span> {application.source || 'N/A'}</p>
                       <p><span className="text-gray-500">Priority:</span> <span className="capitalize">{application.priority}</span></p>
                       {application.ats_score && (
-                        <p><span className="text-gray-500">ATS Score:</span> <span className="text-blue-400">{application.ats_score}%</span></p>
+                        <p><span className="text-gray-500">ATS Score:</span> <span className="text-[#26A69A]">{application.ats_score}%</span></p>
                       )}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold mb-2">Salary Range</h3>
+                    <h3 className="text-[#1A237E] font-semibold mb-2">Salary Range</h3>
                     {application.salary_range ? (
-                      <p className="text-gray-300">
+                      <p className="text-[#607086]">
                         {application.salary_range.currency || '$'}
                         {application.salary_range.min?.toLocaleString()} - 
                         {application.salary_range.max?.toLocaleString()}
@@ -250,29 +250,29 @@ export default function ApplicationDetailPage() {
 
                 {/* Timeline */}
                 <div>
-                  <h3 className="text-white font-semibold mb-4">Interview Timeline</h3>
+                  <h3 className="text-[#1A237E] font-semibold mb-4">Interview Timeline</h3>
                   {stages.length > 0 ? (
                     <div className="space-y-3">
                       {stages.map((stage, i) => (
                         <div
                           key={stage.id}
-                          className="flex items-center gap-4 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10"
+                          className="flex items-center gap-4 p-3 bg-white/40 rounded-lg cursor-pointer hover:bg-white/60"
                           onClick={() => {
                             setSelectedStage(stage);
                             setShowStageModal(true);
                           }}
                         >
-                          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm">
+                          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[#1A237E] text-sm">
                             {i + 1}
                           </div>
                           <div className="flex-1">
-                            <p className="text-white font-medium">{stage.stage_name || STAGE_TYPES.find(t => t.id === stage.stage_type)?.label}</p>
-                            <p className="text-gray-400 text-sm">{formatDate(stage.scheduled_at)}</p>
+                            <p className="text-[#1A237E] font-medium">{stage.stage_name || STAGE_TYPES.find(t => t.id === stage.stage_type)?.label}</p>
+                            <p className="text-[#607086]/80 text-sm">{formatDate(stage.scheduled_at)}</p>
                           </div>
                           <span className={`px-2 py-1 rounded text-xs ${
                             stage.outcome === 'passed' ? 'bg-green-500/20 text-green-400' :
                             stage.outcome === 'failed' ? 'bg-red-500/20 text-red-400' :
-                            stage.outcome === 'cancelled' ? 'bg-gray-500/20 text-gray-400' :
+                            stage.outcome === 'cancelled' ? 'bg-gray-500/20 text-[#607086]/80' :
                             'bg-yellow-500/20 text-yellow-400'
                           }`}>
                             {stage.outcome || 'pending'}
@@ -288,7 +288,7 @@ export default function ApplicationDetailPage() {
                       setSelectedStage(null);
                       setShowStageModal(true);
                     }}
-                    className="mt-4 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm"
+                    className="mt-4 bg-white/60 hover:bg-white/20 text-[#1A237E] px-4 py-2 rounded-lg text-sm"
                     data-testid="add-stage-btn"
                   >
                     + Add Interview Stage
@@ -301,13 +301,13 @@ export default function ApplicationDetailPage() {
             {activeTab === 'stages' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-white font-semibold">Interview Stages</h3>
+                  <h3 className="text-[#1A237E] font-semibold">Interview Stages</h3>
                   <button
                     onClick={() => {
                       setSelectedStage(null);
                       setShowStageModal(true);
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg text-sm"
                   >
                     + Add Stage
                   </button>
@@ -316,7 +316,7 @@ export default function ApplicationDetailPage() {
                   stages.map((stage) => (
                     <div
                       key={stage.id}
-                      className="bg-white/5 rounded-lg p-4 cursor-pointer hover:bg-white/10"
+                      className="bg-white/40 rounded-lg p-4 cursor-pointer hover:bg-white/60"
                       onClick={() => {
                         setSelectedStage(stage);
                         setShowStageModal(true);
@@ -324,10 +324,10 @@ export default function ApplicationDetailPage() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h4 className="text-white font-medium">
+                          <h4 className="text-[#1A237E] font-medium">
                             {stage.stage_name || STAGE_TYPES.find(t => t.id === stage.stage_type)?.label}
                           </h4>
-                          <p className="text-gray-400 text-sm">{formatDate(stage.scheduled_at)}</p>
+                          <p className="text-[#607086]/80 text-sm">{formatDate(stage.scheduled_at)}</p>
                         </div>
                         <span className={`px-2 py-1 rounded text-xs capitalize ${
                           stage.outcome === 'passed' ? 'bg-green-500/20 text-green-400' :
@@ -339,8 +339,8 @@ export default function ApplicationDetailPage() {
                       </div>
                       {stage.ai_structured && (
                         <div className="mt-3 pt-3 border-t border-white/10">
-                          <p className="text-gray-400 text-sm mb-1">Key Points:</p>
-                          <ul className="text-gray-300 text-sm space-y-1">
+                          <p className="text-[#607086]/80 text-sm mb-1">Key Points:</p>
+                          <ul className="text-[#607086] text-sm space-y-1">
                             {stage.ai_structured.positive_signals?.slice(0, 2).map((s, i) => (
                               <li key={i} className="text-green-400">✓ {s}</li>
                             ))}
@@ -362,10 +362,10 @@ export default function ApplicationDetailPage() {
             {activeTab === 'emails' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-white font-semibold">Generated Emails</h3>
+                  <h3 className="text-[#1A237E] font-semibold">Generated Emails</h3>
                   <button
                     onClick={() => setShowEmailModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg text-sm"
                     data-testid="generate-email-btn"
                   >
                     Generate Email (1cr)
@@ -373,20 +373,20 @@ export default function ApplicationDetailPage() {
                 </div>
                 {emails.length > 0 ? (
                   emails.map((email) => (
-                    <div key={email.id} className="bg-white/5 rounded-lg p-4">
+                    <div key={email.id} className="bg-white/40 rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <span className="text-blue-400 text-sm capitalize">{email.email_type.replace('_', ' ')}</span>
-                          <h4 className="text-white font-medium">{email.subject}</h4>
+                          <span className="text-[#26A69A] text-sm capitalize">{email.email_type.replace('_', ' ')}</span>
+                          <h4 className="text-[#1A237E] font-medium">{email.subject}</h4>
                         </div>
                         <span className="text-gray-500 text-sm">{formatDate(email.created_at)}</span>
                       </div>
-                      <pre className="text-gray-300 text-sm whitespace-pre-wrap font-sans mt-2">
+                      <pre className="text-[#607086] text-sm whitespace-pre-wrap font-sans mt-2">
                         {email.content}
                       </pre>
                       <button
                         onClick={() => navigator.clipboard.writeText(email.content)}
-                        className="mt-3 text-blue-400 hover:text-blue-300 text-sm"
+                        className="mt-3 text-[#26A69A] hover:text-[#26A69A] text-sm"
                       >
                         Copy to clipboard
                       </button>
@@ -401,13 +401,13 @@ export default function ApplicationDetailPage() {
             {/* Notes Tab */}
             {activeTab === 'notes' && (
               <div>
-                <h3 className="text-white font-semibold mb-4">Notes</h3>
+                <h3 className="text-[#1A237E] font-semibold mb-4">Notes</h3>
                 <textarea
                   value={application.notes || ''}
                   onChange={(e) => updateApplication({ notes: e.target.value })}
                   rows={10}
                   placeholder="Add your notes about this application..."
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 resize-none"
+                  className="w-full px-4 py-3 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] placeholder-gray-500 resize-none"
                   data-testid="notes-textarea"
                 />
               </div>
@@ -511,21 +511,21 @@ function StageModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[#1A237E]">
             {stage ? 'Edit Stage' : 'Add Interview Stage'}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">×</button>
+          <button onClick={onClose} className="text-[#607086]/80 hover:text-[#1A237E] text-2xl">×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-white mb-1">Stage Type</label>
+            <label className="block text-[#1A237E] mb-1">Stage Type</label>
             <select
               value={stageType}
               onChange={(e) => setStageType(e.target.value as StageType)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
             >
               {STAGE_TYPES.map(t => (
                 <option key={t.id} value={t.id}>{t.label}</option>
@@ -534,32 +534,32 @@ function StageModal({
           </div>
 
           <div>
-            <label className="block text-white mb-1">Custom Name (optional)</label>
+            <label className="block text-[#1A237E] mb-1">Custom Name (optional)</label>
             <input
               type="text"
               value={stageName}
               onChange={(e) => setStageName(e.target.value)}
               placeholder="e.g., Round 1 with Sarah"
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
             />
           </div>
 
           <div>
-            <label className="block text-white mb-1">Scheduled Date/Time</label>
+            <label className="block text-[#1A237E] mb-1">Scheduled Date/Time</label>
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
             />
           </div>
 
           <div>
-            <label className="block text-white mb-1">Outcome</label>
+            <label className="block text-[#1A237E] mb-1">Outcome</label>
             <select
               value={outcome}
               onChange={(e) => setOutcome(e.target.value as StageOutcome)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
             >
               <option value="pending">Pending</option>
               <option value="passed">Passed</option>
@@ -569,13 +569,13 @@ function StageModal({
           </div>
 
           <div>
-            <label className="block text-white mb-1">Interview Notes</label>
+            <label className="block text-[#1A237E] mb-1">Interview Notes</label>
             <textarea
               value={rawNotes}
               onChange={(e) => setRawNotes(e.target.value)}
               rows={6}
               placeholder="Brain dump your notes here... topics discussed, questions asked, your impressions..."
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white resize-none"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] resize-none"
             />
             <p className="text-gray-500 text-xs mt-1">Notes will be automatically structured when saved</p>
           </div>
@@ -585,7 +585,7 @@ function StageModal({
               <button
                 type="button"
                 onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                className="bg-red-600 hover:bg-red-700 text-[#1A237E] px-4 py-2 rounded-lg"
               >
                 Delete
               </button>
@@ -593,14 +593,14 @@ function StageModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg"
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-[#1A237E] py-2 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-2 rounded-lg font-semibold"
             >
               {loading ? 'Saving...' : 'Save'}
             </button>
@@ -660,19 +660,19 @@ function EmailModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl max-w-lg w-full p-6">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Generate Email</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">×</button>
+          <h2 className="text-2xl font-bold text-[#1A237E]">Generate Email</h2>
+          <button onClick={onClose} className="text-[#607086]/80 hover:text-[#1A237E] text-2xl">×</button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-white mb-1">Email Type</label>
+            <label className="block text-[#1A237E] mb-1">Email Type</label>
             <select
               value={emailType}
               onChange={(e) => setEmailType(e.target.value as EmailType)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
             >
               <option value="thank_you">Thank You</option>
               <option value="follow_up">Follow Up</option>
@@ -685,11 +685,11 @@ function EmailModal({
 
           {stages.length > 0 && (emailType === 'thank_you' || emailType === 'follow_up') && (
             <div>
-              <label className="block text-white mb-1">Related Interview (optional)</label>
+              <label className="block text-[#1A237E] mb-1">Related Interview (optional)</label>
               <select
                 value={stageId}
                 onChange={(e) => setStageId(e.target.value)}
-                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
+                className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E]"
               >
                 <option value="">Select interview...</option>
                 {stages.map(s => (
@@ -702,13 +702,13 @@ function EmailModal({
           )}
 
           <div>
-            <label className="block text-white mb-1">Additional Context (optional)</label>
+            <label className="block text-[#1A237E] mb-1">Additional Context (optional)</label>
             <textarea
               value={context}
               onChange={(e) => setContext(e.target.value)}
               rows={3}
               placeholder="Any specific points to mention..."
-              className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white resize-none"
+              className="w-full px-4 py-2 bg-white/40 border border-black/[0.06] rounded-lg text-[#1A237E] resize-none"
             />
           </div>
 
@@ -721,14 +721,14 @@ function EmailModal({
           <div className="flex gap-4 pt-4">
             <button
               onClick={onClose}
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg"
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-[#1A237E] py-2 rounded-lg"
             >
               Cancel
             </button>
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-[#1A237E] py-2 rounded-lg font-semibold"
             >
               {loading ? 'Generating...' : 'Generate (1 credit)'}
             </button>

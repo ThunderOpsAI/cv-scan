@@ -32,8 +32,8 @@ function verdictStyles(verdict: string) {
       };
     default:
       return {
-        border: "border-white/20",
-        bg: "bg-white/5",
+        border: "border-black/[0.06]",
+        bg: "bg-white/40",
         label: verdict,
         text: "text-gray-200",
       };
@@ -173,8 +173,8 @@ function JobFitContent() {
 
   if (status === "loading" || loadingJobs) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className=" flex items-center justify-center">
+        <div className="text-[#1A237E] text-xl">Loading...</div>
       </div>
     );
   }
@@ -186,16 +186,16 @@ function JobFitContent() {
   const vs = latestAnalysis ? verdictStyles(latestAnalysis.verdict) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold text-white">
-          <span className="text-blue-400">CV</span>Scan
+        <Link href="/dashboard" className="text-2xl font-bold text-[#1A237E]">
+          <span className="text-[#26A69A]">CV</span>Scan
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/profile/facts" className="text-gray-300 hover:text-white text-sm">
+          <Link href="/dashboard/profile/facts" className="text-[#607086] hover:text-[#1A237E] text-sm">
             Career Memory
           </Link>
-          <Link href="/dashboard" className="text-gray-300 hover:text-white">
+          <Link href="/dashboard" className="text-[#607086] hover:text-[#1A237E]">
             Dashboard
           </Link>
         </div>
@@ -203,9 +203,9 @@ function JobFitContent() {
 
       <main className="container mx-auto px-4 py-10 max-w-5xl space-y-10">
         <header>
-          <p className="text-blue-300 text-sm font-semibold uppercase tracking-wide">Phase 2 — Activation</p>
-          <h1 className="text-4xl font-bold text-white mt-2">Job fit</h1>
-          <p className="text-gray-300 mt-3 max-w-3xl">
+          <p className="text-[#26A69A] text-sm font-semibold uppercase tracking-wide">Phase 2 — Activation</p>
+          <h1 className="text-4xl font-bold text-[#1A237E] mt-2">Job fit</h1>
+          <p className="text-[#607086] mt-3 max-w-3xl">
             Paste a job description and get an apply / stretch / skip verdict grounded only in your approved
             profile facts. Each run uses {CREDIT_COSTS.jobFit} credit
             {CREDIT_COSTS.jobFit === 1 ? "" : "s"} (you have {session.user.credits}).
@@ -226,45 +226,45 @@ function JobFitContent() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <form onSubmit={runFit} className="lg:col-span-2 space-y-5">
-            <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 border border-white/20 space-y-4">
+            <div className="bg-white/60 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06] space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-white font-semibold mb-2 text-sm">Job title</label>
+                  <label className="block text-[#1A237E] font-semibold mb-2 text-sm">Job title</label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white/40 border border-black/[0.06] rounded-lg p-3 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     placeholder="Senior Software Engineer"
                     disabled={running}
                   />
                 </div>
                 <div>
-                  <label className="block text-white font-semibold mb-2 text-sm">Company</label>
+                  <label className="block text-[#1A237E] font-semibold mb-2 text-sm">Company</label>
                   <input
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white/40 border border-black/[0.06] rounded-lg p-3 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     placeholder="Acme Corp"
                     disabled={running}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Job URL (optional)</label>
+                <label className="block text-[#1A237E] font-semibold mb-2 text-sm">Job URL (optional)</label>
                 <input
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white/40 border border-black/[0.06] rounded-lg p-3 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   placeholder="https://..."
                   disabled={running}
                 />
               </div>
               <div>
-                <label className="block text-white font-semibold mb-2 text-sm">Job description</label>
+                <label className="block text-[#1A237E] font-semibold mb-2 text-sm">Job description</label>
                 <textarea
                   value={rawDescription}
                   onChange={(e) => setRawDescription(e.target.value)}
-                  className="min-h-[220px] w-full bg-white/5 border border-white/20 rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="min-h-[220px] w-full bg-white/40 border border-black/[0.06] rounded-lg p-4 text-[#1A237E] placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   placeholder="Paste the full job description..."
                   disabled={running}
                 />
@@ -272,16 +272,16 @@ function JobFitContent() {
               <button
                 type="submit"
                 disabled={running || rawDescription.trim().length < 20}
-                className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-lg bg-blue-600 px-6 py-3 font-semibold text-[#1A237E] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {running ? "Saving job and analyzing fit..." : "Save job and run fit analysis"}
               </button>
             </div>
           </form>
 
-          <aside className="bg-white/5 backdrop-blur-lg rounded-lg p-6 border border-white/20 h-fit">
-            <h2 className="text-lg font-bold text-white mb-2">Recent jobs</h2>
-            <p className="text-gray-400 text-sm mb-4">Open a past job to view its latest saved analysis.</p>
+          <aside className="bg-white/40 backdrop-blur-lg rounded-lg p-6 border border-black/[0.06] h-fit">
+            <h2 className="text-lg font-bold text-[#1A237E] mb-2">Recent jobs</h2>
+            <p className="text-[#607086]/80 text-sm mb-4">Open a past job to view its latest saved analysis.</p>
             {jobs.length === 0 ? (
               <p className="text-gray-500 text-sm">No saved jobs yet.</p>
             ) : (
@@ -291,10 +291,10 @@ function JobFitContent() {
                     <button
                       type="button"
                       onClick={() => loadJobAnalysis(job)}
-                      className="w-full text-left rounded-lg border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10 transition-colors"
+                      className="w-full text-left rounded-lg border border-white/10 bg-white/40 px-3 py-2 hover:bg-white/60 transition-colors"
                     >
-                      <p className="text-white text-sm font-medium line-clamp-1">{job.title}</p>
-                      <p className="text-gray-400 text-xs">{job.company}</p>
+                      <p className="text-[#1A237E] text-sm font-medium line-clamp-1">{job.title}</p>
+                      <p className="text-[#607086]/80 text-xs">{job.company}</p>
                     </button>
                   </li>
                 ))}
@@ -308,15 +308,15 @@ function JobFitContent() {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
                 <p className={`text-xs font-bold uppercase tracking-wide ${vs.text}`}>{vs.label}</p>
-                <h2 className="text-2xl font-bold text-white mt-1">
-                  {analysisJob.title} <span className="text-gray-400 font-normal">@</span> {analysisJob.company}
+                <h2 className="text-2xl font-bold text-[#1A237E] mt-1">
+                  {analysisJob.title} <span className="text-[#607086]/80 font-normal">@</span> {analysisJob.company}
                 </h2>
                 <p className="text-gray-200 mt-4 leading-relaxed">{latestAnalysis.rationale}</p>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
                 <Link
                   href={`/dashboard/tailor/${analysisJob.job_id}?fromFit=1`}
-                  className="text-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                  className="text-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-indigo-500"
                 >
                   Tailor bullets & cover letter
                 </Link>
@@ -326,13 +326,13 @@ function JobFitContent() {
                     title: analysisJob.title,
                     company: analysisJob.company,
                   }).toString()}`}
-                  className="text-center rounded-lg bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-600"
+                  className="text-center rounded-lg bg-purple-600/90 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-purple-600"
                 >
                   Full job pack (legacy flow)
                 </Link>
                 <Link
                   href="/dashboard/scanner"
-                  className="text-center rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                  className="text-center rounded-lg bg-white/60 px-4 py-2 text-sm font-semibold text-[#1A237E] hover:bg-white/20"
                 >
                   ATS scanner
                 </Link>
@@ -379,15 +379,15 @@ function JobFitContent() {
             </div>
 
             {analysisHistory.length > 1 && (
-              <div className="mt-8 border-t border-white/20 pt-6">
-                <h3 className="text-white font-semibold mb-3">Fit history (newest first)</h3>
-                <ul className="space-y-2 text-sm text-gray-300">
+              <div className="mt-8 border-t border-black/[0.06] pt-6">
+                <h3 className="text-[#1A237E] font-semibold mb-3">Fit history (newest first)</h3>
+                <ul className="space-y-2 text-sm text-[#607086]">
                   {analysisHistory.map((a) => (
                     <li
                       key={a.analysis_id}
                       className="flex flex-wrap justify-between gap-2 rounded-lg bg-black/20 px-3 py-2 border border-white/10"
                     >
-                      <span className="uppercase text-xs font-bold text-gray-400">{a.verdict}</span>
+                      <span className="uppercase text-xs font-bold text-[#607086]/80">{a.verdict}</span>
                       <span className="text-gray-500 text-xs">
                         {new Date(a.created_at).toLocaleString()}
                       </span>
@@ -407,8 +407,8 @@ export default function JobFitPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-          <div className="text-white text-xl">Loading...</div>
+        <div className=" flex items-center justify-center">
+          <div className="text-[#1A237E] text-xl">Loading...</div>
         </div>
       }
     >

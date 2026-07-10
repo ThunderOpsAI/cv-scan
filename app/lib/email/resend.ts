@@ -74,6 +74,42 @@ export async function sendWelcomeEmail(to: string, name: string) {
   }
 }
 
+export async function sendVerificationEmail(to: string, token: string) {
+  try {
+    const url = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}&email=${encodeURIComponent(to)}`;
+    
+    await getResendClient().emails.send({
+      from: `${APP_NAME} <onboarding@cv-scan.com>`,
+      to: [to],
+      subject: `Verify your email for ${APP_NAME}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <body style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #f9fafb; padding: 30px; border-radius: 10px;">
+              <h1 style="color: #1A237E; margin: 0 0 20px 0; font-size: 24px;">Verify your email</h1>
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                Please click the button below to verify your email address and activate your account.
+              </p>
+              <div style="margin: 30px 0;">
+                <a href="${url}"
+                   style="background: #26A69A; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 16px;">
+                  Verify Email
+                </a>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    return { success: false, error };
+  }
+}
+
 export async function sendPaymentReceiptEmail(
   to: string,
   name: string,

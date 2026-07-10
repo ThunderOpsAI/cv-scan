@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { logCriticalError } from '@/lib/analytics/server';
+import Stripe from 'stripe';
 
 export async function DELETE() {
   try {
@@ -13,6 +14,30 @@ export async function DELETE() {
     }
 
     const supabase = createClient();
+
+    // Fetch user before deletion to get Stripe customer ID
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('stripe_customer_id')
+      .eq('id', session.user.id)
+      .single();
+
+    if (userRecord?.stripe_customer_id && process.env.STRIPE_SECRET_KEY) {
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+          apiVersion: "2024-06-20" as any,
+        });
+        await stripe.customers.del(userRecord.stripe_customer_id);
+      } catch (stripeErr) {
+        console.error('Failed to delete Stripe customer:', stripeErr);
+        await logCriticalError({
+          workflow: 'account_deletion_stripe_cleanup',
+          userId: session.user.id,
+          supabase,
+          error: stripeErr,
+        });
+      }
+    }
 
     // Delete user storage items first since they do not cascade
     try {

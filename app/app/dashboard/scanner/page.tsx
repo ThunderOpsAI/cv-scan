@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import imageCompression from "browser-image-compression";
+import { Camera, Upload, Loader2 } from "lucide-react";
 import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { ScanAnimation } from "@/components/ui/ScanAnimation";
@@ -120,8 +122,19 @@ export default function ScannerPage() {
     setUploading(true);
 
     try {
+      let finalFile = file;
+      // Compress large images from mobile cameras before upload
+      if (file.type.startsWith("image/")) {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        finalFile = await imageCompression(file, options);
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", finalFile);
 
       const res = await fetch("/api/jobs/ocr", {
         method: "POST",
@@ -130,7 +143,7 @@ export default function ScannerPage() {
       const data = (await res.json()) as JobAdOcrResponse;
 
       if (!res.ok) {
-        throw new Error(data.error || "Could not read that screenshot");
+        throw new Error(data.error || "Could not read that file");
       }
 
       setJobDescription(data.text || "");
@@ -164,7 +177,7 @@ export default function ScannerPage() {
             <span className="text-lg font-semibold text-[#1A237E]">CV</span>
           </div>
           <div>
-            <div className="text-lg font-semibold tracking-[-0.03em]">CVScan</div>
+            <div className="text-lg font-semibold tracking-[-0.03em]">AI CV Scan</div>
             <div className="text-xs text-[#757575]">magic scan</div>
           </div>
         </Link>
@@ -183,7 +196,7 @@ export default function ScannerPage() {
                   Scan a role like it matters.
                 </h1>
                 <p className="mt-4 max-w-3xl text-base leading-8 text-[#757575]">
-                  Drop in a screenshot or paste the description. CVScan will surface the exact keywords, gaps, and profile signals that deserve your attention next.
+                  Drop in a screenshot or paste the description. AI CV Scan will surface the exact keywords, gaps, and profile signals that deserve your attention next.
                 </p>
               </div>
 
@@ -223,39 +236,62 @@ export default function ScannerPage() {
                     </div>
                   </div>
 
-                  <label className="mt-6 block">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleFileChange}
-                      className="sr-only"
-                      data-testid="job-ad-upload-input"
-                    />
-                    <span className="flex cursor-pointer flex-col gap-4 rounded-[1.4rem] border border-white/10 bg-[linear-gradient(135deg,rgba(10,18,34,0.9),rgba(14,31,56,0.72))] p-5 transition hover:border-cyan-300/25 hover:bg-white/[0.06]">
-                      <span className="flex items-center gap-4">
-                        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/18 bg-cyan-300/10 text-cyan-100">
-                          {uploading ? "..." : "QR"}
-                        </span>
-                        <span>
-                          <span className="block text-sm font-medium text-white">
-                            {jobAdFile ? `Captured: ${jobAdFile.name}` : "Upload a screenshot or capture from camera"}
+                  <div className="relative mt-6">
+                    <div className="flex flex-col gap-4 rounded-[1.4rem] border border-black/[0.08] bg-white p-5 shadow-sm transition hover:border-[#26A69A]/30 hover:bg-[#F8FCFC]">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#26A69A]/20 bg-[#26A69A]/10 text-[#26A69A]">
+                          {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+                        </div>
+                        <div>
+                          <span className="block text-sm font-medium text-[#1A237E]">
+                            {jobAdFile ? `Selected: ${jobAdFile.name}` : "Upload file or take a photo"}
                           </span>
-                          <span className="mt-1 block text-sm text-slate-400">
-                            Framed viewfinder guidance, direct OCR, and clearer success/error feedback.
+                          <span className="mt-1 block text-sm text-[#607086]">
+                            Choose to snap a photo or browse your files.
                           </span>
-                        </span>
-                      </span>
-                      <span className="grid gap-2 rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-xs text-slate-400">
-                        <span>1. Aim for the full job description inside the frame.</span>
-                        <span>2. Keep strong contrast and avoid glare.</span>
-                        <span>3. Wait for the text box below to fill before scanning.</span>
-                      </span>
-                    </span>
-                  </label>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-3 sm:flex-row mt-2">
+                        <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 px-4 py-3 text-sm font-semibold text-[#168579] transition hover:bg-[#26A69A]/20 cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                            className="hidden"
+                            title="Take photo"
+                          />
+                          <Camera className="h-4 w-4" />
+                          <span>Take Photo</span>
+                        </label>
+
+                        <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06] cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={handleFileChange}
+                            disabled={uploading}
+                            className="hidden"
+                            data-testid="job-ad-upload-input"
+                            title="Upload file"
+                          />
+                          <Upload className="h-4 w-4" />
+                          <span>Upload File</span>
+                        </label>
+                      </div>
+
+                      <div className="grid gap-2 rounded-2xl border border-black/[0.06] bg-[#F7FAFA] p-4 text-xs text-[#607086]">
+                        <span>1. Use an image or PDF, or snap a clear photo of the job ad.</span>
+                        <span>2. Keep the full description in frame and avoid glare.</span>
+                        <span>3. Wait for the text box below to fill before running the scan.</span>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="mt-6">
-                    <label className="mb-3 block text-sm font-medium text-white">
+                    <label className="mb-3 block text-sm font-medium text-[#1A237E]">
                       Job description
                     </label>
                     <textarea
@@ -263,19 +299,19 @@ export default function ScannerPage() {
                       onChange={(e) => setJobDescription(e.target.value)}
                       rows={12}
                       placeholder="Paste the full job description, or upload a screenshot to fill this box..."
-                      className="w-full rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-white placeholder:text-slate-500 focus:border-cyan-300/40 focus:outline-none"
+                      className="w-full rounded-[1.4rem] border border-black/[0.08] bg-white px-4 py-4 text-[#1A237E] placeholder:text-[#7A879C] focus:border-[#26A69A]/40 focus:outline-none"
                       data-testid="job-description-input"
                     />
                   </div>
 
                   {uploading ? (
-                    <div className="mt-4 rounded-2xl border border-cyan-300/16 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
+                    <div className="mt-4 rounded-2xl border border-[#26A69A]/20 bg-[#26A69A]/10 px-4 py-3 text-sm text-[#1A237E]">
                       Reading job ad screenshot and syncing the text into your scan draft...
                     </div>
                   ) : null}
 
                   {error ? (
-                    <div className="mt-4 rounded-2xl border border-rose-300/20 bg-rose-300/10 px-4 py-3 text-sm text-rose-100">
+                    <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                       {error}
                     </div>
                   ) : null}
@@ -323,12 +359,12 @@ export default function ScannerPage() {
                   data-testid="scan-results"
                 >
                   <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-                    <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_70px_rgba(2,8,23,0.3)] backdrop-blur-xl">
+                    <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
                       <p className="eyebrow">Results</p>
                       <div className="mt-4 flex justify-center">
                         <ScoreGauge score={scanResult.ats_score} />
                       </div>
-                      <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4 text-sm text-slate-300">
+                      <div className="mt-5 rounded-[1.4rem] border border-black/[0.06] bg-[#F7FAFA] p-4 text-sm text-[#4E5B7A]">
                         <div className="flex items-center justify-between gap-4">
                           <span>Overall fit</span>
                           <span className={`font-semibold ${getScoreColor(scanResult.ats_score)}`}>
@@ -338,22 +374,22 @@ export default function ScannerPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_70px_rgba(2,8,23,0.3)] backdrop-blur-xl">
+                    <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="eyebrow">Keyword map</p>
-                          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
+                          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#1A237E]">
                             Match coverage at a glance
                           </h2>
                         </div>
-                        <div className="rounded-full border border-emerald-300/16 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-100">
+                        <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
                           Score locked
                         </div>
                       </div>
 
                       <div className="mt-6 grid gap-6 md:grid-cols-2">
                         <div>
-                          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Matched keywords</h3>
+                          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">Matched keywords</h3>
                           <div className="mt-3 flex flex-wrap gap-2">
                             {scanResult.keyword_matches.found.length > 0 ? (
                               scanResult.keyword_matches.found.map((keyword, index) => (
@@ -362,7 +398,7 @@ export default function ScannerPage() {
                                   initial={{ opacity: 0, scale: 0.9 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ duration: 0.3, delay: index * 0.04 }}
-                                  className="rounded-full border border-emerald-300/16 bg-emerald-300/10 px-3 py-1 text-sm text-emerald-100"
+                                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm text-emerald-700"
                                 >
                                   {keyword}
                                 </motion.span>
@@ -374,7 +410,7 @@ export default function ScannerPage() {
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-200">Missing keywords</h3>
+                          <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-700">Missing keywords</h3>
                           <div className="mt-3 flex flex-wrap gap-2">
                             {scanResult.keyword_matches.missing.length > 0 ? (
                               scanResult.keyword_matches.missing.map((keyword, index) => (
@@ -384,7 +420,7 @@ export default function ScannerPage() {
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ duration: 0.3, delay: index * 0.05 }}
                                   title={`This role signals ${keyword} as important. Add grounded evidence for it if you have it.`}
-                                  className="rounded-full border border-rose-300/16 bg-rose-300/10 px-3 py-1 text-sm text-rose-100"
+                                  className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm text-rose-700"
                                 >
                                   {keyword}
                                 </motion.span>
@@ -399,16 +435,16 @@ export default function ScannerPage() {
                   </div>
 
                   <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-                    <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_70px_rgba(2,8,23,0.3)] backdrop-blur-xl">
+                    <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
                       <p className="eyebrow">Section breakdown</p>
                       <div className="mt-5 space-y-4">
                         {Object.entries(scanResult.section_scores).map(([section, score]) => (
-                          <div key={section} className="rounded-[1.25rem] border border-white/8 bg-white/[0.03] px-4 py-4">
+                          <div key={section} className="rounded-[1.25rem] border border-black/[0.06] bg-[#F7FAFA] px-4 py-4">
                             <div className="mb-2 flex items-center justify-between gap-4">
-                              <span className="capitalize text-slate-200">{section}</span>
+                              <span className="capitalize text-[#1A237E]">{section}</span>
                               <span className={`font-semibold ${getScoreColor(score as number)}`}>{score}%</span>
                             </div>
-                            <div className="h-2 rounded-full bg-white/10">
+                            <div className="h-2 rounded-full bg-[#D7E7E5]">
                               <div
                                 className={`h-2 rounded-full ${getScoreBar(score as number)}`}
                                 style={{ width: `${score}%` }}
@@ -419,16 +455,16 @@ export default function ScannerPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_70px_rgba(2,8,23,0.3)] backdrop-blur-xl">
+                    <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
                       <p className="eyebrow">Actionable guidance</p>
-                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
+                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#1A237E]">
                         What to improve before tailoring
                       </h2>
                       {scanResult.recommendations.length > 0 ? (
                         <ul className="mt-5 space-y-3">
                           {scanResult.recommendations.map((rec, index) => (
-                            <li key={index} className="flex items-start gap-3 rounded-[1.25rem] border border-white/8 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                              <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan-300/12 text-xs font-semibold text-cyan-100">
+                            <li key={index} className="flex items-start gap-3 rounded-[1.25rem] border border-black/[0.06] bg-[#F7FAFA] px-4 py-4 text-sm leading-7 text-[#4E5B7A]">
+                              <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#26A69A]/12 text-xs font-semibold text-[#26A69A]">
                                 {index + 1}
                               </span>
                               <span>{rec}</span>
@@ -436,7 +472,7 @@ export default function ScannerPage() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="mt-5 rounded-[1.25rem] border border-emerald-300/16 bg-emerald-300/10 px-4 py-4 text-sm text-emerald-100">
+                        <p className="mt-5 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-700">
                           Your profile already looks strong for this role. You can move straight into tailoring.
                         </p>
                       )}
@@ -444,7 +480,7 @@ export default function ScannerPage() {
                   </div>
                 </motion.div>
               ) : !loading && !uploading ? (
-                <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_24px_70px_rgba(2,8,23,0.3)] backdrop-blur-xl">
+                <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
                   <ScanAnimation stageIndex={0} stages={scanStages} visibleKeywords={visibleKeywords} />
                 </div>
               ) : null}

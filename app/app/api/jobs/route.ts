@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
           : null;
     const source: JobSource = isJobSource(body.source) ? body.source : "manual";
 
-    if (!title || !company || raw_description.length < 20) {
+    if (!title || !company || raw_description.length < 20 || raw_description.length > 25000) {
       return NextResponse.json(
-        { error: "Title, company, and a job description (at least 20 characters) are required." },
+        { error: "Title, company, and a job description (between 20 and 25000 characters) are required." },
         { status: 400 }
       );
     }
