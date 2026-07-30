@@ -190,7 +190,7 @@ function NewJobPackContent() {
                   </label>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg, image/png, image/webp"
                     capture="environment"
                     onChange={handleJobAdImageUpload}
                     disabled={ocrLoading}

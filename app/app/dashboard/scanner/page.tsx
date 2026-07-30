@@ -256,7 +256,7 @@ export default function ScannerPage() {
                         <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-[#26A69A]/30 bg-[#26A69A]/10 px-4 py-3 text-sm font-semibold text-[#168579] transition hover:bg-[#26A69A]/20 cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/jpeg, image/png, image/webp"
                             capture="environment"
                             onChange={handleFileChange}
                             disabled={uploading}
@@ -270,7 +270,7 @@ export default function ScannerPage() {
                         <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06] cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           <input
                             type="file"
-                            accept="image/*,.pdf"
+                            accept="image/jpeg, image/png, image/webp,.pdf"
                             onChange={handleFileChange}
                             disabled={uploading}
                             className="hidden"

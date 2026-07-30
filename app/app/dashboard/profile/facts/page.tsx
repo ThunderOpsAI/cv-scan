@@ -479,7 +479,7 @@ export default function ProfileFactsPage() {
                 <input
                   id="resume-image-upload"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg, image/png, image/webp"
                   capture="environment"
                   onChange={handleResumeImageUpload}
                   className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700"
