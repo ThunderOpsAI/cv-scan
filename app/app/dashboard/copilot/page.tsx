@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Conversation, Message } from "@/types/intelligence";
 import { CopilotPageSkeleton } from "@/components/ui/dashboard-skeletons";
+import imageCompression from "browser-image-compression";
 
 export default function CopilotPage() {
   const { data: session, status } = useSession();
@@ -16,6 +17,7 @@ export default function CopilotPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -49,13 +51,45 @@ export default function CopilotPage() {
     }
   };
 
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || sending) return;
+    if ((!input.trim() && !attachedFile) || sending) return;
 
     setSending(true);
     const userMessage = input;
     setInput("");
+    const fileToSend = attachedFile;
+    setAttachedFile(null);
+
+    let finalFile = fileToSend;
+    let extractedText = "";
+
+    if (finalFile && finalFile.type.startsWith("image/")) {
+      try {
+        const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
+        finalFile = await imageCompression(finalFile, options);
+
+        const formData = new FormData();
+        formData.append("file", finalFile);
+
+        const uploadRes = await fetch("/api/jobs/ocr", {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (uploadRes.ok && uploadData.text) {
+          extractedText = uploadData.text;
+        }
+      } catch (err) {
+        console.error("Compression or upload failed", err);
+      }
+    }
+
+    const fullMessage = extractedText 
+      ? `${userMessage}\n\n[Attached File Content]:\n${extractedText}`
+      : userMessage;
 
     setMessages((prev) => [
       ...prev,
@@ -63,7 +97,7 @@ export default function CopilotPage() {
         id: Date.now().toString(),
         conversation_id: currentConversation || "",
         role: "user",
-        content: userMessage,
+        content: fullMessage,
         created_at: new Date().toISOString(),
       },
     ]);
@@ -74,7 +108,7 @@ export default function CopilotPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversation_id: currentConversation,
-          content: userMessage,
+          content: fullMessage,
         }),
       });
 
@@ -213,8 +247,46 @@ export default function CopilotPage() {
 
               {/* Input */}
               <form onSubmit={sendMessage} className="flex-none border-t border-black/[0.06] p-4">
-                <div className="flex gap-2">
-                <input
+                {attachedFile && (
+                  <div className="mb-2 flex items-center justify-between rounded-lg bg-black/[0.04] px-3 py-2 text-sm text-[#1A237E]">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="shrink-0">📎</span>
+                      <span className="truncate font-medium">{attachedFile.name}</span>
+                      <span className="shrink-0 text-xs text-[#757575]">
+                        ({(attachedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAttachedFile(null)}
+                      className="ml-2 shrink-0 p-1 text-[#757575] hover:text-red-500"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="file"
+                    id="chatFileInput"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setAttachedFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("chatFileInput")?.click()}
+                    className="shrink-0 flex items-center justify-center w-12 h-12 bg-white/60 hover:bg-black/[0.04] border border-black/[0.06] rounded-lg text-xl transition-colors text-[#26A69A]"
+                    title="Attach photo or file"
+                    aria-label="Attach photo or file"
+                  >
+                    📷
+                  </button>
+                  <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -224,7 +296,7 @@ export default function CopilotPage() {
                   />
                   <button
                     type="submit"
-                    disabled={!input.trim() || sending}
+                    disabled={(!input.trim() && !attachedFile) || sending}
                     className="shrink-0 bg-[#26A69A] hover:bg-[#1A237E] text-white px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors sm:px-6"
                   >
                     Send
