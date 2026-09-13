@@ -8,6 +8,7 @@ import {
   validateGooglePlayPackage,
   verifyGooglePlayPurchase,
 } from "@/lib/billing/google-play";
+import { CREDIT_PACKAGE_MAP } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 
@@ -67,9 +68,8 @@ export async function POST(request: NextRequest) {
     const verification = await verifyGooglePlayPurchase(body);
 
     if (verification.verified && verification.purchaseType === "product") {
-      // Determine credit amount from productId (e.g., 'credits_10', 'credits_50')
-      const match = verification.productId.match(/credits?_?(\d+)/i);
-      const amount = match ? parseInt(match[1], 10) : 0;
+      // Determine credit amount from CREDIT_PACKAGE_MAP using productId
+      const amount = CREDIT_PACKAGE_MAP[verification.productId as keyof typeof CREDIT_PACKAGE_MAP]?.credits || 0;
 
       if (amount > 0) {
         const supabase = createClient();

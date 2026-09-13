@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { APP_NAME } from "@/lib/branding";
 import { CREDIT_PACKAGES } from "@/lib/pricing";
+import { purchaseGooglePlayProduct } from "@/lib/billing/google-play-client";
 
 
 
@@ -16,6 +17,7 @@ function BuyCreditsContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
   const [isAndroidWebView, setIsAndroidWebView] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Detect Android WebView to hide Stripe (Google Play Policy)
@@ -44,7 +46,33 @@ function BuyCreditsContent() {
 
   const handlePurchase = async (packageType: string) => {
     setLoading(packageType);
+    setError(null);
     try {
+      if (isAndroidWebView) {
+        const { purchaseToken, error: playError } = await purchaseGooglePlayProduct(packageType);
+        if (playError || !purchaseToken) {
+          throw new Error(playError || "Google Play purchase failed.");
+        }
+        
+        const verifyRes = await fetch("/api/google-play/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            packageName: "com.cvscan.app",
+            productId: packageType,
+            purchaseToken,
+            purchaseType: "product"
+          }),
+        });
+
+        if (!verifyRes.ok) {
+          throw new Error("Failed to verify purchase on server.");
+        }
+
+        router.push("/dashboard?payment=success");
+        return;
+      }
+
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,9 +87,9 @@ function BuyCreditsContent() {
       if (url) {
         window.location.href = url;
       }
-    } catch (error) {
-      console.error("Purchase error:", error);
-      alert("Failed to initiate purchase. Please try again.");
+    } catch (err: any) {
+      console.error("Purchase error:", err);
+      setError(err.message || "Failed to initiate purchase. Please try again.");
       setLoading(null);
     }
   };
@@ -113,13 +141,10 @@ function BuyCreditsContent() {
             </div>
           )}
 
-          {isAndroidWebView && (
-            <div className="mb-8 rounded-3xl border border-amber-400/20 bg-amber-50 px-6 py-5 text-center text-amber-900 shadow-sm">
-              <p className="font-semibold text-lg mb-2">Purchasing currently unavailable in the app</p>
-              <p className="text-sm">
-                Due to Google Play Billing policies, we cannot process payments directly in the app at this time. 
-                Please visit <span className="font-semibold">aievscan.com</span> in your phone&apos;s standard browser or on a desktop to purchase credits.
-              </p>
+          {error && (
+            <div className="mb-8 rounded-3xl border border-red-400/20 bg-red-50 px-6 py-5 text-center text-red-900 shadow-sm">
+              <p className="font-semibold text-lg mb-2">Purchase Error</p>
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
@@ -170,16 +195,14 @@ function BuyCreditsContent() {
 
                 <button
                   onClick={() => handlePurchase(plan.id)}
-                  disabled={loading !== null || isAndroidWebView}
+                  disabled={loading !== null}
                   className={`mt-8 w-full rounded-full px-5 py-3 text-sm font-semibold transition ${
-                    isAndroidWebView
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : plan.popular
+                    plan.popular
                       ? "bg-[#26A69A] text-white hover:bg-[#2bbbad]"
                       : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                   } ${loading === plan.id ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  {isAndroidWebView ? "Unavailable in App" : loading === plan.id ? "Processing..." : plan.cta}
+                  {loading === plan.id ? "Processing..." : plan.cta}
                 </button>
               </div>
             ))}
