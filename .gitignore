@@ -27,3 +27,10 @@ app/test-results/
 # Personal / local
 Important Info DO NOT COMMIT for my eyes only/
 docs/cvscan-test-profiles/
+# Added by git setup script
+.env.*.local
+*.log
+dist/
+build/
+venv/
+__pycache__/
