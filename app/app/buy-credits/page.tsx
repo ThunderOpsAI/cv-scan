@@ -16,16 +16,26 @@ function BuyCreditsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
-  const [isAndroidWebView, setIsAndroidWebView] = useState(false);
+  const [isAndroidApp, setIsAndroidApp] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detect Android WebView to hide Stripe (Google Play Policy)
-    const ua = navigator.userAgent;
-    const isAndroid = /Android/i.test(ua);
+    // Detect Android native app or Android WebView to ensure Google Play Billing is strictly used
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+    const isAndroidUA = /Android/i.test(ua);
     const isWebView = /wv|WebView/i.test(ua);
-    if (isAndroid && isWebView) {
-      setIsAndroidWebView(true);
+    
+    // Check if running inside Capacitor native Android
+    let isCapacitorAndroid = false;
+    if (typeof window !== "undefined" && "Capacitor" in window) {
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string } }).Capacitor;
+      if (cap?.isNativePlatform?.() && cap?.getPlatform?.() === "android") {
+        isCapacitorAndroid = true;
+      }
+    }
+
+    if (isCapacitorAndroid || (isAndroidUA && isWebView)) {
+      setIsAndroidApp(true);
     }
   }, []);
 
@@ -48,7 +58,7 @@ function BuyCreditsContent() {
     setLoading(packageType);
     setError(null);
     try {
-      if (isAndroidWebView) {
+      if (isAndroidApp) {
         const { purchaseToken, error: playError } = await purchaseGooglePlayProduct(packageType);
         if (playError || !purchaseToken) {
           throw new Error(playError || "Google Play purchase failed.");
@@ -66,7 +76,8 @@ function BuyCreditsContent() {
         });
 
         if (!verifyRes.ok) {
-          throw new Error("Failed to verify purchase on server.");
+          const errData = await verifyRes.json().catch(() => null);
+          throw new Error(errData?.error || "Failed to verify purchase on server.");
         }
 
         router.push("/dashboard?payment=success");
@@ -87,9 +98,9 @@ function BuyCreditsContent() {
       if (url) {
         window.location.href = url;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Purchase error:", err);
-      setError(err.message || "Failed to initiate purchase. Please try again.");
+      setError((err instanceof Error ? err.message : "Failed to initiate purchase. Please try again."));
       setLoading(null);
     }
   };
@@ -151,7 +162,9 @@ function BuyCreditsContent() {
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-semibold tracking-tight text-[#1A237E] md:text-5xl">Choose more credits</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-[#757575] md:text-base">
-              Same pricing system as the homepage, with secure Stripe checkout and no subscription lock-in.
+              {isAndroidApp
+                ? "Flexible credit packages with secure Google Play checkout and no subscription lock-in."
+                : "Same pricing system as the homepage, with secure checkout and no subscription lock-in."}
             </p>
           </div>
 
@@ -202,7 +215,7 @@ function BuyCreditsContent() {
                       : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                   } ${loading === plan.id ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  {loading === plan.id ? "Processing..." : plan.cta}
+                  {loading === plan.id ? "Processing..." : isAndroidApp ? `Buy via Google Play` : plan.cta}
                 </button>
               </div>
             ))}
@@ -216,8 +229,9 @@ function BuyCreditsContent() {
                 writing generation, or interview replies.
               </div>
               <div className="rounded-3xl border border-black/[0.06] bg-[#F0EEF0]/50 p-5 text-sm text-[#757575]">
-                Checkout is handled by Stripe, credits do not expire, and launch pricing currently highlights a 50%
-                discount for the first 200 users on the Popular Pack.
+                {isAndroidApp
+                  ? "Checkout is handled securely by Google Play Billing, credits do not expire, and can be used on all your CVScan devices."
+                  : "Credits do not expire, and launch pricing currently highlights a 50% discount for the first 200 users on the Popular Pack."}
               </div>
             </div>
           </div>

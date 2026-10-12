@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { emitAnalyticsEvent, logCriticalError } from '@/lib/analytics/server';
 import { createClient } from '@/lib/supabase/server';
-import { CreateApplicationRequest, ApplicationListResponse } from '@/types/applications';
+import { CreateApplicationRequest, ApplicationListResponse, ApplicationStatus } from '@/types/applications';
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
     let jobPackId = body.job_pack_id;
 
     if (jobPackId) {
-      const { data: ownedJobPack, error: jobPackError } = await (supabase
+      const { data: ownedJobPack, error: jobPackError } = await supabase
         .from('job_packs')
-        .select as any)('id')
+        .select('id')
         .eq('id', jobPackId)
         .eq('user_id', session.user.id)
         .maybeSingle();
@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
       jobPackId = ownedJobPack.id;
     }
 
-    const { data: application, error } = await (supabase
+    const { data: application, error } = await supabase
       .from('applications')
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         company: body.company,
         title: body.title,
@@ -107,14 +107,14 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ application });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Application creation error:', error);
     await logCriticalError({
       workflow: 'application_create',
       error,
     });
     return NextResponse.json(
-      { error: error.message || 'Failed to create application' },
+      { error: (error instanceof Error ? error.message : 'Failed to create application') },
       { status: 500 }
     );
   }
@@ -136,14 +136,15 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = (page - 1) * limit;
 
-    let query = (supabase
+    let query = supabase
       .from('applications')
-      .select as any)('*', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('user_id', session.user.id)
       .eq('is_archived', archived);
 
-    if (status) {
-      query = query.eq('status', status);
+    const validStatuses: ApplicationStatus[] = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'rejected', 'withdrawn'];
+    if (status && validStatuses.includes(status as ApplicationStatus)) {
+      query = query.eq('status', status as ApplicationStatus);
     }
 
     const { data: applications, error, count } = await query
@@ -164,7 +165,7 @@ export async function GET(req: NextRequest) {
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching applications:', error);
     return NextResponse.json(
       { error: 'Failed to fetch applications' },

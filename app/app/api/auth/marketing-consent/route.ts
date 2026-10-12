@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
   const supabase = createClient();
   const now = new Date().toISOString();
 
-  const { error } = await (supabase
+  const { error } = await supabase
     .from("users")
-    .update as any)({
+    .update({
       marketing_opt_in: optIn,
       marketing_opt_in_at: optIn ? now : null,
     })

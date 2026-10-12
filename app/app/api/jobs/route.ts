@@ -18,7 +18,7 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: jobs, error } = await (supabase as any)
+    const { data: jobs, error } = await supabase
       .from("jobs")
       .select("*")
       .eq("user_id", session.user.id)
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: job, error } = await (supabase as any)
+    const { data: job, error } = await supabase
       .from("jobs")
       .insert({
         user_id: session.user.id,

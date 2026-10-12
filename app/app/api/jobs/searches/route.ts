@@ -14,9 +14,9 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: searches, error } = await (supabase
+    const { data: searches, error } = await supabase
       .from('saved_searches')
-      .select as any)('*')
+      .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
@@ -29,10 +29,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ searches: searches || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get saved searches error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch saved searches' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch saved searches') },
       { status: 500 }
     );
   }
@@ -57,9 +57,9 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: search, error } = await (supabase
+    const { data: search, error } = await supabase
       .from('saved_searches')
-      .insert as any)({
+      .insert({
       user_id: session.user.id,
       name: body.name,
       query_params: body.query_params,
@@ -77,10 +77,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ search }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create saved search error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create saved search' },
+      { error: (error instanceof Error ? error.message : 'Failed to create saved search') },
       { status: 500 }
     );
   }

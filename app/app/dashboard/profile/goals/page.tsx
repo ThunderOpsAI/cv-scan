@@ -8,7 +8,7 @@ import Link from "next/link";
 import { SmartGoal } from "@/types/profile";
 
 export default function SmartGoalsPage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
     const [goals, setGoals] = useState<SmartGoal[]>([]);
     const [loading, setLoading] = useState(true);

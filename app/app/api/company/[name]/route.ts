@@ -30,9 +30,9 @@ export async function GET(
     const supabase = createClient();
 
     if (!forceRefresh) {
-      const { data: cachedCompany } = await (supabase
+      const { data: cachedCompany } = await supabase
         .from('company_cache')
-        .select as any)('*')
+        .select('*')
         .eq('company_name', companyName)
         .gt('expires_at', new Date().toISOString())
         .single();
@@ -46,9 +46,9 @@ export async function GET(
       }
     }
 
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from('users')
-      .select as any)('credits')
+      .select('credits')
       .eq('id', session.user.id)
       .single();
 
@@ -61,7 +61,7 @@ export async function GET(
 
     const companyData = await fetchCompanyResearch(companyName);
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Company research: ${companyName}`,
@@ -82,9 +82,9 @@ export async function GET(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + CACHE_DURATION_DAYS);
 
-    await (supabase
+    await supabase
       .from('company_cache')
-      .upsert as any)({
+      .upsert({
         company_name: companyName,
         data: companyData,
         expires_at: expiresAt.toISOString(),
@@ -96,10 +96,10 @@ export async function GET(
       expires_at: expiresAt.toISOString(),
       creditsRemaining: deductResult[0].new_credits,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Company research error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch company data' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch company data') },
       { status: 500 }
     );
   }
@@ -164,16 +164,16 @@ export async function POST(
     const companyName = decodeURIComponent(params.name);
     const supabase = createClient();
 
-    await (supabase
+    await supabase
       .from('company_cache')
-      .delete as any)()
+      .delete()
       .eq('company_name', companyName);
 
     return NextResponse.json({ success: true, message: 'Cache cleared' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Clear cache error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to clear cache' },
+      { error: (error instanceof Error ? error.message : 'Failed to clear cache') },
       { status: 500 }
     );
   }

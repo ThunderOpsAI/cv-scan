@@ -29,9 +29,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
     }
 
-    const { data: bullet, error } = await (supabase
+    const { data: bullet, error } = await supabase
       .from('bullets')
-      .update as any)(updateData)
+      .update(updateData)
       .eq('id', params.id)
       .eq('experience_id', ownedBullet.experience_id)
       .select()
@@ -50,10 +50,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ bullet });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update bullet error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update bullet' },
+      { error: (error instanceof Error ? error.message : 'Failed to update bullet') },
       { status: 500 }
     );
   }
@@ -78,9 +78,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Bullet not found' }, { status: 404 });
     }
 
-    const { data: deletedBullet, error } = await (supabase
+    const { data: deletedBullet, error } = await supabase
       .from('bullets')
-      .delete as any)()
+      .delete()
       .eq('id', params.id)
       .eq('experience_id', ownedBullet.experience_id)
       .select('id')
@@ -99,10 +99,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete bullet error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete bullet' },
+      { error: (error instanceof Error ? error.message : 'Failed to delete bullet') },
       { status: 500 }
     );
   }

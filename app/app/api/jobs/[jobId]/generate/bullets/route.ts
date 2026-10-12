@@ -36,7 +36,7 @@ export async function POST(
 
     const supabase = createClient();
 
-    const { data: job, error: jobError } = await (supabase as any)
+    const { data: job, error: jobError } = await supabase
       .from("jobs")
       .select("*")
       .eq("job_id", params.jobId)

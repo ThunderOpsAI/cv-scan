@@ -3,13 +3,12 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Conversation, Message } from "@/types/intelligence";
 import { CopilotPageSkeleton } from "@/components/ui/dashboard-skeletons";
 import imageCompression from "browser-image-compression";
 
 export default function CopilotPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<string | null>(null);

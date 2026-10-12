@@ -58,8 +58,8 @@ export default function GenerateBullets() {
 
       // Update session to reflect new credit count
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : "An error occurred"));
     } finally {
       setLoading(false);
     }

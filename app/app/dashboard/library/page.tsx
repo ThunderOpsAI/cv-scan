@@ -5,12 +5,21 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+interface SavedCoverLetter {
+  id: string;
+  created_at: string;
+  input: {
+    job_description?: string;
+  };
+  output: string;
+}
+
 export default function Library() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [savedLetters, setSavedLetters] = useState<any[]>([]);
+    const [savedLetters, setSavedLetters] = useState<SavedCoverLetter[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedLetter, setSelectedLetter] = useState<any>(null);
+    const [selectedLetter, setSelectedLetter] = useState<SavedCoverLetter | null>(null);
 
     useEffect(() => {
         if (status === "unauthenticated") {

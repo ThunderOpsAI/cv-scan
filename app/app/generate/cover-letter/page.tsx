@@ -64,8 +64,8 @@ export default function GenerateCoverLetter() {
 
       // Update session to reflect new credit count
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : "An error occurred"));
     } finally {
       setLoading(false);
     }
@@ -97,13 +97,21 @@ export default function GenerateCoverLetter() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(""), 3000);
-    } catch (err: any) {
-      setError(err.message || "Failed to save");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : "Failed to save"));
     }
   };
 
   /* Fetch history */
-  const [history, setHistory] = useState<any[]>([]);
+  interface HistoryItem {
+    id: string;
+    created_at: string;
+    input: {
+      job_description?: string;
+    };
+    output: string;
+  }
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const fetchHistory = async () => {
     if (status !== "authenticated") return;

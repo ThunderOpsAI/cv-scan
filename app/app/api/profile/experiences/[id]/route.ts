@@ -34,9 +34,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
     }
 
-    const { data: experience, error } = await (supabase
+    const { data: experience, error } = await supabase
       .from('experiences')
-      .update as any)(updateData)
+      .update(updateData)
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select()
@@ -55,10 +55,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ experience });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update experience error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update experience' },
+      { error: (error instanceof Error ? error.message : 'Failed to update experience') },
       { status: 500 }
     );
   }
@@ -83,9 +83,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
     }
 
-    const { data: deletedExperience, error } = await (supabase
+    const { data: deletedExperience, error } = await supabase
       .from('experiences')
-      .delete as any)()
+      .delete()
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select('id')
@@ -104,10 +104,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete experience error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete experience' },
+      { error: (error instanceof Error ? error.message : 'Failed to delete experience') },
       { status: 500 }
     );
   }

@@ -14,8 +14,8 @@ export async function GET() {
         const supabase = createClient();
 
         // Get profile first
-        const { data: profile } = await (supabase
-            .from('profiles') as any)
+        const { data: profile } = await supabase
+            .from('profiles')
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -24,8 +24,8 @@ export async function GET() {
             return NextResponse.json({ stories: [] });
         }
 
-        const { data: stories, error } = await (supabase
-            .from('star_stories') as any)
+        const { data: stories, error } = await supabase
+            .from('star_stories')
             .select('*')
             .eq('profile_id', profile.id)
             .order('created_at', { ascending: false });
@@ -33,10 +33,10 @@ export async function GET() {
         if (error) throw error;
 
         return NextResponse.json({ stories: stories || [] });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Fetch stories error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to fetch stories' },
+            { error: (error instanceof Error ? error.message : 'Failed to fetch stories') },
             { status: 500 }
         );
     }
@@ -53,8 +53,8 @@ export async function POST(req: Request) {
         const supabase = createClient();
 
         // Verify profile ownership
-        const { data: profile } = await (supabase
-            .from('profiles') as any)
+        const { data: profile } = await supabase
+            .from('profiles')
             .select('id')
             .eq('user_id', session.user.id)
             .single();
@@ -63,8 +63,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        const { data: story, error } = await (supabase
-            .from('star_stories') as any)
+        const { data: story, error } = await supabase
+            .from('star_stories')
             .insert({
                 profile_id: profile.id,
                 title: body.title,
@@ -80,10 +80,10 @@ export async function POST(req: Request) {
         if (error) throw error;
 
         return NextResponse.json({ story }, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Create story error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to create story' },
+            { error: (error instanceof Error ? error.message : 'Failed to create story') },
             { status: 500 }
         );
     }

@@ -35,7 +35,19 @@ export async function GET(req: NextRequest) {
       searchJSearch({ keywords, location, page, results_per_page: limit })
     ]);
 
-    let allFormattedJobs: any[] = [];
+    interface DiscoveredJobItem {
+      external_id: string;
+      source: string;
+      title: string;
+      company: string;
+      location: string;
+      description: string;
+      url: string;
+      salary_min?: number | null;
+      salary_max?: number | null;
+      posted_at: string;
+    }
+    let allFormattedJobs: DiscoveredJobItem[] = [];
 
     // Process Adzuna results
     if (adzunaRes.status === 'fulfilled' && adzunaRes.value?.results) {
@@ -87,9 +99,9 @@ export async function GET(req: NextRequest) {
     jobsWithScores.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
 
     for (const job of jobsWithScores) {
-      await (supabase
+      await supabase
         .from('discovered_jobs')
-        .upsert as any)({
+        .upsert({
           user_id: session.user.id,
           external_id: job.external_id,
           source: job.source,
@@ -114,10 +126,10 @@ export async function GET(req: NextRequest) {
       page,
       has_more: false, // Simplification for combined feed
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Job discovery error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to discover jobs' },
+      { error: (error instanceof Error ? error.message : 'Failed to discover jobs') },
       { status: 500 }
     );
   }

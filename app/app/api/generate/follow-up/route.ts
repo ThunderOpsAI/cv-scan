@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: userRow } = await (supabase as any)
+    const { data: userRow } = await supabase
       .from("users")
       .select("credits, name")
       .eq("id", session.user.id)

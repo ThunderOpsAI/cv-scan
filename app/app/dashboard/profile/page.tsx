@@ -160,7 +160,7 @@ export default function ProfilePage() {
                       const data = await res.json();
                       alert(data.error || "Failed to delete account. Please try again later.");
                     }
-                  } catch (err) {
+                  } catch {
                     alert("An error occurred. Please try again.");
                   }
                 }

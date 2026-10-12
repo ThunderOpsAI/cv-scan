@@ -23,9 +23,9 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
+    const { data: profile } = await supabase
       .from('profiles')
-      .select as any)('*')
+      .select('*')
       .eq('user_id', session.user.id)
       .single();
 
@@ -52,29 +52,29 @@ export async function GET() {
       return NextResponse.json({ strength });
     }
 
-    const { data: experiences } = await (supabase
+    const { data: experiences } = await supabase
       .from('experiences')
-      .select as any)('id')
+      .select('id')
       .eq('profile_id', profile.id);
 
-    const { data: education } = await (supabase
+    const { data: education } = await supabase
       .from('education')
-      .select as any)('id')
+      .select('id')
       .eq('profile_id', profile.id);
 
-    const { data: skills } = await (supabase
+    const { data: skills } = await supabase
       .from('skills')
-      .select as any)('id')
+      .select('id')
       .eq('profile_id', profile.id);
 
-    const { data: starStories } = await (supabase
+    const { data: starStories } = await supabase
       .from('star_stories')
-      .select as any)('id')
+      .select('id')
       .eq('profile_id', profile.id);
 
-    const { data: smartGoals } = await (supabase
+    const { data: smartGoals } = await supabase
       .from('smart_goals')
-      .select as any)('id')
+      .select('id')
       .eq('profile_id', profile.id);
 
     const experiencesCount = experiences?.length || 0;
@@ -164,10 +164,10 @@ export async function GET() {
     };
 
     return NextResponse.json({ strength });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get profile strength error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to calculate profile strength' },
+      { error: (error instanceof Error ? error.message : 'Failed to calculate profile strength') },
       { status: 500 }
     );
   }

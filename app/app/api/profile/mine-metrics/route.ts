@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/types';
 import { getOwnedBullet } from '@/lib/supabase/user-scope';
 import { gemini } from '@/lib/gemini';
 import { deductCredits } from '@/lib/supabase/credits';
@@ -32,10 +34,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Mine metrics error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process request' },
+      { error: (error instanceof Error ? error.message : 'Failed to process request') },
       { status: 500 }
     );
   }
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
 async function generateQuestions(
   body: MineMetricsRequest,
   userId: string,
-  supabase: any
+  supabase: SupabaseClient<Database>
 ) {
   const { bullet_id, context } = body;
 
@@ -102,7 +104,7 @@ Return ONLY the questions, one per line, without numbering.`;
 async function enhanceBullet(
   body: SubmitMetricsAnswersRequest,
   userId: string,
-  supabase: any,
+  supabase: SupabaseClient<Database>,
   req: NextRequest
 ) {
   const { bullet_id, answers } = body;
@@ -168,7 +170,7 @@ Return ONLY the enhanced bullet point, nothing else.`;
     );
   }
 
-  const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+  const { data: deductResult, error: deductError } = await deductCredits(supabase, {
     p_user_id: userId,
     p_amount: CREDIT_COST,
     p_description: 'Metric mining enhancement',

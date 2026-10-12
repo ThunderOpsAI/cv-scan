@@ -5,7 +5,7 @@ import { plainAiText } from '@/lib/text/plain-ai-output';
 
 interface EmailContext {
   application: Application;
-  stage?: ApplicationStage;
+  stage?: ApplicationStage | null;
   recipientName?: string;
   additionalContext?: string;
 }
@@ -73,7 +73,7 @@ export async function generateEmail(
 
 function buildThankYouPrompt(
   application: Application,
-  stage?: ApplicationStage,
+  stage?: ApplicationStage | null,
   recipientName?: string,
   additionalContext?: string
 ): string {
@@ -106,7 +106,7 @@ Return JSON with:
 
 function buildFollowUpPrompt(
   application: Application,
-  stage?: ApplicationStage,
+  stage?: ApplicationStage | null,
   recipientName?: string,
   additionalContext?: string
 ): string {

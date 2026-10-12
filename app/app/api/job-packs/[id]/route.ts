@@ -19,9 +19,9 @@ export async function GET(
     const supabase = createClient();
 
     // Get job pack
-    const { data: jobPack, error } = await (supabase
+    const { data: jobPack, error } = await supabase
       .from('job_packs')
-      .select as any)('*')
+      .select('*')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -34,9 +34,9 @@ export async function GET(
     }
 
     // Get associated ATS scan
-    const { data: atsScan } = await (supabase
+    const { data: atsScan } = await supabase
       .from('ats_scans')
-      .select as any)('*')
+      .select('*')
       .eq('job_pack_id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -45,7 +45,7 @@ export async function GET(
       job_pack: jobPack,
       ats_scan: atsScan,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching job pack:', error);
     return NextResponse.json(
       { error: 'Failed to fetch job pack' },
@@ -77,9 +77,9 @@ export async function PUT(
     };
 
     // Check ownership
-    const { data: existing } = await (supabase
+    const { data: existing } = await supabase
       .from('job_packs')
-      .select as any)('id')
+      .select('id')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -92,9 +92,9 @@ export async function PUT(
     }
 
     // Update job pack
-    const { data: jobPack, error } = await (supabase
+    const { data: jobPack, error } = await supabase
       .from('job_packs')
-      .update as any)({
+      .update({
         ...updateData,
         updated_at: new Date().toISOString(),
       })
@@ -112,7 +112,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ job_pack: jobPack });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating job pack:', error);
     return NextResponse.json(
       { error: 'Failed to update job pack' },
@@ -136,9 +136,9 @@ export async function DELETE(
     const supabase = createClient();
 
     // Check ownership and delete
-    const { error } = await (supabase
+    const { error } = await supabase
       .from('job_packs')
-      .delete as any)()
+      .delete()
       .eq('id', id)
       .eq('user_id', session.user.id);
 
@@ -151,7 +151,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting job pack:', error);
     return NextResponse.json(
       { error: 'Failed to delete job pack' },

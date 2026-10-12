@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Skill, SkillCategory, SkillProficiency } from "@/types/profile";
 
 export default function SkillsPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);

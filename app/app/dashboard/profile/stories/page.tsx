@@ -8,7 +8,7 @@ import Link from "next/link";
 import { StarStory } from "@/types/profile";
 
 export default function StarStoriesPage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
     const [stories, setStories] = useState<StarStory[]>([]);
     const [loading, setLoading] = useState(true);

@@ -51,13 +51,13 @@ export async function POST(req: NextRequest) {
       console.warn('Copilot message truncated before generation', { requestId });
     }
 
-    const supabase = createClient() as any;
+    const supabase = createClient();
 
     const { data: user } = await supabase
       .from('users')
       .select('credits')
       .eq('id', session.user.id)
-      .single() as { data: { credits: number } | null };
+      .single();
 
     let conversationId = body.conversation_id;
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         .insert({
           user_id: session.user.id,
           title,
-        } as any)
+        })
         .select()
         .single();
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         conversation_id: conversationId,
         role: 'user',
         content: userContent,
-      } as any)
+      })
       .select()
       .single();
 
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       (conversationMessages || [])
         .slice(1)
         .reverse()
-        .map((msg: any) => ({ role: msg.role, content: msg.content }))
+        .map((msg: { role: string; content: string }) => ({ role: msg.role, content: msg.content }))
     );
 
     const fullPrompt = systemPrompt + '\n\n' +
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         conversation_id: conversationId,
         role: 'assistant',
         content: assistantResponse,
-      } as any)
+      })
       .select()
       .single();
 
@@ -165,11 +165,11 @@ export async function POST(req: NextRequest) {
       console.error('Failed to save assistant message:', assistantError);
     }
 
-    await (supabase as any)
+    await supabase
       .from('conversations')
       .update({
         last_message_at: new Date().toISOString(),
-      } as any)
+      })
       .eq('id', conversationId)
       .eq('user_id', session.user.id);
 
@@ -179,10 +179,10 @@ export async function POST(req: NextRequest) {
       assistant_message: assistantMessage,
       creditsRemaining: user?.credits ?? null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Copilot chat error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process message' },
+      { error: (error instanceof Error ? error.message : 'Failed to process message') },
       { status: 500 }
     );
   }

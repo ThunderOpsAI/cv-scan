@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Number(req.nextUrl.searchParams.get("limit")) || 100, 200);
 
   const supabase = createClient();
-  let q = (supabase.from("credit_ledger") as any)
+  let q = supabase.from("credit_ledger")
     .select("event_id, event_type, amount, balance_after, description, reference_id, created_at")
     .eq("user_id", session.user.id)
     .order("created_at", { ascending: false })

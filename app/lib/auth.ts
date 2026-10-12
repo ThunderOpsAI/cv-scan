@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CustomSupabaseAdapter } from "@/lib/auth/adapter";
 import { buildConsentFields } from "@/lib/auth/consent";
 import GoogleProvider from "next-auth/providers/google";
+import EmailProvider from "next-auth/providers/email";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import {
@@ -45,7 +46,7 @@ const providers: NextAuthOptions["providers"] = [
       const supabase = createClient();
       const { data: user } = await supabase
         .from("users")
-        .select("*")
+        .select("id, email, name, image, hashed_password, emailVerified")
         .eq("email", credentials.email)
         .single();
         
@@ -83,13 +84,17 @@ if (hasGoogleAuthEnv) {
 
 if (hasEmailAuthEnv) {
   providers.push(
-    {
-      id: "email",
-      name: "Email",
-      type: "email",
-      server: {},
-      maxAge: 24 * 60 * 60,
+    EmailProvider({
+      server: {
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD,
+        },
+      },
       from: process.env.EMAIL_FROM || "noreply@example.com",
+      maxAge: 24 * 60 * 60,
       sendVerificationRequest: async ({ identifier, url }: SendVerificationRequestParams) => {
         const nodemailer = await import("nodemailer");
         const transport = nodemailer.createTransport({
@@ -118,7 +123,7 @@ if (hasEmailAuthEnv) {
           throw new Error("Failed to send verification email");
         }
       },
-    } as any
+    })
   );
 }
 
@@ -169,7 +174,7 @@ export const authOptions: NextAuthOptions = {
 
       if (user.id && hasSupabaseServerEnv && !isEmailVerificationRequest) {
         const supabase = createClient();
-        const { error } = await supabase.from("users").update(buildConsentFields() as any).eq("id", user.id);
+        const { error } = await supabase.from("users").update(buildConsentFields()).eq("id", user.id);
 
         if (error) {
           console.error("Failed to record auth consent (non-fatal):", error);
@@ -208,9 +213,10 @@ export const authOptions: NextAuthOptions = {
           session.user.id = dbUser.id;
           let credits = dbUser.credits;
           try {
-            const balRes = await (supabase.rpc as any)("get_credit_balance", { p_user_id: dbUser.id });
-            if (!balRes.error && balRes.data != null) {
-              const n = typeof balRes.data === "number" ? balRes.data : Number(balRes.data);
+            const balRes = await supabase.rpc("get_credit_balance", { p_user_id: dbUser.id });
+            const balData = (balRes as { error: unknown; data: unknown }).data;
+            if (!balRes.error && balData != null) {
+              const n = typeof balData === "number" ? balData : Number(balData);
               if (!Number.isNaN(n)) {
                 credits = n;
               }

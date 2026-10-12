@@ -14,9 +14,9 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: profile, error } = await (supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .select as any)('*')
+      .select('*')
       .eq('user_id', session.user.id)
       .single();
 
@@ -32,10 +32,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ profile });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get profile error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch profile' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch profile') },
       { status: 500 }
     );
   }
@@ -52,9 +52,9 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const supabase = createClient();
 
-    const { data: existingProfile } = await (supabase
+    const { data: existingProfile } = await supabase
       .from('profiles')
-      .select as any)('id')
+      .select('id')
       .eq('user_id', session.user.id)
       .single();
 
@@ -73,9 +73,9 @@ export async function PUT(req: NextRequest) {
         github_url: body.github_url,
       };
 
-      const result = await (supabase
+      const result = await supabase
         .from('profiles')
-        .update as any)(updateData)
+        .update(updateData)
         .eq('user_id', session.user.id)
         .select()
         .single();
@@ -94,9 +94,9 @@ export async function PUT(req: NextRequest) {
         github_url: body.github_url,
       };
 
-      const result = await (supabase
+      const result = await supabase
         .from('profiles')
-        .insert as any)({
+        .insert({
         user_id: session.user.id,
         ...createData,
       })
@@ -116,10 +116,10 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ profile });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update/Create profile error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to save profile' },
+      { error: (error instanceof Error ? error.message : 'Failed to save profile') },
       { status: 500 }
     );
   }

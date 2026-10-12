@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { emitAnalyticsEvent, logCriticalError } from "@/lib/analytics/server";
+import type { Database } from "./types";
 
 export type CreditRpcResult = {
   success: boolean;
@@ -25,9 +26,9 @@ export type AddCreditsArgs = {
 };
 
 export async function deductCredits(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   args: DeductCreditsArgs
-): Promise<{ data: CreditRpcResult[] | null; error: any }> {
+): Promise<{ data: CreditRpcResult[] | null; error: unknown }> {
   const result = await _deductCredits(supabase, args);
   const rpcResult = result.data?.[0];
 
@@ -35,7 +36,7 @@ export async function deductCredits(
     await emitAnalyticsEvent({
       eventName: "credit_spent",
       userId: args.p_user_id,
-      supabase,
+      supabase: supabase as unknown as Parameters<typeof emitAnalyticsEvent>[0]["supabase"],
       properties: {
         amount: args.p_amount,
         balance_after: rpcResult.new_credits,
@@ -46,7 +47,7 @@ export async function deductCredits(
     await logCriticalError({
       workflow: "credit_debit",
       userId: args.p_user_id,
-      supabase,
+      supabase: supabase as unknown as Parameters<typeof logCriticalError>[0]["supabase"],
       error: result.error ?? rpcResult?.error_message ?? "Unknown credit debit failure",
       properties: {
         amount: args.p_amount,
@@ -61,10 +62,17 @@ export async function deductCredits(
 export const deductCredit = deductCredits;
 
 export async function addCredits(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   args: AddCreditsArgs
-): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  const rpcArgs: Record<string, unknown> = {
+): Promise<{ data: CreditRpcResult[] | null; error: unknown }> {
+  const rpcArgs: {
+    p_user_id: string;
+    p_amount: number;
+    p_description: string;
+    p_reference_id?: string | null;
+    p_metadata?: Record<string, unknown> | null;
+    p_admin_id?: string | null;
+  } = {
     p_user_id: args.p_user_id,
     p_amount: args.p_amount,
     p_description: args.p_description,
@@ -75,14 +83,14 @@ export async function addCredits(
     rpcArgs.p_reference_id = args.p_reference_id;
   }
 
-  const res = await supabase.rpc("add_credits", rpcArgs as never);
+  const res = await supabase.rpc("add_credits", rpcArgs);
   const rpcResult = res.data?.[0];
 
   if (!res.error && rpcResult?.success) {
     await emitAnalyticsEvent({
-      eventName: "credit_added",
+      eventName: "credit_purchased",
       userId: args.p_user_id,
-      supabase,
+      supabase: supabase as unknown as Parameters<typeof emitAnalyticsEvent>[0]["supabase"],
       properties: {
         amount: args.p_amount,
         balance_after: rpcResult.new_credits,
@@ -93,7 +101,7 @@ export async function addCredits(
     await logCriticalError({
       workflow: "credit_add",
       userId: args.p_user_id,
-      supabase,
+      supabase: supabase as unknown as Parameters<typeof logCriticalError>[0]["supabase"],
       error: res.error ?? rpcResult?.error_message ?? "Unknown credit add failure",
       properties: {
         amount: args.p_amount,
@@ -102,14 +110,19 @@ export async function addCredits(
     });
   }
 
-  return res as any;
+  return res as { data: CreditRpcResult[] | null; error: unknown };
 }
 
 async function _deductCredits(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   args: DeductCreditsArgs
-): Promise<{ data: CreditRpcResult[] | null; error: any }> {
-  const rpcArgs: Record<string, unknown> = {
+): Promise<{ data: CreditRpcResult[] | null; error: unknown }> {
+  const rpcArgs: {
+    p_user_id: string;
+    p_amount: number;
+    p_description: string;
+    p_reference_id?: string | null;
+  } = {
     p_user_id: args.p_user_id,
     p_amount: args.p_amount,
     p_description: args.p_description,
@@ -118,16 +131,17 @@ async function _deductCredits(
     rpcArgs.p_reference_id = args.p_reference_id;
   }
 
-  const res = await supabase.rpc("deduct_credits", rpcArgs as never);
+  const res = await supabase.rpc("deduct_credits", rpcArgs);
 
   // If successful or the error is not "function not found", return the result
-  if (!res.error) return res as any;
+  if (!res.error) return res as { data: CreditRpcResult[] | null; error: unknown };
 
+  const errorObj = res.error as { code?: string; message?: string; details?: string; hint?: string } | null;
   const errorMsg = [
-    res.error?.code,
-    res.error?.message,
-    res.error?.details,
-    res.error?.hint,
+    errorObj?.code,
+    errorObj?.message,
+    errorObj?.details,
+    errorObj?.hint,
   ]
     .filter(Boolean)
     .join(" ");
@@ -144,12 +158,13 @@ async function _deductCredits(
     );
 
   if (isFunctionNotFound) {
-    return await supabase.rpc("deduct_credit", {
+    const fallbackRes = await supabase.rpc("deduct_credit", {
       p_user_id: args.p_user_id,
       p_amount: args.p_amount,
       p_description: args.p_description,
-    } as never) as any;
+    });
+    return fallbackRes as { data: CreditRpcResult[] | null; error: unknown };
   }
 
-  return res as any;
+  return res as { data: CreditRpcResult[] | null; error: unknown };
 }

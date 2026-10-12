@@ -33,13 +33,6 @@ export default function JobPacksPage() {
     }
   };
 
-  const getScoreColor = (score?: number) => {
-    if (!score) return "text-[#607086]/80";
-    if (score >= 80) return "text-green-400";
-    if (score >= 60) return "text-yellow-400";
-    return "text-red-400";
-  };
-
   const getScoreBadge = (score?: number) => {
     if (!score) return "bg-gray-500/20 text-[#607086]/80";
     if (score >= 80) return "bg-green-500/20 text-green-400";

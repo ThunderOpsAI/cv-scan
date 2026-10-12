@@ -24,9 +24,9 @@ export async function PUT(
     };
     const supabase = createClient();
 
-    const { data: search, error } = await (supabase
+    const { data: search, error } = await supabase
       .from('saved_searches')
-      .update as any)(updateData)
+      .update(updateData)
       .eq('id', params.id)
       .eq('user_id', session.user.id)
       .select()
@@ -41,10 +41,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ search });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update saved search error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update saved search' },
+      { error: (error instanceof Error ? error.message : 'Failed to update saved search') },
       { status: 500 }
     );
   }
@@ -64,9 +64,9 @@ export async function DELETE(
 
     const supabase = createClient();
 
-    const { error } = await (supabase
+    const { error } = await supabase
       .from('saved_searches')
-      .delete as any)()
+      .delete()
       .eq('id', params.id)
       .eq('user_id', session.user.id);
 
@@ -79,10 +79,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete saved search error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete saved search' },
+      { error: (error instanceof Error ? error.message : 'Failed to delete saved search') },
       { status: 500 }
     );
   }

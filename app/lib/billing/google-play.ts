@@ -339,6 +339,40 @@ export async function verifyGooglePlayPurchase(
   };
 }
 
+export async function consumeGooglePlayProduct(
+  packageName: string,
+  productId: string,
+  purchaseToken: string
+): Promise<void> {
+  const accessToken = await getGooglePlayAccessToken();
+  const path = `/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(
+    productId
+  )}/tokens/${encodeURIComponent(purchaseToken)}:consume`;
+  await fetch(`${GOOGLE_PLAY_API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+}
+
+export async function acknowledgeGooglePlayProduct(
+  packageName: string,
+  productId: string,
+  purchaseToken: string
+): Promise<void> {
+  const accessToken = await getGooglePlayAccessToken();
+  const path = `/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(
+    productId
+  )}/tokens/${encodeURIComponent(purchaseToken)}:acknowledge`;
+  await fetch(`${GOOGLE_PLAY_API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+}
+
 function isGooglePlayDeveloperNotification(
   value: Record<string, unknown>
 ): value is GooglePlayDeveloperNotification {

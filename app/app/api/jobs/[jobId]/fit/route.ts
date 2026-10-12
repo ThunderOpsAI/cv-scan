@@ -34,7 +34,7 @@ export async function POST(
 
     const supabase = createClient();
 
-    const { data: job, error: jobError } = await (supabase as any)
+    const { data: job, error: jobError } = await supabase
       .from("jobs")
       .select("*")
       .eq("job_id", params.jobId)
@@ -57,7 +57,7 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const { data: userRow } = await (supabase as any)
+    const { data: userRow } = await supabase
       .from("users")
       .select("credits")
       .eq("id", session.user.id)
@@ -106,7 +106,7 @@ export async function POST(
       approvedFactsBlock,
     });
 
-    const { data: row, error: insertError } = await (supabase as any)
+    const { data: row, error: insertError } = await supabase
       .from("fit_analyses")
       .insert({
         user_id: session.user.id,

@@ -21,7 +21,7 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: row, error } = await (supabase as any)
+    const { data: row, error } = await supabase
       .from("users")
       .select("career_path, onboarding_completed_at")
       .eq("id", session.user.id)
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("users")
       .update(updates)
       .eq("id", session.user.id)

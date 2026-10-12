@@ -20,8 +20,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Story not found' }, { status: 404 });
         }
 
-        const { data: updatedStory, error } = await (supabase
-            .from('star_stories') as any)
+        const { data: updatedStory, error } = await supabase
+            .from('star_stories')
             .update({
                 title: body.title,
                 situation: body.situation,
@@ -41,10 +41,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         return NextResponse.json({ story: updatedStory });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Update story error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to update story' },
+            { error: (error instanceof Error ? error.message : 'Failed to update story') },
             { status: 500 }
         );
     }
@@ -78,10 +78,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Delete story error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to delete story' },
+            { error: (error instanceof Error ? error.message : 'Failed to delete story') },
             { status: 500 }
         );
     }

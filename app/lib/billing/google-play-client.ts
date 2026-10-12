@@ -1,67 +1,57 @@
+import { Capacitor } from "@capacitor/core";
+import { NativePurchases, PURCHASE_TYPE } from "@capgo/native-purchases";
+
 /**
- * Client utility for interacting with the Google Play Billing API.
+ * Client utility for interacting with Google Play Billing.
+ * On native Android (Capacitor), uses @capgo/native-purchases.
+ * In a standard browser or non-Android environment, returns an informative error.
  */
 
-// Extend the Window interface to support getDigitalGoodsService
-declare global {
-  interface Window {
-    getDigitalGoodsService?: (provider: string) => Promise<any>;
-  }
+export interface GooglePlayPurchaseResult {
+  purchaseToken?: string;
+  orderId?: string;
+  error?: string;
 }
 
-export async function purchaseGooglePlayProduct(productId: string): Promise<{ purchaseToken?: string; error?: string }> {
-  if (typeof window === 'undefined') {
-    return { error: 'Not running in a browser environment' };
+export function isGooglePlayAvailable(): boolean {
+  return typeof window !== "undefined" && Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android";
+}
+
+export async function purchaseGooglePlayProduct(
+  productId: string
+): Promise<GooglePlayPurchaseResult> {
+  if (typeof window === "undefined") {
+    return { error: "Not running in a browser environment" };
   }
 
-  if (!window.getDigitalGoodsService) {
-    return { error: 'Digital Goods API not supported on this device/browser.' };
+  // If running in native Android Capacitor shell
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") {
+    try {
+      const transaction = await NativePurchases.purchaseProduct({
+        productIdentifier: productId,
+        productType: PURCHASE_TYPE.INAPP,
+        quantity: 1,
+        // Consumables must not auto-acknowledge so our backend can verify and consume
+        autoAcknowledgePurchases: false,
+      });
+
+      if (!transaction.purchaseToken) {
+        return { error: "Google Play purchase completed but no purchase token was returned." };
+      }
+
+      return {
+        purchaseToken: transaction.purchaseToken,
+        orderId: transaction.orderId,
+      };
+    } catch (error: unknown) {
+      console.error("Google Play native purchase error:", error);
+      return {
+        error: error instanceof Error ? error.message : "An error occurred during Google Play purchase.",
+      };
+    }
   }
 
-  try {
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-    
-    if (!service) {
-      return { error: 'Could not connect to Google Play Billing service.' };
-    }
-
-    const supportedInstruments = [{
-      supportedMethods: 'https://play.google.com/billing',
-      data: {
-        sku: productId,
-      },
-    }];
-
-    const details = {
-      total: {
-        label: 'Total',
-        amount: {
-          currency: 'USD',
-          value: '0', // The actual value is defined in the Google Play Console
-        },
-      },
-    };
-
-    const request = new PaymentRequest(supportedInstruments, details);
-    
-    const canMakePayment = await request.canMakePayment();
-    if (!canMakePayment) {
-      return { error: 'Payment cannot be made with the specified instrument.' };
-    }
-
-    const paymentResponse = await request.show();
-    
-    const purchaseToken = paymentResponse.details.purchaseToken;
-    
-    await paymentResponse.complete('success');
-
-    if (!purchaseToken) {
-      return { error: 'Purchase completed but no token was returned.' };
-    }
-
-    return { purchaseToken };
-  } catch (error: any) {
-    console.error('Google Play purchase error:', error);
-    return { error: error?.message || 'An error occurred during the purchase process.' };
-  }
+  return {
+    error: "Google Play Billing is only available in the Android app.",
+  };
 }

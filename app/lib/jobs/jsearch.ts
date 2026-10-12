@@ -11,7 +11,7 @@ export async function searchJSearch(params: {
     return { results: [] };
   }
 
-  const { keywords = "", location = "us", page = 1, results_per_page = 10 } = params;
+  const { keywords = "", location = "us", page = 1 } = params;
   const query = encodeURIComponent(`${keywords} in ${location}`);
   const url = `https://jsearch.p.rapidapi.com/search?query=${query}&page=${page}&num_pages=1`;
 
@@ -37,7 +37,22 @@ export async function searchJSearch(params: {
   }
 }
 
-export function formatJSearchJob(job: any) {
+export interface JSearchRawJob {
+  job_id: string;
+  job_title: string;
+  employer_name: string;
+  job_city?: string | null;
+  job_state?: string | null;
+  job_country?: string | null;
+  job_description?: string;
+  job_apply_link?: string;
+  job_google_link?: string;
+  job_min_salary?: number | null;
+  job_max_salary?: number | null;
+  job_posted_at_datetime_utc?: string;
+}
+
+export function formatJSearchJob(job: JSearchRawJob) {
   return {
     external_id: `jsearch-${job.job_id}`,
     source: "jsearch" as const,

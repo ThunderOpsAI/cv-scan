@@ -34,9 +34,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
     }
 
-    const { data: bullets, error } = await (supabase
+    const { data: bullets, error } = await supabase
       .from('bullets')
-      .select as any)('*')
+      .select('*')
       .eq('experience_id', ownedExperienceId)
       .order('sort_order', { ascending: true });
 
@@ -49,10 +49,10 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ bullets: bullets || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get bullets error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch bullets' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch bullets') },
       { status: 500 }
     );
   }
@@ -86,19 +86,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
     }
 
-    const { data: maxSort } = await (supabase
+    const { data: maxSort } = await supabase
       .from('bullets')
-      .select as any)('sort_order')
+      .select('sort_order')
       .eq('experience_id', ownedExperienceId)
       .order('sort_order', { ascending: false })
       .limit(1)
       .single();
 
-    const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
+    const nextSortOrder = typeof maxSort?.sort_order === 'number' ? maxSort.sort_order + 1 : 0;
 
-    const { data: bullet, error } = await (supabase
+    const { data: bullet, error } = await supabase
       .from('bullets')
-      .insert as any)({
+      .insert({
       experience_id: ownedExperienceId,
       content: body.content,
       sort_order: nextSortOrder,
@@ -115,10 +115,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ bullet }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create bullet error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create bullet' },
+      { error: (error instanceof Error ? error.message : 'Failed to create bullet') },
       { status: 500 }
     );
   }

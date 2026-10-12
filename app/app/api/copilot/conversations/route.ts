@@ -28,10 +28,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ conversations: conversations || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get conversations error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch conversations' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch conversations') },
       { status: 500 }
     );
   }

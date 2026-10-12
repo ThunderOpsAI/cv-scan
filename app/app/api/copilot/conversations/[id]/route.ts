@@ -17,9 +17,9 @@ export async function GET(
 
     const supabase = createClient();
 
-    const { data: conversation } = await (supabase
+    const { data: conversation } = await supabase
       .from('conversations')
-      .select as any)('*')
+      .select('*')
       .eq('id', params.id)
       .eq('user_id', session.user.id)
       .single();
@@ -31,9 +31,9 @@ export async function GET(
       );
     }
 
-    const { data: messages, error } = await (supabase
+    const { data: messages, error } = await supabase
       .from('messages')
-      .select as any)('*')
+      .select('*')
       .eq('conversation_id', conversation.id)
       .order('created_at', { ascending: true });
 
@@ -49,10 +49,10 @@ export async function GET(
       conversation,
       messages: messages || [],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get conversation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch conversation' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch conversation') },
       { status: 500 }
     );
   }

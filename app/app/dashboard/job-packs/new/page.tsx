@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
 import { JobPackResponse } from "@/types/job-packs";
 
 type ApiErrorResponse = { error?: string };

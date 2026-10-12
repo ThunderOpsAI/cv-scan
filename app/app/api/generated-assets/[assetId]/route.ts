@@ -25,7 +25,7 @@ export async function DELETE(
 
     const supabase = createClient();
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("generated_assets")
       .delete()
       .eq("asset_id", params.assetId)

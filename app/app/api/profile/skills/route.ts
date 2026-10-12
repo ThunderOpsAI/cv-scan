@@ -14,8 +14,8 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
-      .from('profiles') as any)
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('id')
       .eq('user_id', session.user.id)
       .single();
@@ -24,8 +24,8 @@ export async function GET() {
       return NextResponse.json({ skills: [] }, { status: 200 });
     }
 
-    const { data: skills, error } = await (supabase
-      .from('skills') as any)
+    const { data: skills, error } = await supabase
+      .from('skills')
       .select('*')
       .eq('profile_id', profile.id)
       .order('category', { ascending: true })
@@ -40,10 +40,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ skills: skills || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get skills error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch skills' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch skills') },
       { status: 500 }
     );
   }
@@ -68,8 +68,8 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
-      .from('profiles') as any)
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('id')
       .eq('user_id', session.user.id)
       .single();
@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: maxSort } = await (supabase
-      .from('skills') as any)
+    const { data: maxSort } = await supabase
+      .from('skills')
       .select('sort_order')
       .eq('profile_id', profile.id)
       .eq('category', body.category)
@@ -90,10 +90,10 @@ export async function POST(req: NextRequest) {
       .limit(1)
       .single();
 
-    const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
+    const nextSortOrder = typeof maxSort?.sort_order === 'number' ? maxSort.sort_order + 1 : 0;
 
-    const { data: skill, error } = await (supabase
-      .from('skills') as any)
+    const { data: skill, error } = await supabase
+      .from('skills')
       .insert({
         profile_id: profile.id,
         category: body.category,
@@ -114,10 +114,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ skill }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create skill error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create skill' },
+      { error: (error instanceof Error ? error.message : 'Failed to create skill') },
       { status: 500 }
     );
   }

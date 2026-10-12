@@ -43,7 +43,16 @@ function sanitizeExtractedText(value: string) {
 }
 
 function stripControlChars(value: string) {
-  return value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+  let res = "";
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    // filter out 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F
+    if (code <= 8 || code === 11 || code === 12 || (code >= 14 && code <= 31)) {
+      continue;
+    }
+    res += value[i];
+  }
+  return res;
 }
 
 async function extractDocxText(buffer: Buffer) {
@@ -74,7 +83,12 @@ async function extractPdfText(buffer: Buffer) {
     const page = await pdf.getPage(pageNumber);
     const content = await page.getTextContent();
     const text = content.items
-      .map((item: any) => ("str" in item ? item.str : ""))
+      .map((item) => {
+        if (typeof item === "object" && item !== null && "str" in item) {
+          return String((item as { str: unknown }).str);
+        }
+        return "";
+      })
       .join(" ");
     pages.push(text);
   }

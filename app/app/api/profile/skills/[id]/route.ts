@@ -31,9 +31,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Skill not found' }, { status: 404 });
     }
 
-    const { data: skill, error } = await (supabase
+    const { data: skill, error } = await supabase
       .from('skills')
-      .update as any)(updateData)
+      .update(updateData)
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select()
@@ -52,10 +52,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ skill });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update skill error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update skill' },
+      { error: (error instanceof Error ? error.message : 'Failed to update skill') },
       { status: 500 }
     );
   }
@@ -80,9 +80,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Skill not found' }, { status: 404 });
     }
 
-    const { data: deletedSkill, error } = await (supabase
+    const { data: deletedSkill, error } = await supabase
       .from('skills')
-      .delete as any)()
+      .delete()
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select('id')
@@ -101,10 +101,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete skill error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete skill' },
+      { error: (error instanceof Error ? error.message : 'Failed to delete skill') },
       { status: 500 }
     );
   }

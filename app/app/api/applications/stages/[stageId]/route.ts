@@ -20,9 +20,9 @@ export async function GET(
     const supabase = createClient();
 
     // Get stage with application ownership check
-    const { data: stage, error } = await (supabase
+    const { data: stage, error } = await supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(id, user_id)')
+      .select('*, applications!inner(id, user_id)')
       .eq('id', stageId)
       .eq('applications.user_id', session.user.id)
       .single();
@@ -35,10 +35,11 @@ export async function GET(
     }
 
     // Remove joined data
-    delete stage.applications;
+    const stageData = { ...stage };
+    delete (stageData as { applications?: unknown }).applications;
 
-    return NextResponse.json({ stage });
-  } catch (error: any) {
+    return NextResponse.json({ stage: stageData });
+  } catch (error: unknown) {
     console.error('Error fetching stage:', error);
     return NextResponse.json(
       { error: 'Failed to fetch stage' },
@@ -73,9 +74,9 @@ export async function PUT(
     };
 
     // Verify ownership
-    const { data: existing } = await (supabase
+    const { data: existing } = await supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(id, user_id)')
+      .select('*, applications!inner(id, user_id)')
       .eq('id', stageId)
       .eq('applications.user_id', session.user.id)
       .single();
@@ -93,9 +94,9 @@ export async function PUT(
       ai_structured = await structureInterviewNotes(updateData.raw_notes);
     }
 
-    const { data: stage, error } = await (supabase
+    const { data: stage, error } = await supabase
       .from('application_stages')
-      .update as any)({
+      .update({
         ...updateData,
         ai_structured,
         updated_at: new Date().toISOString(),
@@ -114,7 +115,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ stage });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating stage:', error);
     return NextResponse.json(
       { error: 'Failed to update stage' },
@@ -138,9 +139,9 @@ export async function DELETE(
     const supabase = createClient();
 
     // Verify ownership before delete
-    const { data: existing } = await (supabase
+    const { data: existing } = await supabase
       .from('application_stages')
-      .select as any)('*, applications!inner(id, user_id)')
+      .select('*, applications!inner(id, user_id)')
       .eq('id', stageId)
       .eq('applications.user_id', session.user.id)
       .single();
@@ -152,9 +153,9 @@ export async function DELETE(
       );
     }
 
-    const { error } = await (supabase
+    const { error } = await supabase
       .from('application_stages')
-      .delete as any)()
+      .delete()
       .eq('id', stageId)
       .eq('application_id', existing.application_id);
 
@@ -167,7 +168,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting stage:', error);
     return NextResponse.json(
       { error: 'Failed to delete stage' },
