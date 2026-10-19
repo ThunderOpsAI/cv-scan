@@ -32,5 +32,9 @@ docs/cvscan-test-profiles/
 *.log
 dist/
 build/
-venv/
-__pycache__/
+# Android signing
+*.jks
+*.keystore
+android/app/release.keystore
+android/app/build/
+android/.gradle/

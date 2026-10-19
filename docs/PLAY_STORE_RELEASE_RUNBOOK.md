@@ -1,6 +1,6 @@
 # Google Play Store Release Runbook
 
-This runbook covers the end-to-end procedure for packaging, signing, verifying, and publishing **CVScan** (`com.cvscan.app`) to Google Play Closed Testing.
+This runbook covers the end-to-end procedure for packaging, signing, verifying, and publishing **AI CV Scan** (`com.cvscan.app`) to Google Play Closed Testing.
 
 ---
 
@@ -75,9 +75,9 @@ In Play Console under **Monetize > In-app products**, create the 3 one-time cred
 
 | Product ID | Type | Default Title | Description | Pricing Suggestion |
 |---|---|---|---|---|
-| `starter` | One-time / Consumable | Starter Pack | 20 CVScan Credits | $4.99 AUD / USD |
-| `popular` | One-time / Consumable | Launch Pack | 50 CVScan Credits | $9.99 AUD / USD |
-| `pro` | One-time / Consumable | Pro Pack | 150 CVScan Credits | $15.99 AUD / USD |
+| `starter` | One-time / Consumable | Starter Pack | 20 AI CV Scan Credits | $4.99 AUD / USD |
+| `popular` | One-time / Consumable | Launch Pack | 50 AI CV Scan Credits | $9.99 AUD / USD |
+| `pro` | One-time / Consumable | Pro Pack | 150 AI CV Scan Credits | $15.99 AUD / USD |
 
 *Note: Ensure status is set to Active.*
 
@@ -94,7 +94,7 @@ In Play Console under **Monetize > In-app products**, create the 3 one-time cred
    - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`: `<escaped-or-base64-json-key>`
    - `GOOGLE_PLAY_WEBHOOK_TOKEN`: `<random-secure-secret-token>`
 6. In Google Cloud Pub/Sub, configure Real-time Developer Notifications (RTDN) pointing to:
-   `https://cvscan.com.au/api/google-play/webhook?token=<GOOGLE_PLAY_WEBHOOK_TOKEN>`
+   `https://www.aicvscan.com/api/google-play/webhook?token=<GOOGLE_PLAY_WEBHOOK_TOKEN>`
 
 ---
 
@@ -117,7 +117,7 @@ In Play Console under **Monetize > In-app products**, create the 3 one-time cred
      }
    ]
    ```
-4. Deploy to Vercel and verify `https://cvscan.com.au/.well-known/assetlinks.json` returns HTTP 200 with the exact fingerprint.
+4. Deploy to Vercel and verify `https://www.aicvscan.com/.well-known/assetlinks.json` returns HTTP 200 with the exact fingerprint.
 
 ---
 
@@ -129,4 +129,4 @@ In Play Console under **Monetize > In-app products**, create the 3 one-time cred
 4. Add Closed Testing testers (email list or Google Group).
 5. For new personal Play Developer accounts:
    - Must have **12 opted-in testers for 14 continuous days** before production rollout can be applied for.
-6. Provide tester feedback URL: `https://cvscan.com.au/contact` or Play Console internal testing feedback channel.
+6. Provide tester feedback URL: `https://www.aicvscan.com/contact` or Play Console internal testing feedback channel.

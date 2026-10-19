@@ -1,6 +1,6 @@
 # Verification & Test Evidence
 
-This document logs all automated validations, compilation checks, builds, tests, and security audits executed for the Google Play submission readiness of **CVScan**.
+This document logs all automated validations, compilation checks, builds, tests, and security audits executed for the Google Play submission readiness of **AI CV Scan**.
 
 ---
 
@@ -55,7 +55,7 @@ This document logs all automated validations, compilation checks, builds, tests,
 - **ProGuard Rules:** Custom rules added in `android/app/proguard-rules.pro` protecting Capacitor bridge and Google Play BillingClient (`com.android.billingclient.api.**`).
 - **Network Security Config:** `android/app/src/main/res/xml/network_security_config.xml` wired with strict cleartext disabled in production.
 - **Billing Permissions:** `com.android.vending.BILLING` declared in `AndroidManifest.xml`.
-- **App Links Intent Filter:** Configured in `AndroidManifest.xml` with `autoVerify="true"` for domain `cvscan.com.au`.
+- **App Links Intent Filter:** Configured in `AndroidManifest.xml` with `autoVerify="true"` for domain `www.aicvscan.com`.
 
 ---
 

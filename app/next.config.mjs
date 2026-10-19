@@ -10,9 +10,6 @@ const nextConfig = {
   turbopack: {
     root: repoRoot,
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

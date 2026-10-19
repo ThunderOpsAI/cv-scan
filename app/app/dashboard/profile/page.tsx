@@ -118,7 +118,7 @@ export default function ProfilePage() {
           <div className="mb-8 p-6 bg-white/40 border border-black/[0.06] rounded-xl">
             <h2 className="text-2xl font-semibold text-[#1A237E] mb-3">Data Export & Deletion</h2>
             <p className="text-[#607086] mb-2">
-              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@cvscan.com.au" className="underline text-[#26A69A]">privacy@cvscan.com.au</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
+              You can request an export of your account data, including approved profile facts and generated assets. For V1, contact <a href="mailto:privacy@aicvscan.com" className="underline text-[#26A69A]">privacy@aicvscan.com</a> from the email address on your account and we will provide a machine-readable export after verifying the request.
             </p>
             <button
               className="mb-2 bg-blue-600 hover:bg-blue-700 text-[#1A237E] px-4 py-2 rounded-lg font-semibold"

@@ -1,4 +1,4 @@
-# CVScan — Owner Instructions
+# AI CV Scan — Owner Instructions
 
 > **Agent:** Agent 4 — Phase 3 (Polish + Play Store Readiness)
 > **Date:** April 28, 2026
@@ -18,7 +18,7 @@ All secrets must be set in **Vercel** (project → Settings → Environment Vari
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + local | ✅ Yes | Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel only | ✅ Yes | **Never expose client-side.** Used for admin operations (delete account, credit seeding). |
 | `NEXTAUTH_SECRET` | Vercel + local | ✅ Yes | Generate with `openssl rand -base64 32`. Must be stable across deploys. |
-| `NEXTAUTH_URL` | Vercel + local | ✅ Yes | `https://cvscan.com.au` in production. `http://localhost:3000` locally. |
+| `NEXTAUTH_URL` | Vercel + local | ✅ Yes | `https://www.aicvscan.com` in production. `http://localhost:3000` locally. |
 | `GOOGLE_CLIENT_ID` | Vercel + local | Optional | Google OAuth client ID (if offering Google sign-in). |
 | `GOOGLE_CLIENT_SECRET` | Vercel + local | Optional | Google OAuth client secret. |
 | `STRIPE_SECRET_KEY` | Vercel only | ✅ Yes | Stripe secret key. Use `sk_test_...` for test mode, `sk_live_...` for production. |
@@ -30,12 +30,12 @@ All secrets must be set in **Vercel** (project → Settings → Environment Vari
 | `GEMINI_API_KEY` | Vercel only | ✅ Yes | Google Gemini API key for AI generation. |
 | `OPENAI_API_KEY` | Vercel only | ✅ Yes | OpenAI API key for AI generation. |
 | `RESEND_API_KEY` | Vercel only | ✅ Yes | Resend API key for magic-link sign-in emails. |
-| `EMAIL_FROM` | Vercel only | Optional | Sender address for magic-link emails. Default: `noreply@cvscan.com.au`. |
-| `NEXT_PUBLIC_APP_URL` | Vercel + local | Optional | App base URL. Default: `https://cvscan.com.au`. |
+| `EMAIL_FROM` | Vercel only | Optional | Sender address for magic-link emails. Default: `noreply@aicvscan.com`. |
+| `NEXT_PUBLIC_APP_URL` | Vercel + local | Optional | App base URL. Default: `https://www.aicvscan.com`. |
 
 ### API Keys That Need Rotation or Creation
 
-- **Resend:** Create a Resend account at [resend.com](https://resend.com), verify your `cvscan.com.au` domain, and generate an API key.
+- **Resend:** Create a Resend account at [resend.com](https://resend.com), verify your `www.aicvscan.com` domain, and generate an API key.
 - **Stripe:** If still using test keys (`sk_test_...`), create live keys and update all `STRIPE_*` variables when ready for real payments.
 - **Gemini / OpenAI:** Rotate keys if they were previously shared with other projects or agents.
 
@@ -48,24 +48,24 @@ All secrets must be set in **Vercel** (project → Settings → Environment Vari
 
 ## Section 2: Domain & DNS
 
-### Step 1: Verify `cvscan.com.au` Is Live
+### Step 1: Verify `www.aicvscan.com` Is Live
 
 ```bash
 # Check DNS resolution
-curl -I -L https://cvscan.com.au
+curl -I -L https://www.aicvscan.com
 
 # Expected: HTTP/2 200 with Vercel headers
 ```
 
 If the domain is not resolving:
 
-1. Log in to your domain registrar for `cvscan.com.au`
+1. Log in to your domain registrar for `www.aicvscan.com`
 2. Add/verify the following DNS records pointing to Vercel:
    - **A record:** `76.76.21.21`
    - **CNAME record:** `cname.vercel-dns.com` (for `www` subdomain if desired)
 3. In **Vercel** → Project → Settings → Domains:
-   - Add `cvscan.com.au` as the primary domain
-   - Add `www.cvscan.com.au` (optional, redirects to root)
+   - Add `www.aicvscan.com` as the primary domain
+   - Add `www.aicvscan.com` (optional, redirects to root)
 4. Wait for DNS propagation (typically 5–30 minutes)
 
 ### Step 2: SSL Certificate
@@ -74,16 +74,16 @@ Vercel automatically provisions and manages SSL certificates. After adding the d
 
 1. Check the domain status in Vercel → Settings → Domains
 2. Confirm the SSL column shows ✅ (auto-provisioned via Let's Encrypt)
-3. Verify HTTPS works: `curl -I https://cvscan.com.au/privacy`
+3. Verify HTTPS works: `curl -I https://www.aicvscan.com/privacy`
 
 ### Step 3: Verify Critical URLs
 
 After domain is live, confirm all three mandatory Play Store URLs return `200`:
 
 ```bash
-curl -o /dev/null -sw '%{http_code}' https://cvscan.com.au/privacy
-curl -o /dev/null -sw '%{http_code}' https://cvscan.com.au/terms
-curl -o /dev/null -sw '%{http_code}' https://cvscan.com.au/delete-account
+curl -o /dev/null -sw '%{http_code}' https://www.aicvscan.com/privacy
+curl -o /dev/null -sw '%{http_code}' https://www.aicvscan.com/terms
+curl -o /dev/null -sw '%{http_code}' https://www.aicvscan.com/delete-account
 ```
 
 All three must return `200`.
@@ -169,7 +169,7 @@ Configure the following webhook in Stripe Dashboard → Developers → Webhooks:
 
 | Field | Value |
 |-------|-------|
-| **Endpoint URL** | `https://cvscan.com.au/api/stripe/webhook` |
+| **Endpoint URL** | `https://www.aicvscan.com/api/stripe/webhook` |
 | **API version** | `2024-06-20` (or latest) |
 | **Signing secret** | Copy to `STRIPE_WEBHOOK_SECRET` env var |
 
@@ -217,7 +217,7 @@ Copy each Price ID to the corresponding `STRIPE_PRICE_*` env var.
 1. Go to [play.google.com/console](https://play.google.com/console)
 2. Click **"Create app"**
 3. Fill in:
-   - **App name:** `CVScan — AI Resume Coach`
+   - **App name:** `AI AI CV Scan — AI Resume Coach`
    - **Default language:** English (Australia)
    - **App or game:** App
    - **Free or paid:** Free (with in-app purchases)
@@ -229,7 +229,7 @@ Copy the listing content from `docs/PLAY_STORE_METADATA.md`:
 
 | Field | Source |
 |-------|--------|
-| App name | `CVScan — AI Resume Coach` |
+| App name | `AI AI CV Scan — AI Resume Coach` |
 | Short description | Section 1 of `PLAY_STORE_METADATA.md` |
 | Full description | Section 2 of `PLAY_STORE_METADATA.md` |
 | Category | **Productivity** |
@@ -287,7 +287,7 @@ Copy the listing content from `docs/PLAY_STORE_METADATA.md`:
 |----------|--------|
 | Does your app collect or share user data? | Yes |
 | Is all user data encrypted in transit? | Yes |
-| Can users request deletion? | Yes — in-app and at `https://cvscan.com.au/delete-account` |
+| Can users request deletion? | Yes — in-app and at `https://www.aicvscan.com/delete-account` |
 | Financial info collected? | Yes — credit history. Shared with Stripe (web), Google Play (Android) |
 | Personal info collected? | Yes — name, email, location, phone, profile photo |
 | Photos/videos collected? | Yes — resume uploads (PDF/DOCX). Purpose: core functionality |
@@ -372,7 +372,7 @@ To join the beta:
 2. Click "Become a tester"
 3. Install the app from the Play Store listing
 
-Please email beta@cvscan.com.au if you hit any issues.
+Please email beta@aicvscan.com if you hit any issues.
 Thanks!
 ```
 
@@ -419,7 +419,7 @@ Run through this checklist before clicking **"Submit for Review"** in Play Conso
 
 | # | Check | Done? |
 |---|-------|-------|
-| 1 | `cvscan.com.au` resolves and returns 200 on `/`, `/privacy`, `/terms`, `/delete-account` | ☐ |
+| 1 | `www.aicvscan.com` resolves and returns 200 on `/`, `/privacy`, `/terms`, `/delete-account` | ☐ |
 | 2 | All environment variables are set in Vercel (Section 1) | ☐ |
 | 3 | Magic-link email sign-in works end-to-end (send link → receive email → click → land on dashboard) | ☐ |
 | 4 | Google sign-in works (if enabled) | ☐ |
@@ -430,7 +430,7 @@ Run through this checklist before clicking **"Submit for Review"** in Play Conso
 | 9 | No placeholder text visible on any page ("TODO", "Lorem ipsum", "test") | ☐ |
 | 10 | No debug logging or hardcoded secrets in the codebase | ☐ |
 | 11 | DPA agreements with Gemini and OpenAI are confirmed or risk-accepted (Section 8) | ☐ |
-| 12 | Stripe webhook is configured at `https://cvscan.com.au/api/stripe/webhook` | ☐ |
+| 12 | Stripe webhook is configured at `https://www.aicvscan.com/api/stripe/webhook` | ☐ |
 | 13 | Store listing content is transcribed from `PLAY_STORE_METADATA.md` | ☐ |
 | 14 | App icon (512×512) and feature graphic (1024×500) are uploaded | ☐ |
 | 15 | At least 2 phone screenshots (1080×1920) are uploaded | ☐ |
@@ -478,12 +478,12 @@ Run through this checklist before clicking **"Submit for Review"** in Play Conso
 
 ### Handle First User Support Emails
 
-1. Set up a mailbox for `support@cvscan.com.au` and `beta@cvscan.com.au`
+1. Set up a mailbox for `support@aicvscan.com` and `beta@aicvscan.com`
 2. Expected support categories:
    - **Sign-in issues:** Check if Resend is delivering emails. Verify the user exists in Supabase.
    - **Credit questions:** Check the `credit_transactions` table for the user's balance.
    - **Generation failures:** Check Vercel logs. Usually an AI API quota or timeout issue.
-   - **Account deletion:** Direct them to `https://cvscan.com.au/delete-account` or the in-app path.
+   - **Account deletion:** Direct them to `https://www.aicvscan.com/delete-account` or the in-app path.
 3. Response time target: < 24 hours for beta, < 48 hours for production
 
 ---

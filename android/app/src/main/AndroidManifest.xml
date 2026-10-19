@@ -30,7 +30,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="cvscan.com.au"
+                    android:host="www.aicvscan.com"
+                    android:pathPrefix="/" />
+                <data
+                    android:scheme="https"
+                    android:host="aicvscan.com"
                     android:pathPrefix="/" />
             </intent-filter>
 

@@ -13,8 +13,15 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   const config = getGooglePlayConfig();
   const authHeader = request.headers.get("authorization");
+  const webhookToken = request.nextUrl.searchParams.get("token");
 
-  if (config.webhookToken && authHeader !== `Bearer ${config.webhookToken}`) {
+  // Pub/Sub push subscriptions can be configured with this secret in the endpoint
+  // URL. Keep the Authorization-header option for direct, authenticated calls.
+  const isAuthorized =
+    Boolean(config.webhookToken) &&
+    (authHeader === `Bearer ${config.webhookToken}` || webhookToken === config.webhookToken);
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

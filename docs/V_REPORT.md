@@ -55,7 +55,7 @@ Smoke test note: the new PDF/DOCX extraction helper was exercised locally agains
 | Item | Status | Notes |
 |---|---|---|
 | `/privacy` loads and contains accurate disclosures | PASS | Local `HEAD /privacy` returned `200`. Updated page to remove the incorrect Anthropic reference and to use `.com.au` contact details. |
-| `/terms` loads and contains accurate disclosures | PASS | Local `HEAD /terms` returned `200`. Updated legal contact to `legal@cvscan.com.au`. |
+| `/terms` loads and contains accurate disclosures | PASS | Local `HEAD /terms` returned `200`. Updated legal contact to `legal@aicvscan.com`. |
 | `/delete-account` loads without auth | PASS | Local `HEAD /delete-account` returned `200`. |
 | In-app deletion removes from `public.users`, `auth.users`, and `resume_uploads` | BLOCKED | Code path exists and deletes storage first, then `public.users`, then `auth.admin.deleteUser()`. Could not be executed locally without Supabase env and an authenticated user. |
 | No beta placeholder text remains in legal pages | PASS | Verified release-facing legal pages and updated lingering legacy-domain / provider references. |
@@ -64,11 +64,11 @@ Smoke test note: the new PDF/DOCX extraction helper was exercised locally agains
 
 | Item | Status | Notes |
 |---|---|---|
-| `cvscan.com.au` resolves to Vercel | FAIL | `curl -I -L https://cvscan.com.au` on April 27, 2026 returned `curl: (6) Could not resolve host: cvscan.com.au`. |
-| `https://cvscan.com.au/privacy` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
-| `https://cvscan.com.au/terms` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
-| `https://cvscan.com.au/delete-account` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
-| All internal `cvscan.com` references updated to `cvscan.com.au` | PASS | Verified with `rg -nP "cvscan\\.com(?!\\.au)" . -S` returning no matches. |
+| `www.aicvscan.com` resolves to Vercel | FAIL | `curl -I -L https://www.aicvscan.com` on April 27, 2026 returned `curl: (6) Could not resolve host: www.aicvscan.com`. |
+| `https://www.aicvscan.com/privacy` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
+| `https://www.aicvscan.com/terms` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
+| `https://www.aicvscan.com/delete-account` is publicly accessible | FAIL | Blocked by unresolved domain. Local route works. |
+| All internal `cvscan.com` references updated to `www.aicvscan.com` | PASS | Verified with `rg -nP "cvscan\\.com(?!\\.au)" . -S` returning no matches. |
 
 ## V6 Existing Blockers / Prior-Agent Issues
 
@@ -88,7 +88,7 @@ Smoke test note: the new PDF/DOCX extraction helper was exercised locally agains
 - Re-enabled protected-route redirects in `app/proxy.ts`.
 - Fixed auth provider runtime behavior so `/api/auth/providers` returns `200` instead of crashing when email env is absent.
 - Added missing `next-auth` / `stripe` dependency declarations to `app/package.json`.
-- Corrected all remaining legacy-domain references to `cvscan.com.au`.
+- Corrected all remaining legacy-domain references to `www.aicvscan.com`.
 - Corrected release-facing legal copy to match the actual AI-provider set (Gemini + OpenAI only).
 - Added server-side PDF/DOCX resume extraction and storage wiring for `resume_uploads/{user_id}/...`.
 - Added a concrete analytics retention SQL script for BA-4.
@@ -98,5 +98,5 @@ Smoke test note: the new PDF/DOCX extraction helper was exercised locally agains
 - No local `.env.local`; auth, Supabase, Stripe, Google OAuth, and email verification cannot be exercised end-to-end.
 - `cd app && npm run dev` fails in this sandbox due `uv_interface_addresses` host enumeration errors; direct-host startup works for limited local inspection.
 - The app uses magic-link email plus optional Google OAuth; verification of the live sign-in flow remained blocked locally by missing env.
-- `cvscan.com.au` was not resolving on April 27, 2026.
+- `www.aicvscan.com` was not resolving on April 27, 2026.
 - Google Play purchase verification and RTDN webhook paths are now present, but still need live Play Console credentials for end-to-end verification.

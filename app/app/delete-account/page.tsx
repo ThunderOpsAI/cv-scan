@@ -112,7 +112,7 @@ export default function DeleteAccountPage() {
               from the email address associated with your account:
             </p>
             <a
-              href="mailto:privacy@cvscan.com.au?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20AI%20CV%20Scan%20account%20and%20all%20associated%20data.%20My%20registered%20email%20address%20is%3A%20%5Byour%20email%20here%5D"
+              href="mailto:privacy@aicvscan.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20AI%20CV%20Scan%20account%20and%20all%20associated%20data.%20My%20registered%20email%20address%20is%3A%20%5Byour%20email%20here%5D"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/60 hover:bg-white/15 border border-black/[0.06] text-[#1A237E] text-sm font-medium transition-colors"
             >
               <svg
@@ -129,7 +129,7 @@ export default function DeleteAccountPage() {
                   d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
                 />
               </svg>
-              Email privacy@cvscan.com.au
+              Email privacy@aicvscan.com
             </a>
             <p className="text-xs text-gray-500 mt-3">
               Please include the email address associated with your account.
@@ -190,7 +190,7 @@ export default function DeleteAccountPage() {
               Terms of Service
             </Link>
             <a
-              href="mailto:support@cvscan.com.au"
+              href="mailto:support@aicvscan.com"
               className="hover:text-[#607086] transition-colors"
             >
               Contact Support

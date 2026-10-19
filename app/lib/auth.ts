@@ -82,7 +82,11 @@ if (hasGoogleAuthEnv) {
   );
 }
 
-if (hasEmailAuthEnv) {
+// Magic-link persistence requires the Supabase adapter. Do not register an
+// unusable Email provider when only SMTP variables are present (for example,
+// in local UI tests); NextAuth otherwise emits runtime errors on every session
+// request.
+if (hasEmailAuthEnv && hasSupabaseServerEnv) {
   providers.push(
     EmailProvider({
       server: {
