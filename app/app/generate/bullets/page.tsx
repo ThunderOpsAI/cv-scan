@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
 
 export default function GenerateBullets() {
   const { data: session, status } = useSession();
@@ -155,36 +156,25 @@ export default function GenerateBullets() {
                     </ul>
                   </div>
                 )}
-                <p className="text-[#607086]/80 mb-6">
-                  Click any bullet point to copy it to your clipboard
-                </p>
-                <div className="space-y-4">
-                  {bullets.map((bullet, index) => (
-                    <div
-                      key={index}
-                      onClick={() => copyBullet(bullet)}
-                      className="bg-white/40 border border-black/[0.06] rounded-xl p-4 hover:bg-white/60 cursor-pointer transition-all group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-[#26A69A] font-bold">•</span>
-                        <p className="text-[#1A237E] flex-1">{bullet}</p>
-                        <svg
-                          className="w-5 h-5 text-[#607086]/80 group-hover:text-[#26A69A] transition-colors flex-shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ScribeInlineEditor
+                  mode="bullets"
+                  title="Scribe Inline Bullet Editor"
+                  subtitle="Click any bullet point below to open the floating AI toolbar (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization)."
+                  items={bullets.map((bullet, index) => ({
+                    id: `gen-bullet-${index}`,
+                    text: bullet,
+                  }))}
+                  onUpdateItem={(id, newText) => {
+                    const idx = Number(id.replace("gen-bullet-", ""));
+                    setBullets((prev) => prev.map((b, i) => (i === idx ? newText : b)));
+                  }}
+                  jobContext={jobDuty}
+                  keywords={jobDuty.split(/[\s,/.]+/).filter((t) => t.length > 4)}
+                  onCopyAll={() => {
+                    copyBullet(bullets.map((b) => `• ${b}`).join("\n"));
+                  }}
+                  copyAllLabel="Copy All Bullets"
+                />
 
                 <button
                   onClick={() => {
