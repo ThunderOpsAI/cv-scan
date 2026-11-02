@@ -22,7 +22,7 @@ export async function searchJobs(params: {
     radius = 50,
     page = 1,
     results_per_page = 20,
-    country = 'au', // Default to Australia as requested
+    country = 'au', // Primary market default (Australia)
   } = params;
 
   const queryParams = new URLSearchParams({

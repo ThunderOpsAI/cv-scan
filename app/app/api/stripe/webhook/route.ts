@@ -29,7 +29,7 @@ async function creditPurchaseFromStripe(params: {
   const { userId, credits, packageType, referenceId, stripeSessionId, amountTotal, customerEmail } = params;
 
   const supabase = createClient();
-  const { data: rpcResult, error: rpcError } = await (supabase.rpc as any)("add_credits", {
+  const { data: rpcResult, error: rpcError } = await supabase.rpc("add_credits", {
     p_user_id: userId,
     p_amount: credits,
     p_type: "purchase",
@@ -49,7 +49,7 @@ async function creditPurchaseFromStripe(params: {
   console.info(`Credits applied for ${userId} ref=${referenceId} (+${credits})`);
 
   if (process.env.RESEND_API_KEY && customerEmail) {
-    const { data: user } = await (supabase.from("users").select as any)("name").eq("id", userId).single();
+    const { data: user } = await supabase.from("users").select("name").eq("id", userId).single();
     if (user) {
       sendPaymentReceiptEmail(customerEmail, user.name || "User", credits, amountTotal ?? 0).catch((err) =>
         console.error("Failed to send receipt email:", err)
@@ -96,7 +96,7 @@ async function persistSubscriptionState(params: {
     patch.stripe_customer_id = customerId;
   }
 
-  const { error } = await (supabase.from("users").update as any)(patch).eq("id", userId);
+  const { error } = await supabase.from("users").update(patch).eq("id", userId);
   if (error) {
     console.error("Failed to update user subscription state:", error);
     return false;
@@ -171,7 +171,7 @@ async function handleCheckoutSessionCompleted(
   }
 
   if (session.customer && typeof session.customer === "string") {
-    await (supabase.from("users").update as any)({ stripe_customer_id: session.customer }).eq("id", userId);
+    await supabase.from("users").update({ stripe_customer_id: session.customer }).eq("id", userId);
   }
 
   return { ok: true };
@@ -184,7 +184,7 @@ async function handleSubscriptionUpdated(stripe: Stripe, sub: Stripe.Subscriptio
   let userId = full.metadata?.userId;
 
   if (!userId) {
-    const { data } = await (supabase.from("users").select as any)("id")
+    const { data } = await supabase.from("users").select("id")
       .eq("stripe_subscription_id", full.id)
       .maybeSingle();
     if (data?.id) userId = data.id;
@@ -209,7 +209,7 @@ async function handleSubscriptionUpdated(stripe: Stripe, sub: Stripe.Subscriptio
 
 async function handleSubscriptionDeleted(sub: Stripe.Subscription): Promise<void> {
   const supabase = createClient();
-  const { error } = await (supabase.from("users").update as any)({
+  const { error } = await supabase.from("users").update({
     plan_tier: "free",
     stripe_subscription_id: null,
     stripe_subscription_status: sub.status ?? "canceled",
@@ -242,7 +242,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2024-06-20" as any,
+      apiVersion: "2026-02-25.clover",
     });
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
 
@@ -271,8 +271,8 @@ export async function POST(req: NextRequest) {
     } else {
       console.info(`Unhandled event type: ${event.type}`);
     }
-  } catch (err: any) {
-    console.error(`Webhook error: ${err.message}`);
+  } catch (err: unknown) {
+    console.error(`Webhook error: ${err instanceof Error ? err.message : String(err)}`);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 

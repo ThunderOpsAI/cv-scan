@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createClient();
-    const { data: userRow } = await (supabase.from("users").select as any)(
+    const { data: userRow } = await supabase.from("users").select(
       "stripe_customer_id"
     )
       .eq("id", session.user.id)
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         : null;
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2024-06-20" as any,
+      apiVersion: "2026-02-25.clover",
     });
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";

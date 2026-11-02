@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Experience, Bullet } from "@/types/profile";
 
 export default function ExperiencePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [bullets, setBullets] = useState<Record<string, Bullet[]>>({});

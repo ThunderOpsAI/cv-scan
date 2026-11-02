@@ -25,7 +25,7 @@ export async function GET(
 
     const supabase = createClient();
 
-    const { data: job, error } = await (supabase as any)
+    const { data: job, error } = await supabase
       .from("jobs")
       .select("*")
       .eq("job_id", params.jobId)

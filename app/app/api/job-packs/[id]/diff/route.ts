@@ -20,9 +20,9 @@ export async function GET(
     const supabase = createClient();
 
     // Get job pack
-    const { data: jobPack, error } = await (supabase
+    const { data: jobPack, error } = await supabase
       .from('job_packs')
-      .select as any)('*')
+      .select('*')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -56,7 +56,7 @@ export async function GET(
     const diff = computeDetailedDiff(originalResume, jobPack.resume_version);
 
     return NextResponse.json(diff);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error computing diff:', error);
     return NextResponse.json(
       { error: 'Failed to compute diff' },

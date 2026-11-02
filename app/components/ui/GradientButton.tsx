@@ -53,7 +53,7 @@ export function GradientButton(props: LinkButtonProps | NativeButtonProps) {
   } = props;
   const classes = getButtonClasses(variant, size, className);
 
-  if ("href" in props) {
+  if ("href" in props && typeof props.href === "string") {
     return (
       <Link href={props.href} className={classes}>
         {children}

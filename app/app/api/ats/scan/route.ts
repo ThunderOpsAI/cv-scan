@@ -6,7 +6,7 @@ import { deductCredits } from '@/lib/supabase/credits';
 import { debitReferenceFromRequest } from '@/lib/billing/idempotency';
 import { analyzeJobDescription } from '@/lib/ats/scanner';
 import { loadProfileForTailoring } from '@/lib/ats/profile-loader';
-import { ATSScanRequest, ATSScanResponse } from '@/types/job-packs';
+import { ATSScan, ATSScanRequest, ATSScanResponse } from '@/types/job-packs';
 
 const FREE_SCANS_PER_DAY = 3;
 const CREDIT_COST = 1;
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check free scans remaining today
-    const { data: freeCountResult } = await (supabase as any).rpc(
+    const { data: freeCountResult } = await supabase.rpc(
       'count_free_scans_today',
       { p_user_id: session.user.id }
     );
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Deduct credit
-      const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+      const { data: deductResult, error: deductError } = await deductCredits(supabase, {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: 'ATS scan',
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         section_scores: analysis.section_scores,
         recommendations: analysis.recommendations,
         is_free_scan: isFreeScan,
-      } as any)
+      })
       .select()
       .single();
 
@@ -111,23 +111,34 @@ export async function POST(req: NextRequest) {
     }
 
     const response: ATSScanResponse = {
-      scan,
+      scan: {
+        id: scan.id,
+        user_id: scan.user_id,
+        job_pack_id: scan.job_pack_id ?? undefined,
+        job_description: scan.job_description,
+        ats_score: scan.ats_score,
+        keyword_matches: scan.keyword_matches as unknown as ATSScan['keyword_matches'],
+        section_scores: scan.section_scores as unknown as ATSScan['section_scores'],
+        recommendations: scan.recommendations || [],
+        is_free_scan: Boolean(scan.is_free_scan),
+        created_at: scan.created_at,
+      },
       free_scans_remaining: isFreeScan ? freeScansRemaining - 1 : 0,
       credits_charged: creditsCharged,
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('ATS scan error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to scan job description' },
+      { error: (error instanceof Error ? error.message : 'Failed to scan job description') },
       { status: 500 }
     );
   }
 }
 
 // GET - Check free scans remaining
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -137,7 +148,7 @@ export async function GET(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: freeCountResult } = await (supabase as any).rpc(
+    const { data: freeCountResult } = await supabase.rpc(
       'count_free_scans_today',
       { p_user_id: session.user.id }
     );
@@ -149,7 +160,7 @@ export async function GET(req: NextRequest) {
       free_scans_remaining: freeScansRemaining,
       free_scans_per_day: FREE_SCANS_PER_DAY,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error checking free scans:', error);
     return NextResponse.json(
       { error: 'Failed to check free scans' },

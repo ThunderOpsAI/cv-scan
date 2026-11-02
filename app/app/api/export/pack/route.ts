@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: job, error: jobErr } = await (supabase as any)
+    const { data: job, error: jobErr } = await supabase
       .from("jobs")
       .select("*")
       .eq("job_id", jobId)
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const { data: assets } = await (supabase as any)
+    const { data: assets } = await supabase
       .from("generated_assets")
       .select("*")
       .eq("user_id", session.user.id)

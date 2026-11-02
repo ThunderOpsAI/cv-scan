@@ -18,9 +18,20 @@ export async function searchRemoteOk(params: { keywords?: string }) {
 
     const data = await response.json();
     
-    // The first item in RemoteOK's array is usually a legal/info object, followed by job objects
-    // Each job object has an 'id' and 'company', etc.
-    const jobs = Array.isArray(data) ? data.filter((item: any) => item.id && item.company) : [];
+    interface RemoteOkItem {
+      id?: string | number;
+      company?: string;
+      position?: string;
+      title?: string;
+      location?: string;
+      description?: string;
+      url?: string;
+      apply_url?: string;
+      salary_min?: number;
+      salary_max?: number;
+      date?: string | number;
+    }
+    const jobs = Array.isArray(data) ? (data as RemoteOkItem[]).filter((item) => item.id && item.company) : [];
     
     return { results: jobs };
   } catch (error) {
@@ -29,15 +40,29 @@ export async function searchRemoteOk(params: { keywords?: string }) {
   }
 }
 
-export function formatRemoteOkJob(job: any) {
+export interface RemoteOkJobInput {
+  id?: string | number;
+  company?: string;
+  position?: string;
+  title?: string;
+  location?: string;
+  description?: string;
+  url?: string;
+  apply_url?: string;
+  salary_min?: number;
+  salary_max?: number;
+  date?: string | number;
+}
+
+export function formatRemoteOkJob(job: RemoteOkJobInput) {
   return {
     external_id: `remoteok-${job.id}`,
     source: "remoteok" as const,
-    title: job.position || job.title,
-    company: job.company,
+    title: job.position || job.title || "",
+    company: job.company || "",
     location: job.location || "Remote",
     description: job.description || "",
-    url: job.url || job.apply_url,
+    url: job.url || job.apply_url || "",
     salary_min: job.salary_min || null,
     salary_max: job.salary_max || null,
     posted_at: job.date ? new Date(job.date).toISOString() : new Date().toISOString(),

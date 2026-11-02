@@ -24,9 +24,9 @@ export async function loadProfileForTailoring(
   try {
     // Contact fields can come from the legacy profile, but generation claims below
     // are sourced only from approved profile_facts rows.
-    const { data: profile, error: profileError } = await (supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select as any)('*')
+      .select('full_name, phone, location, linkedin_url, portfolio_url, github_url')
       .eq('user_id', userId)
       .maybeSingle();
 
@@ -34,9 +34,9 @@ export async function loadProfileForTailoring(
       console.error('Failed to load profile:', profileError);
     }
 
-    const { data: user, error: userError } = await (supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
-      .select as any)('name, email')
+      .select('name, email')
       .eq('id', userId)
       .maybeSingle();
 
@@ -44,9 +44,9 @@ export async function loadProfileForTailoring(
       console.error('Failed to load user identity:', userError);
     }
 
-    const { data: approvedFacts, error: factsError } = await (supabase
+    const { data: approvedFacts, error: factsError } = await supabase
       .from('profile_facts')
-      .select as any)('fact_id, fact_type, fact_text, source')
+      .select('fact_id, fact_type, fact_text, source')
       .eq('user_id', userId)
       .eq('is_approved', true)
       .order('created_at', { ascending: true });

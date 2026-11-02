@@ -11,6 +11,7 @@ import { ScannerPageSkeleton } from "@/components/ui/dashboard-skeletons";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { ScanAnimation } from "@/components/ui/ScanAnimation";
 import { ScoreGauge } from "@/components/ui/ScoreGauge";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
 import { ATSScan, ATSScanResponse } from "@/types/job-packs";
 
 type ApiErrorResponse = { error?: string };
@@ -43,6 +44,9 @@ export default function ScannerPage() {
   const [loading, setLoading] = useState(false);
   const [freeScansRemaining, setFreeScansRemaining] = useState<number | null>(null);
   const [scanResult, setScanResult] = useState<ATSScan | null>(null);
+  const [tailoredBullets, setTailoredBullets] = useState<string[]>([]);
+  const [coverLetterParagraphs, setCoverLetterParagraphs] = useState<string[]>([]);
+  const [activeEditorTab, setActiveEditorTab] = useState<"bullets" | "cover">("bullets");
   const [error, setError] = useState("");
   const [scanStageIndex, setScanStageIndex] = useState(0);
 
@@ -104,6 +108,24 @@ export default function ScannerPage() {
       setScanResult(data.scan);
       setFreeScansRemaining(data.free_scans_remaining);
       setScanStageIndex(scanStages.length - 1);
+
+      const matched = data.scan.keyword_matches.found.slice(0, 4);
+      const missing = data.scan.keyword_matches.missing.slice(0, 3);
+      const kw1 = matched[0] || "Cross-functional delivery";
+      const kw2 = matched[1] || "Stakeholder alignment";
+      const kw3 = missing[0] || "Strategic roadmapping";
+
+      setTailoredBullets([
+        `Led end-to-end execution of ${kw1.toLowerCase()} initiatives across cross-functional teams, improving delivery predictability by 28%.`,
+        `Optimized ${kw2.toLowerCase()} workflows and executive reporting dashboards, reducing cycle times across 12+ active workstreams.`,
+        `Spearheaded ${kw3.toLowerCase()} and data-driven prioritization to align product outcomes with core business KPIs.`,
+      ]);
+
+      setCoverLetterParagraphs([
+        `Dear Hiring Team, I am writing to express my strong interest in this role. Having delivered measurable results across ${kw1.toLowerCase()} and ${kw2.toLowerCase()}, I am ready to contribute immediately to your team's objectives.`,
+        `In my recent work, I organized cross-functional delivery pipelines and analyzed operational bottlenecks to accelerate turnaround times while maintaining high quality standards.`,
+        `I would welcome the opportunity to discuss how my background and focus on ${kw3.toLowerCase()} can support your upcoming roadmap. Thank you for your time and consideration.`,
+      ]);
     } catch (err) {
       setError(getErrorMessage(err, "Scan failed"));
     } finally {
@@ -257,7 +279,6 @@ export default function ScannerPage() {
                           <input
                             type="file"
                             accept="image/*"
-                            capture="environment"
                             onChange={handleFileChange}
                             disabled={uploading}
                             className="hidden"
@@ -270,7 +291,7 @@ export default function ScannerPage() {
                         <label className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-3 text-sm font-semibold text-[#1A237E] transition hover:bg-black/[0.06] cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                           <input
                             type="file"
-                            accept="image/*,.pdf"
+                            accept="image/jpeg, image/png, image/webp,.pdf"
                             onChange={handleFileChange}
                             disabled={uploading}
                             className="hidden"
@@ -477,6 +498,88 @@ export default function ScannerPage() {
                         </p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Scribe Inline Co-Writing & Diff Editor */}
+                  <div className="rounded-[2rem] border border-black/[0.08] bg-white p-6 shadow-[0_24px_60px_rgba(26,35,126,0.08)]">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                      <div>
+                        <p className="eyebrow">Scribe Co-Writer</p>
+                        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#1A237E]">
+                          Interactive Resume Bullets &amp; Cover Letter Editor
+                        </h2>
+                      </div>
+                      <div className="flex rounded-xl border border-black/[0.08] bg-[#F7FAFA] p-1">
+                        <button
+                          type="button"
+                          onClick={() => setActiveEditorTab("bullets")}
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                            activeEditorTab === "bullets"
+                              ? "bg-[#1A237E] text-white shadow-sm"
+                              : "text-[#607086] hover:text-[#1A237E]"
+                          }`}
+                        >
+                          Tailored Bullets ({tailoredBullets.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveEditorTab("cover")}
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                            activeEditorTab === "cover"
+                              ? "bg-[#1A237E] text-white shadow-sm"
+                              : "text-[#607086] hover:text-[#1A237E]"
+                          }`}
+                        >
+                          Cover Letter Sections ({coverLetterParagraphs.length})
+                        </button>
+                      </div>
+                    </div>
+
+                    {activeEditorTab === "bullets" ? (
+                      <ScribeInlineEditor
+                        mode="bullets"
+                        title="Tailored Resume Bullets"
+                        subtitle="Click any bullet to open the Scribe micro-toolbar (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization)."
+                        items={tailoredBullets.map((text, idx) => ({
+                          id: `scan-bullet-${idx}`,
+                          text,
+                        }))}
+                        onUpdateItem={(id, newText) => {
+                          const idx = Number(id.replace("scan-bullet-", ""));
+                          setTailoredBullets((prev) =>
+                            prev.map((item, i) => (i === idx ? newText : item))
+                          );
+                        }}
+                        jobContext={jobDescription}
+                        keywords={[
+                          ...scanResult.keyword_matches.found,
+                          ...scanResult.keyword_matches.missing,
+                        ]}
+                        copyAllLabel="Copy All Bullets"
+                      />
+                    ) : (
+                      <ScribeInlineEditor
+                        mode="paragraphs"
+                        title="Generated Cover Letter Sections"
+                        subtitle="Click any paragraph to refine tone, add metrics, weave in missing job keywords, or toggle AU/UK ↔ US localization."
+                        items={coverLetterParagraphs.map((text, idx) => ({
+                          id: `scan-cover-${idx}`,
+                          text,
+                        }))}
+                        onUpdateItem={(id, newText) => {
+                          const idx = Number(id.replace("scan-cover-", ""));
+                          setCoverLetterParagraphs((prev) =>
+                            prev.map((item, i) => (i === idx ? newText : item))
+                          );
+                        }}
+                        jobContext={jobDescription}
+                        keywords={[
+                          ...scanResult.keyword_matches.found,
+                          ...scanResult.keyword_matches.missing,
+                        ]}
+                        copyAllLabel="Copy Full Cover Letter"
+                      />
+                    )}
                   </div>
                 </motion.div>
               ) : !loading && !uploading ? (

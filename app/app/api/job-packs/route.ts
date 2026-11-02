@@ -13,7 +13,7 @@ import {
   findUngroundedCandidateClaimLines,
   groundingErrorMessage,
 } from '@/lib/generation/grounding';
-import { CreateJobPackRequest, JobPackResponse, JobPackListResponse } from '@/types/job-packs';
+import { ATSScan, CreateJobPackRequest, JobPackResponse, JobPackListResponse } from '@/types/job-packs';
 
 const CREDIT_COST = 5;
 
@@ -34,14 +34,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient() as any;
+    const supabase = createClient();
 
     // Check credits
     const { data: user } = await supabase
       .from('users')
       .select('credits')
       .eq('id', session.user.id)
-      .single() as { data: { credits: number } | null };
+      .single();
 
     if (!user || user.credits < CREDIT_COST) {
       return NextResponse.json(
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Deduct credits
-    await deductCredits(supabase as any, {
+    await deductCredits(supabase, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Job pack: ${body.job_title} at ${body.company}`,
@@ -110,11 +110,11 @@ export async function POST(req: NextRequest) {
         cover_letter: coverLetter,
         ats_score: atsAnalysis.score,
         cultural_fit_warnings: culturalWarnings,
-      } as any)
+      })
       .select()
       .single();
 
-    if (jobPackError) {
+    if (jobPackError || !jobPack) {
       console.error('Failed to create job pack:', jobPackError);
       return NextResponse.json(
         { error: 'Failed to create job pack' },
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
         section_scores: atsAnalysis.section_scores,
         recommendations: atsAnalysis.recommendations,
         is_free_scan: false,
-      } as any)
+      })
       .select()
       .single();
 
@@ -150,22 +150,43 @@ export async function POST(req: NextRequest) {
         priority: 'medium',
         notes: 'Auto-created from saved Job Pack.',
         job_pack_id: jobPack.id,
-      } as any);
+      });
 
     if (applicationError) {
       console.error('Failed to auto-create application tracker entry:', applicationError);
     }
 
     const response: JobPackResponse = {
-      job_pack: jobPack,
-      ats_scan: (atsScan || undefined) as any,
+      job_pack: {
+        ...jobPack,
+        resume_version: jobPack.resume_version ?? undefined,
+        cover_letter: jobPack.cover_letter ?? undefined,
+        ats_score: jobPack.ats_score ?? undefined,
+        cultural_fit_warnings: Array.isArray(jobPack.cultural_fit_warnings)
+          ? (jobPack.cultural_fit_warnings as string[])
+          : [],
+      },
+      ats_scan: atsScan
+        ? {
+            id: atsScan.id,
+            user_id: atsScan.user_id,
+            job_pack_id: atsScan.job_pack_id ?? undefined,
+            job_description: atsScan.job_description,
+            ats_score: atsScan.ats_score,
+            keyword_matches: atsScan.keyword_matches as unknown as ATSScan['keyword_matches'],
+            section_scores: atsScan.section_scores as unknown as ATSScan['section_scores'],
+            recommendations: atsScan.recommendations || [],
+            is_free_scan: Boolean(atsScan.is_free_scan),
+            created_at: atsScan.created_at,
+          }
+        : undefined,
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Job pack creation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create job pack' },
+      { error: (error instanceof Error ? error.message : 'Failed to create job pack') },
       { status: 500 }
     );
   }
@@ -208,12 +229,18 @@ export async function GET(req: NextRequest) {
       .eq('user_id', session.user.id);
 
     const response: JobPackListResponse = {
-      job_packs: jobPacks || [],
+      job_packs: (jobPacks || []).map((jp) => ({
+        ...jp,
+        resume_version: jp.resume_version ?? undefined,
+        cover_letter: jp.cover_letter ?? undefined,
+        ats_score: jp.ats_score ?? undefined,
+        cultural_fit_warnings: Array.isArray(jp.cultural_fit_warnings) ? (jp.cultural_fit_warnings as string[]) : [],
+      })),
       total: count || 0,
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching job packs:', error);
     return NextResponse.json(
       { error: 'Failed to fetch job packs' },

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const referenceId = debitReferenceFromRequest(req, "gen-bullets");
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: "Generated resume bullets",
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const profile = await loadProfileForTailoring(session.user.id, supabase);
 
     if (!profile) {
-      await addCredits(supabase as any, {
+      await addCredits(supabase, {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: "Refund: Missing profile facts",
@@ -95,7 +95,7 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
       const response = result.response;
       text = response.text();
     } catch (err) {
-      await addCredits(supabase as any, {
+      await addCredits(supabase, {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: "Refund: Generation failed",
@@ -124,7 +124,7 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     if (bullets.length === 0) {
-      await addCredits(supabase as any, {
+      await addCredits(supabase, {
         p_user_id: session.user.id,
         p_amount: CREDIT_COST,
         p_description: "Refund: Ungrounded bullets",
@@ -137,9 +137,9 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
     }
 
     // Save generation to database
-    const { error: generationError } = await (supabase
+    const { error: generationError } = await supabase
       .from("generations")
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         type: "bullets",
         input: {
@@ -177,14 +177,14 @@ Return ONLY the bullet points, one per line, without any numbering or bullet sym
       ungroundableNotes,
       creditsRemaining: deductResult[0].new_credits,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generate bullets error:", error);
     await logCriticalError({
       workflow: "tailoring_run",
       error,
     });
     return NextResponse.json(
-      { error: error.message || "Failed to generate bullets" },
+      { error: (error instanceof Error ? error.message : "Failed to generate bullets") },
       { status: 500 }
     );
   }

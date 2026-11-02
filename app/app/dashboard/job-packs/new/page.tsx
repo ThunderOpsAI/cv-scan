@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
 import { JobPackResponse } from "@/types/job-packs";
 
 type ApiErrorResponse = { error?: string };
@@ -190,8 +189,7 @@ function NewJobPackContent() {
                   </label>
                   <input
                     type="file"
-                    accept="image/*"
-                    capture="environment"
+                    accept="image/jpeg, image/png, image/webp"
                     onChange={handleJobAdImageUpload}
                     disabled={ocrLoading}
                     className="block w-full text-sm text-[#607086] file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#1A237E] hover:file:bg-blue-700 disabled:opacity-60"

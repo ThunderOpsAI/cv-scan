@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { planMeetsMinimum, type PlanTier } from "@/lib/billing/plan-tier";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 
@@ -56,7 +55,7 @@ function generateSessionSummary(messages: ChatMessage[], role: string, company: 
 }
 
 export default function InterviewPracticePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -69,7 +68,6 @@ export default function InterviewPracticePage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const planTier = "starter"; // Beta: emulate starter tier
   const interviewUnlocked = true; // Beta: unlock all features
 
   useEffect(() => {

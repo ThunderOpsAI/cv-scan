@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const jobId = req.nextUrl.searchParams.get("job_id");
 
     const supabase = createClient();
-    let q = (supabase as any)
+    let q = supabase
       .from("generated_assets")
       .select("*")
       .eq("user_id", session.user.id)
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     if (job_id) {
-      const { data: job } = await (supabase as any)
+      const { data: job } = await supabase
         .from("jobs")
         .select("job_id")
         .eq("job_id", job_id)
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { data: row, error } = await (supabase as any)
+    const { data: row, error } = await supabase
       .from("generated_assets")
       .insert({
         user_id: session.user.id,

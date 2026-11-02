@@ -16,7 +16,7 @@ export async function POST() {
   }
 
   const supabase = createClient();
-  const { data: row } = await (supabase.from("users").select as any)("stripe_customer_id")
+  const { data: row } = await supabase.from("users").select("stripe_customer_id")
     .eq("id", session.user.id)
     .maybeSingle();
 
@@ -33,7 +33,7 @@ export async function POST() {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-06-20" as any,
+    apiVersion: "2026-02-25.clover",
   });
 
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";

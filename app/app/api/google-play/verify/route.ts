@@ -4,10 +4,13 @@ import { authOptions } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import {
   type GooglePlayVerificationPayload,
+  consumeGooglePlayProduct,
   hasGooglePlayServiceAccount,
   validateGooglePlayPackage,
   verifyGooglePlayPurchase,
 } from "@/lib/billing/google-play";
+import { addCredits } from "@/lib/supabase/credits";
+import { CREDIT_PACKAGE_MAP } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 
@@ -67,16 +70,14 @@ export async function POST(request: NextRequest) {
     const verification = await verifyGooglePlayPurchase(body);
 
     if (verification.verified && verification.purchaseType === "product") {
-      // Determine credit amount from productId (e.g., 'credits_10', 'credits_50')
-      const match = verification.productId.match(/credits?_?(\d+)/i);
-      const amount = match ? parseInt(match[1], 10) : 0;
+      // Determine credit amount from CREDIT_PACKAGE_MAP using productId
+      const amount = CREDIT_PACKAGE_MAP[verification.productId as keyof typeof CREDIT_PACKAGE_MAP]?.credits || 0;
 
       if (amount > 0) {
         const supabase = createClient();
-        const { data: rpcResult, error: rpcError } = await (supabase.rpc as any)("add_credits", {
+        const { data: rpcResult, error: rpcError } = await addCredits(supabase, {
           p_user_id: session.user.id,
           p_amount: amount,
-          p_type: "purchase",
           p_description: `Google Play purchase: ${verification.productId}`,
           p_metadata: {
             google_play_order_id: verification.orderId,
@@ -88,6 +89,17 @@ export async function POST(request: NextRequest) {
         if (rpcError || !rpcResult?.[0]?.success) {
           console.error("Failed to add credits from Google Play:", rpcError || rpcResult?.[0]?.error_message);
           return NextResponse.json({ error: "Failed to fulfill purchase credits" }, { status: 500 });
+        }
+
+        // Consume product on Google Play so it can be bought again
+        try {
+          await consumeGooglePlayProduct(
+            verification.packageName,
+            verification.productId,
+            verification.purchaseToken
+          );
+        } catch (consumeErr) {
+          console.warn("Failed to consume product on Google Play after crediting:", consumeErr);
         }
       }
     }

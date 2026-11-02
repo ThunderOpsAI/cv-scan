@@ -1,4 +1,4 @@
-# CVScan — Play Store Metadata
+# AI CV Scan — Play Store Metadata
 
 > **Status:** Ready for transcription to Play Console (pending final asset upload)
 > **Prepared by:** Agent 6 — April 2026
@@ -22,10 +22,10 @@ Land more interviews with AI-powered resume tailoring & scoring.
 ## 2. Long Description (≤ 4,000 characters)
 
 ```
-CVScan is your AI-powered career coach — built to help you score, 
+AI CV Scan is your AI-powered career coach — built to help you score, 
 tailor, and land your dream job faster.
 
-Stop guessing why your resume isn't getting callbacks. CVScan reads 
+Stop guessing why your resume isn't getting callbacks. AI CV Scan reads 
 your resume and the job description, then gives you an instant ATS 
 fit score plus a clear action plan to close the gap. Every 
 generation is grounded in your verified Career Memory — so outputs 
@@ -81,22 +81,22 @@ in strictly isolated, owner-only storage. We do not sell your
 personal data or use your information to train AI models.
 
 Full account deletion is available at any time — directly in the 
-app or at cvscan.com.au/delete-account.
+app or at www.aicvscan.com/delete-account.
 
 ──────────────────────────────
 PLANS & CREDITS
 ──────────────────────────────
 
-CVScan uses a credit system. New accounts include free starter 
+AI CV Scan uses a credit system. New accounts include free starter 
 credits. Additional credits can be purchased via Google Play. 
 Purchased credits do not expire.
 
 ──────────────────────────────
 
-For support, visit cvscan.com.au or email support@cvscan.com.au.
-Privacy Policy: cvscan.com.au/privacy
-Terms of Service: cvscan.com.au/terms
-Account Deletion: cvscan.com.au/delete-account
+For support, visit www.aicvscan.com or email support@aicvscan.com.
+Privacy Policy: www.aicvscan.com/privacy
+Terms of Service: www.aicvscan.com/terms
+Account Deletion: www.aicvscan.com/delete-account
 ```
 
 **Character count:** ~2,400 of 4,000 ✅
@@ -108,7 +108,7 @@ Account Deletion: cvscan.com.au/delete-account
 ### Closed Beta — Initial Release (v0.1.0)
 
 ```
-Welcome to the CVScan closed beta!
+Welcome to the AI CV Scan closed beta!
 
 This is our first beta build. We're testing core features 
 end-to-end before our wider launch.
@@ -128,7 +128,7 @@ Known limitations in this beta build:
 • Some UI elements are pending final polish
 • Support contact is email-only (in-app chat coming)
 
-Found a bug? Email beta@cvscan.com.au with your device model 
+Found a bug? Email beta@aicvscan.com with your device model 
 and a description of the issue. Thank you for helping us 
 test!
 ```
@@ -136,7 +136,7 @@ test!
 ### Production Release Notes Template (v1.0.0)
 
 ```
-CVScan 1.0 — General Availability
+AI CV Scan 1.0 — General Availability
 
 We're live! Thank you to our beta testers. Here's what's 
 included in our 1.0 release:
@@ -148,7 +148,7 @@ included in our 1.0 release:
 • Refined onboarding experience
 • Bug fixes reported by beta testers
 
-Questions? Visit cvscan.com.au or email support@cvscan.com.au.
+Questions? Visit www.aicvscan.com or email support@aicvscan.com.
 ```
 
 ---
@@ -189,6 +189,14 @@ Google Play **requires** at least 2 screenshots per device type. For beta, targe
 | 10-inch tablet | **1600 × 2560 px** | Optional for beta |
 | Chromebook | **1280 × 800 px** | Optional |
 
+**Generated phone screenshots (1,080 × 1,920 PNG):**
+
+- `docs/assets/play-store-screenshots/01-home.png`
+- `docs/assets/play-store-screenshots/02-pricing.png`
+- `docs/assets/play-store-screenshots/03-sign-in.png`
+
+They are reproducible with `cd app && npm run screenshots:play` while the app is available at `http://127.0.0.1:3000`. They show public, unseeded flows only; replace or supplement them with authenticated product screenshots after reviewer test data is available.
+
 **Recommended screenshot set (minimum viable for closed beta):**
 
 | # | Screen | Content |
@@ -217,15 +225,15 @@ Google Play **requires** at least 2 screenshots per device type. For beta, targe
 
 | Field | Value |
 |---|---|
-| App name | `CVScan — AI Resume Coach` |
+| App name | `AI AI CV Scan — AI Resume Coach` |
 | Developer name | [Product Owner to confirm] |
 | Category | **Productivity** |
 | Tags | resume, career, jobs, AI, cover letter |
 | Content rating | Everyone (no violence, no mature content) |
-| Privacy Policy URL | `https://cvscan.com.au/privacy` |
-| Support URL | `https://cvscan.com.au` or `mailto:support@cvscan.com.au` |
-| External deletion URL | `https://cvscan.com.au/delete-account` ✅ |
-| App website | `https://cvscan.com.au` |
+| Privacy Policy URL | `https://www.aicvscan.com/privacy` |
+| Support URL | `https://www.aicvscan.com` or `mailto:support@aicvscan.com` |
+| External deletion URL | `https://www.aicvscan.com/delete-account` ✅ |
+| App website | `https://www.aicvscan.com` |
 
 ---
 
@@ -237,7 +245,7 @@ Google Play **requires** at least 2 screenshots per device type. For beta, targe
 |---|---|
 | Does your app collect or share any of the required user data types? | **Yes** |
 | Is all user data encrypted in transit? | **Yes** |
-| Do you provide a way for users to request data deletion? | **Yes** — In-app and at `https://cvscan.com.au/delete-account` |
+| Do you provide a way for users to request data deletion? | **Yes** — In-app and at `https://www.aicvscan.com/delete-account` |
 | Financial info collected? | **Yes** — credit history. Shared with Stripe (web), Google Play (Android) |
 | Personal info collected? | **Yes** — name, email, location, phone, profile photo |
 | Health and fitness data? | **No** |

@@ -36,9 +36,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Education not found' }, { status: 404 });
     }
 
-    const { data: education, error } = await (supabase
+    const { data: education, error } = await supabase
       .from('education')
-      .update as any)(updateData)
+      .update(updateData)
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select()
@@ -57,10 +57,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ education });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update education error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update education' },
+      { error: (error instanceof Error ? error.message : 'Failed to update education') },
       { status: 500 }
     );
   }
@@ -85,9 +85,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Education not found' }, { status: 404 });
     }
 
-    const { data: deletedEducation, error } = await (supabase
+    const { data: deletedEducation, error } = await supabase
       .from('education')
-      .delete as any)()
+      .delete()
       .eq('id', params.id)
       .eq('profile_id', profileId)
       .select('id')
@@ -106,10 +106,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete education error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete education' },
+      { error: (error instanceof Error ? error.message : 'Failed to delete education') },
       { status: 500 }
     );
   }

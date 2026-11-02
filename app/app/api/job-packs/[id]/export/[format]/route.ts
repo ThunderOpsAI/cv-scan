@@ -34,9 +34,9 @@ export async function GET(
     const supabase = createClient();
 
     // Fetch Job Pack
-    const { data: jobPack, error } = await (supabase
+    const { data: jobPack, error } = await supabase
       .from('job_packs')
-      .select as any)('*')
+      .select('*')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -86,7 +86,7 @@ export async function GET(
       });
 
       const buffer = await Packer.toBuffer(doc);
-      return new Response(buffer as any, {
+      return new Response(new Uint8Array(buffer), {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'Content-Disposition': `attachment; filename="${documentName}.docx"`,
@@ -104,7 +104,7 @@ export async function GET(
       const { height } = page.getSize();
       let y = height - 50;
 
-      const drawText = (text: string, font: any, size: number, options: any = {}) => {
+      const drawText = (text: string, font: typeof timesRomanFont, size: number, options: Record<string, unknown> = {}) => {
         if (y < 50) {
           page = pdfDoc.addPage();
           y = height - 50;
@@ -151,7 +151,7 @@ export async function GET(
 
       const pdfBytes = await pdfDoc.save();
 
-      return new Response(pdfBytes as any, {
+      return new Response(Buffer.from(pdfBytes), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="${documentName}.pdf"`,
@@ -160,10 +160,10 @@ export async function GET(
     }
 
     return NextResponse.json({ error: 'Unsupported format' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Export error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to export document' },
+      { error: (error instanceof Error ? error.message : 'Failed to export document') },
       { status: 500 }
     );
   }

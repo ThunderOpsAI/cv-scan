@@ -1,4 +1,4 @@
-# CVScan — Pre-Submission Checklist
+# AI CV Scan — Pre-Submission Checklist
 
 > **Prepared by:** Agent 6 — April 2026
 > **Version:** Closed Beta (AU/NZ)
@@ -40,13 +40,13 @@ All URLs must be publicly accessible **without login** at time of submission.
 
 | # | URL | Required? | Current Status |
 |---|---|---|---|
-| 3.1 | **Privacy Policy** → `https://cvscan.com.au/privacy` | ✅ Mandatory | Implemented ✅ |
-| 3.2 | **External Deletion URL** → `https://cvscan.com.au/delete-account` | ✅ Mandatory | Implemented ✅ (Agent 6) |
-| 3.3 | **Support URL/Email** → `https://cvscan.com.au` or `mailto:support@cvscan.com.au` | ✅ Mandatory | Pending domain live |
-| 3.4 | **Terms of Service** → `https://cvscan.com.au/terms` | Highly recommended | Implemented ✅ |
-| 3.5 | **App website** → `https://cvscan.com.au` | Recommended | Pending domain live |
+| 3.1 | **Privacy Policy** → `https://www.aicvscan.com/privacy` | ✅ Mandatory | Implemented ✅ |
+| 3.2 | **External Deletion URL** → `https://www.aicvscan.com/delete-account` | ✅ Mandatory | Implemented ✅ (Agent 6) |
+| 3.3 | **Support URL/Email** → `https://www.aicvscan.com` or `mailto:support@aicvscan.com` | ✅ Mandatory | Pending domain live |
+| 3.4 | **Terms of Service** → `https://www.aicvscan.com/terms` | Highly recommended | Implemented ✅ |
+| 3.5 | **App website** → `https://www.aicvscan.com` | Recommended | Pending domain live |
 
-> **Domain readiness blocker:** All URLs above depend on `cvscan.com.au` resolving in production. Confirm deployment and domain DNS before submission.
+> **Domain readiness blocker:** All URLs above depend on `www.aicvscan.com` resolving in production. Confirm deployment and domain DNS before submission.
 
 ---
 
@@ -54,7 +54,7 @@ All URLs must be publicly accessible **without login** at time of submission.
 
 | # | Check | Status | Notes |
 |---|---|---|---|
-| 4.1 | App name entered (`CV Scan — AI Resume Coach`) | ☐ | See `PLAY_STORE_METADATA.md` |
+| 4.1 | App name entered (`AI CV Scan — AI Resume Coach`) | ☐ | See `PLAY_STORE_METADATA.md` |
 | 4.2 | Short description entered (≤ 80 chars) | ☐ | See `PLAY_STORE_METADATA.md` |
 | 4.3 | Long description entered (≤ 4,000 chars) | ☐ | See `PLAY_STORE_METADATA.md` |
 | 4.4 | Category set to **Productivity** | ☐ | |
@@ -135,7 +135,7 @@ All URLs must be publicly accessible **without login** at time of submission.
 | 9.3 | Testers notified with opt-in invite link | ☐ | |
 | 9.4 | Minimum 12 testers have confirmed opt-in | ☐ | **Required before 14-day clock is meaningful** |
 | 9.5 | 14-day clock start date recorded | ☐ | See `BETA_TRACK.md` Section 6 |
-| 9.6 | Beta feedback channel established (email: `beta@cvscan.com.au`) | ☐ | |
+| 9.6 | Beta feedback channel established (email: `beta@aicvscan.com`) | ☐ | |
 
 ---
 
@@ -173,8 +173,7 @@ All URLs must be publicly accessible **without login** at time of submission.
 | `docs/PLAY_STORE_METADATA.md` | Store listing copy, release notes, asset specs |
 | `docs/REVIEWER_ACCESS.md` | Reviewer account setup and Play Console instructions |
 | `docs/BETA_TRACK.md` | Tester list, onboarding, 14-day tracking |
-| `docs/AGENT_HANDOVER.md` | Full agent history, blocking assumptions, compliance matrix |
 | `app/app/delete-account/page.tsx` | Public deletion page (BA-5) |
 | `app/app/api/profile/delete-account/route.ts` | Deletion API (BA-2 patched) |
-| `app/app/privacy/page.tsx` | Privacy Policy (updated by Agents 5 & 6) |
-| `app/app/terms/page.tsx` | Terms of Service (updated by Agent 5) |
+| `app/app/privacy/page.tsx` | Privacy Policy |
+| `app/app/terms/page.tsx` | Terms of Service |

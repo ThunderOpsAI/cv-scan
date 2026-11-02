@@ -14,8 +14,8 @@ export async function GET() {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
-      .from('profiles') as any)
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('id')
       .eq('user_id', session.user.id)
       .single();
@@ -24,8 +24,8 @@ export async function GET() {
       return NextResponse.json({ education: [] }, { status: 200 });
     }
 
-    const { data: education, error } = await (supabase
-      .from('education') as any)
+    const { data: education, error } = await supabase
+      .from('education')
       .select('*')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: true });
@@ -39,10 +39,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ education: education || [] });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get education error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch education' },
+      { error: (error instanceof Error ? error.message : 'Failed to fetch education') },
       { status: 500 }
     );
   }
@@ -67,8 +67,8 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient();
 
-    const { data: profile } = await (supabase
-      .from('profiles') as any)
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('id')
       .eq('user_id', session.user.id)
       .single();
@@ -80,18 +80,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: maxSort } = await (supabase
-      .from('education') as any)
+    const { data: maxSort } = await supabase
+      .from('education')
       .select('sort_order')
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: false })
       .limit(1)
       .single();
 
-    const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
+    const nextSortOrder = typeof maxSort?.sort_order === 'number' ? maxSort.sort_order + 1 : 0;
 
-    const { data: education, error } = await (supabase
-      .from('education') as any)
+    const { data: education, error } = await supabase
+      .from('education')
       .insert({
         profile_id: profile.id,
         institution: body.institution,
@@ -117,10 +117,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ education }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create education error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create education' },
+      { error: (error instanceof Error ? error.message : 'Failed to create education') },
       { status: 500 }
     );
   }

@@ -27,3 +27,19 @@ app/test-results/
 # Personal / local
 Important Info DO NOT COMMIT for my eyes only/
 docs/cvscan-test-profiles/
+.scratch/
+agents/
+.claude/
+.cursor/
+.emergent/
+# Added by git setup script
+.env.*.local
+*.log
+dist/
+build/
+# Android signing
+*.jks
+*.keystore
+android/app/release.keystore
+android/app/build/
+android/.gradle/

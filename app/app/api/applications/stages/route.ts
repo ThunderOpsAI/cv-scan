@@ -24,9 +24,9 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Verify application ownership
-    const { data: application } = await (supabase
+    const { data: application } = await supabase
       .from('applications')
-      .select as any)('id')
+      .select('id')
       .eq('id', body.application_id)
       .eq('user_id', session.user.id)
       .single();
@@ -39,18 +39,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Get max sort_order
-    const { data: existingStages } = await (supabase
+    const { data: existingStages } = await supabase
       .from('application_stages')
-      .select as any)('sort_order')
+      .select('sort_order')
       .eq('application_id', body.application_id)
       .order('sort_order', { ascending: false })
       .limit(1);
 
     const nextOrder = (existingStages?.[0]?.sort_order || 0) + 1;
 
-    const { data: stage, error } = await (supabase
+    const { data: stage, error } = await supabase
       .from('application_stages')
-      .insert as any)({
+      .insert({
         application_id: body.application_id,
         stage_type: body.stage_type,
         stage_name: body.stage_name,
@@ -71,9 +71,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Update application status if needed
-    await (supabase
+    await supabase
       .from('applications')
-      .update as any)({
+      .update({
         status: 'interviewing',
         updated_at: new Date().toISOString(),
       })
@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
       .in('status', ['saved', 'applied', 'screening']);
 
     return NextResponse.json({ stage });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Stage creation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create stage' },
+      { error: (error instanceof Error ? error.message : 'Failed to create stage') },
       { status: 500 }
     );
   }

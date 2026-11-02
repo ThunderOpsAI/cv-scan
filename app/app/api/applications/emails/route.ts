@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
 
     // Check credits
-    const { data: user } = await (supabase
+    const { data: user } = await supabase
       .from('users')
-      .select as any)('credits')
+      .select('credits')
       .eq('id', session.user.id)
       .single();
 
@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Get application
-    const { data: application } = await (supabase
+    const { data: application } = await supabase
       .from('applications')
-      .select as any)('*')
+      .select('*')
       .eq('id', body.application_id)
       .eq('user_id', session.user.id)
       .single();
@@ -61,9 +61,9 @@ export async function POST(req: NextRequest) {
     let stage = null;
     let stageId: string | null = null;
     if (body.stage_id) {
-      const { data: stageData } = await (supabase
+      const { data: stageData } = await supabase
         .from('application_stages')
-        .select as any)('*')
+        .select('*')
         .eq('id', body.stage_id)
         .eq('application_id', application.id)
         .single();
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Deduct credit
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Email generation: ${body.email_type}`,
@@ -105,9 +105,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Store generated email
-    const { data: email, error } = await (supabase
+    const { data: email, error } = await supabase
       .from('generated_emails')
-      .insert as any)({
+      .insert({
         user_id: session.user.id,
         application_id: application.id,
         stage_id: stageId,
@@ -132,10 +132,10 @@ export async function POST(req: NextRequest) {
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Email generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate email' },
+      { error: (error instanceof Error ? error.message : 'Failed to generate email') },
       { status: 500 }
     );
   }

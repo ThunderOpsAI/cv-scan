@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { APP_NAME } from "@/lib/branding";
 import { CREDIT_PACKAGES } from "@/lib/pricing";
+import { purchaseGooglePlayProduct } from "@/lib/billing/google-play-client";
 
 
 
@@ -15,15 +16,26 @@ function BuyCreditsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
-  const [isAndroidWebView, setIsAndroidWebView] = useState(false);
+  const [isAndroidApp, setIsAndroidApp] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detect Android WebView to hide Stripe (Google Play Policy)
-    const ua = navigator.userAgent;
-    const isAndroid = /Android/i.test(ua);
+    // Detect Android native app or Android WebView to ensure Google Play Billing is strictly used
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+    const isAndroidUA = /Android/i.test(ua);
     const isWebView = /wv|WebView/i.test(ua);
-    if (isAndroid && isWebView) {
-      setIsAndroidWebView(true);
+    
+    // Check if running inside Capacitor native Android
+    let isCapacitorAndroid = false;
+    if (typeof window !== "undefined" && "Capacitor" in window) {
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string } }).Capacitor;
+      if (cap?.isNativePlatform?.() && cap?.getPlatform?.() === "android") {
+        isCapacitorAndroid = true;
+      }
+    }
+
+    if (isCapacitorAndroid || (isAndroidUA && isWebView)) {
+      setIsAndroidApp(true);
     }
   }, []);
 
@@ -44,7 +56,34 @@ function BuyCreditsContent() {
 
   const handlePurchase = async (packageType: string) => {
     setLoading(packageType);
+    setError(null);
     try {
+      if (isAndroidApp) {
+        const { purchaseToken, error: playError } = await purchaseGooglePlayProduct(packageType);
+        if (playError || !purchaseToken) {
+          throw new Error(playError || "Google Play purchase failed.");
+        }
+        
+        const verifyRes = await fetch("/api/google-play/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            packageName: "com.cvscan.app",
+            productId: packageType,
+            purchaseToken,
+            purchaseType: "product"
+          }),
+        });
+
+        if (!verifyRes.ok) {
+          const errData = await verifyRes.json().catch(() => null);
+          throw new Error(errData?.error || "Failed to verify purchase on server.");
+        }
+
+        router.push("/dashboard?payment=success");
+        return;
+      }
+
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,9 +98,9 @@ function BuyCreditsContent() {
       if (url) {
         window.location.href = url;
       }
-    } catch (error) {
-      console.error("Purchase error:", error);
-      alert("Failed to initiate purchase. Please try again.");
+    } catch (err: unknown) {
+      console.error("Purchase error:", err);
+      setError((err instanceof Error ? err.message : "Failed to initiate purchase. Please try again."));
       setLoading(null);
     }
   };
@@ -113,20 +152,19 @@ function BuyCreditsContent() {
             </div>
           )}
 
-          {isAndroidWebView && (
-            <div className="mb-8 rounded-3xl border border-amber-400/20 bg-amber-50 px-6 py-5 text-center text-amber-900 shadow-sm">
-              <p className="font-semibold text-lg mb-2">Purchasing currently unavailable in the app</p>
-              <p className="text-sm">
-                Due to Google Play Billing policies, we cannot process payments directly in the app at this time. 
-                Please visit <span className="font-semibold">aievscan.com</span> in your phone&apos;s standard browser or on a desktop to purchase credits.
-              </p>
+          {error && (
+            <div className="mb-8 rounded-3xl border border-red-400/20 bg-red-50 px-6 py-5 text-center text-red-900 shadow-sm">
+              <p className="font-semibold text-lg mb-2">Purchase Error</p>
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-semibold tracking-tight text-[#1A237E] md:text-5xl">Choose more credits</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-[#757575] md:text-base">
-              Same pricing system as the homepage, with secure Stripe checkout and no subscription lock-in.
+              {isAndroidApp
+                ? "Flexible credit packages with secure Google Play checkout and no subscription lock-in."
+                : "Same pricing system as the homepage, with secure checkout and no subscription lock-in."}
             </p>
           </div>
 
@@ -170,16 +208,14 @@ function BuyCreditsContent() {
 
                 <button
                   onClick={() => handlePurchase(plan.id)}
-                  disabled={loading !== null || isAndroidWebView}
+                  disabled={loading !== null}
                   className={`mt-8 w-full rounded-full px-5 py-3 text-sm font-semibold transition ${
-                    isAndroidWebView
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : plan.popular
+                    plan.popular
                       ? "bg-[#26A69A] text-white hover:bg-[#2bbbad]"
                       : "border border-black/[0.08] bg-white/40 text-[#1A237E] hover:bg-white/60"
                   } ${loading === plan.id ? "cursor-not-allowed opacity-60" : ""}`}
                 >
-                  {isAndroidWebView ? "Unavailable in App" : loading === plan.id ? "Processing..." : plan.cta}
+                  {loading === plan.id ? "Processing..." : isAndroidApp ? `Buy via Google Play` : plan.cta}
                 </button>
               </div>
             ))}
@@ -193,8 +229,9 @@ function BuyCreditsContent() {
                 writing generation, or interview replies.
               </div>
               <div className="rounded-3xl border border-black/[0.06] bg-[#F0EEF0]/50 p-5 text-sm text-[#757575]">
-                Checkout is handled by Stripe, credits do not expire, and launch pricing currently highlights a 50%
-                discount for the first 200 users on the Popular Pack.
+                {isAndroidApp
+                  ? "Checkout is handled securely by Google Play Billing, credits do not expire, and can be used on all your CVScan devices."
+                  : "Credits do not expire, and launch pricing currently highlights a 50% discount for the first 200 users on the Popular Pack."}
               </div>
             </div>
           </div>

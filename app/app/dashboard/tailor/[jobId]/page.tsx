@@ -12,6 +12,7 @@ import type {
 } from "@/types/generated-assets";
 import { stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
 import { CREDIT_COSTS } from "@/lib/billing/credit-costs";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
 
 function downloadText(filename: string, content: string) {
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -342,61 +343,32 @@ function TailorInner() {
           </button>
 
           {bulletEvidence && bulletEvidence.items.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-200 border-collapse">
-                <thead>
-                  <tr className="border-b border-black/[0.06]">
-                    <th className="py-2 pr-4">Original (fact)</th>
-                    <th className="py-2 pr-4">Tailored</th>
-                    <th className="py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bulletEvidence.items.map((row) => (
-                    <tr key={row.fact_id} className="border-b border-white/10 align-top">
-                      <td className="py-3 pr-4 max-w-[200px] text-[#607086]">{row.original}</td>
-                      <td className="py-3 pr-4">
-                        <textarea
-                          className="w-full min-h-[72px] bg-slate-950/80 border border-black/[0.06] rounded p-2 text-[#1A237E] text-sm"
-                          value={itemDrafts[row.fact_id] ?? row.tailored}
-                          onChange={(e) =>
-                            setItemDrafts((d) => ({ ...d, [row.fact_id]: e.target.value }))
-                          }
-                        />
-                        <p className="text-blue-200 text-xs mt-1">
-                          Evidence: [fact:{row.fact_id.slice(0, 8)}]
-                          {!row.grounded ? " · Gap signal only, not saved or exported" : ""}
-                        </p>
-                        {!row.grounded && row.note && (
-                          <p className="text-amber-300 text-xs mt-1">Note: {row.note}</p>
-                        )}
-                      </td>
-                      <td className="py-3 whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
-                          <button
-                            type="button"
-                            className="text-xs text-emerald-400 hover:underline"
-                            onClick={() =>
-                              setItemStatus((s) => ({ ...s, [row.fact_id]: "accepted" }))
-                            }
-                          >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            className="text-xs text-rose-400 hover:underline"
-                            onClick={() =>
-                              setItemStatus((s) => ({ ...s, [row.fact_id]: "rejected" }))
-                            }
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-4">
+              <ScribeInlineEditor
+                mode="bullets"
+                title="Scribe Inline Bullet Co-Writer"
+                subtitle="Click any tailored bullet to refine with AI (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization) and preview inline diffs."
+                items={bulletEvidence.items.map((row) => ({
+                  id: row.fact_id,
+                  text: itemDrafts[row.fact_id] ?? row.tailored,
+                  originalFact: row.original,
+                  evidenceTag: `[fact:${row.fact_id.slice(0, 8)}]`,
+                }))}
+                onUpdateItem={(id, newText) => {
+                  setItemDrafts((d) => ({ ...d, [id]: newText }));
+                  setItemStatus((s) => ({ ...s, [id]: "accepted" }));
+                }}
+                jobContext={job.raw_description}
+                keywords={job.raw_description.split(/[\s,/.]+/).filter((t) => t.length > 5).slice(0, 8)}
+                onCopyAll={() => {
+                  const lines = bulletEvidence.items
+                    .filter((i) => i.grounded && itemStatus[i.fact_id] !== "rejected")
+                    .map((i) => `• ${itemDrafts[i.fact_id] ?? i.tailored}`);
+                  void navigator.clipboard.writeText(lines.join("\n"));
+                  setMsg("Tailored bullets copied to clipboard.");
+                }}
+                copyAllLabel="Copy All Bullets"
+              />
             </div>
           )}
 
@@ -450,10 +422,34 @@ function TailorInner() {
           </button>
           {coverLetter && (
             <>
-              <textarea
-                className="w-full min-h-[220px] bg-slate-950/80 border border-black/[0.06] rounded p-3 text-[#1A237E] text-sm"
-                value={coverLetter}
-                onChange={(e) => setCoverLetter(e.target.value)}
+              <ScribeInlineEditor
+                mode="paragraphs"
+                title="Scribe Cover Letter Co-Writer"
+                subtitle="Click any paragraph to refine with AI (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization) and preview inline diffs."
+                items={coverLetter
+                  .split(/\n\n+/)
+                  .map((p) => p.trim())
+                  .filter(Boolean)
+                  .map((para, idx) => ({
+                    id: `tailor-cl-${idx}`,
+                    text: para,
+                  }))}
+                onUpdateItem={(id, newText) => {
+                  const idx = Number(id.replace("tailor-cl-", ""));
+                  const paras = coverLetter
+                    .split(/\n\n+/)
+                    .map((p) => p.trim())
+                    .filter(Boolean);
+                  const nextParas = paras.map((p, i) => (i === idx ? newText : p));
+                  setCoverLetter(nextParas.join("\n\n"));
+                }}
+                jobContext={job.raw_description}
+                keywords={job.raw_description.split(/[\s,/.]+/).filter((t) => t.length > 5).slice(0, 8)}
+                onCopyAll={() => {
+                  void navigator.clipboard.writeText(exportCleanCover);
+                  setMsg("Cover letter copied to clipboard.");
+                }}
+                copyAllLabel="Copy Full Cover Letter"
               />
               {coverEvidenceData && (
                 <div className="rounded-lg border border-white/15 bg-white/40 p-4 text-sm">

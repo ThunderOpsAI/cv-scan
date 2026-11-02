@@ -1,40 +1,49 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { CopilotContext } from '@/types/intelligence';
+
+export interface CopilotContextHints {
+  job_id?: string;
+  profile_id?: string;
+  company_name?: string;
+}
 
 export async function buildCopilotContext(
   userId: string,
-  contextHints: any,
-  supabase: any
+  contextHints: CopilotContextHints | undefined,
+  supabase: SupabaseClient
 ): Promise<CopilotContext> {
   const context: CopilotContext = {};
 
-  const { data: profile } = await (supabase
+  const { data: profile } = await supabase
     .from('profiles')
-    .select as any)('full_name, headline')
+    .select('full_name, headline')
     .eq('user_id', userId)
     .maybeSingle();
 
-  const { data: approvedFacts } = await (supabase
+  const { data: approvedFacts } = await supabase
     .from('profile_facts')
-    .select as any)('fact_type, fact_text')
+    .select('fact_type, fact_text')
     .eq('user_id', userId)
     .eq('is_approved', true)
     .order('created_at', { ascending: true });
 
   if (profile || approvedFacts?.length) {
+    type FactItem = { fact_type: string; fact_text: string };
+    const factsList = (approvedFacts || []) as FactItem[];
     context.profile = {
       full_name: profile?.full_name || 'Candidate',
-      headline: profile?.headline,
-      approved_facts: approvedFacts || [],
-      skills: approvedFacts
-        ?.filter((fact: any) => fact.fact_type === 'skill')
-        .map((fact: any) => fact.fact_text),
+      headline: profile?.headline || undefined,
+      approved_facts: factsList,
+      skills: factsList
+        .filter((fact) => fact.fact_type === 'skill')
+        .map((fact) => fact.fact_text),
     };
   }
 
   if (contextHints?.job_id) {
-    const { data: job } = await (supabase
+    const { data: job } = await supabase
       .from('discovered_jobs')
-      .select as any)('*')
+      .select('title, company, description')
       .eq('id', contextHints.job_id)
       .eq('user_id', userId)
       .single();

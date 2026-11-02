@@ -1,6 +1,6 @@
 /**
- * Canonical credit costs for paid actions (Build Spec Phase 3.2).
- * Keep in sync with route handlers that call deduct_credits.
+ * Canonical ledger credit deductions for metered user actions.
+ * Must remain strictly in sync with database RPC deduct_credits calls.
  */
 export const CREDIT_COSTS = {
   jobFit: 1,

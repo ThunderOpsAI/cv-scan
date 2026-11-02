@@ -25,7 +25,7 @@ export async function GET(
 
     const supabase = createClient();
 
-    const { data: job, error: jobError } = await (supabase as any)
+    const { data: job, error: jobError } = await supabase
       .from("jobs")
       .select("job_id")
       .eq("job_id", params.jobId)
@@ -41,7 +41,7 @@ export async function GET(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    const { data: analyses, error } = await (supabase as any)
+    const { data: analyses, error } = await supabase
       .from("fit_analyses")
       .select("*")
       .eq("job_id", params.jobId)

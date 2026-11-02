@@ -25,7 +25,7 @@ export async function DELETE() {
     if (userRecord?.stripe_customer_id && process.env.STRIPE_SECRET_KEY) {
       try {
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-          apiVersion: "2024-06-20" as any,
+          apiVersion: "2026-02-25.clover",
         });
         await stripe.customers.del(userRecord.stripe_customer_id);
       } catch (stripeErr) {
@@ -107,14 +107,14 @@ export async function DELETE() {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Account deletion error:', error);
     await logCriticalError({
       workflow: 'account_deletion',
       error: error,
     });
     return NextResponse.json(
-      { error: error.message || 'An error occurred while deleting your account' },
+      { error: (error instanceof Error ? error.message : 'An error occurred while deleting your account') },
       { status: 500 }
     );
   }

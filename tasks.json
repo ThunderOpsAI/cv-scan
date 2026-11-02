@@ -6,7 +6,7 @@
       "title": "Adopt standard workspace project structure",
       "status": "done",
       "priority": "high",
-      "owner": "codex",
+      "owner": "maintainer",
       "notes": "Moved the runnable Next.js codebase into /app and created standard root folders."
     },
     {

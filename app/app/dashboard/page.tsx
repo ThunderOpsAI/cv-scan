@@ -1,9 +1,9 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GradientButton } from "@/components/ui/GradientButton";
@@ -136,8 +136,7 @@ function DashboardContent() {
           }
         : null,
     ]
-      .filter(Boolean)
-      .filter((item) => item && !dismissedInsights.includes(item.id))
+      .filter((item): item is NonNullable<typeof item> => item !== null && !dismissedInsights.includes(item.id))
       .slice(0, 3);
   }, [dismissedInsights, lastScan, session?.user?.credits, session?.user?.name, session]);
 
@@ -157,7 +156,9 @@ function DashboardContent() {
     setDismissedInsights(next);
     try {
       window.localStorage.setItem("cvscan-dashboard-insights-dismissed", JSON.stringify(next));
-    } catch {}
+    } catch {
+      // Ignore localStorage availability / quota errors
+    }
   };
 
   return (
@@ -266,7 +267,7 @@ function DashboardContent() {
                     Keep the workflow moving.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-[#757575]">
-                    Web purchases run through Stripe today.
+                    Top up your account with credits to continue scans, interview prep, and exports.
                   </p>
                 </div>
                 <div>

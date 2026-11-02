@@ -3,12 +3,11 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { DiscoveredJob, SavedSearch } from "@/types/intelligence";
 import { JobsPageSkeleton } from "@/components/ui/dashboard-skeletons";
 
 export default function JobsPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [jobs, setJobs] = useState<DiscoveredJob[]>([]);
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);

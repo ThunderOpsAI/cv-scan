@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
 import type { CoverLetterEvidence } from "@/types/generated-assets";
 import { stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
 
@@ -64,8 +65,8 @@ export default function GenerateCoverLetter() {
 
       // Update session to reflect new credit count
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : "An error occurred"));
     } finally {
       setLoading(false);
     }
@@ -97,13 +98,21 @@ export default function GenerateCoverLetter() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(""), 3000);
-    } catch (err: any) {
-      setError(err.message || "Failed to save");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : "Failed to save"));
     }
   };
 
   /* Fetch history */
-  const [history, setHistory] = useState<any[]>([]);
+  interface HistoryItem {
+    id: string;
+    created_at: string;
+    input: {
+      job_description?: string;
+    };
+    output: string;
+  }
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const fetchHistory = async () => {
     if (status !== "authenticated") return;
@@ -239,11 +248,33 @@ export default function GenerateCoverLetter() {
                       </div>
                     </div>
 
-                    <div className="bg-white/40 border border-black/[0.06] rounded-xl p-6">
-                      <div className="text-[#1A237E] whitespace-pre-wrap font-serif leading-relaxed">
-                        {coverLetter}
-                      </div>
-                    </div>
+                    <ScribeInlineEditor
+                      mode="paragraphs"
+                      title="Scribe Cover Letter Co-Writer"
+                      subtitle="Click any paragraph to open the floating AI toolbar (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization)."
+                      items={coverLetter
+                        .split(/\n\n+/)
+                        .map((p) => p.trim())
+                        .filter(Boolean)
+                        .map((para, idx) => ({
+                          id: `gen-cl-para-${idx}`,
+                          text: para,
+                        }))}
+                      onUpdateItem={(id, newText) => {
+                        const idx = Number(id.replace("gen-cl-para-", ""));
+                        const paras = coverLetter
+                          .split(/\n\n+/)
+                          .map((p) => p.trim())
+                          .filter(Boolean);
+                        const nextParas = paras.map((p, i) => (i === idx ? newText : p));
+                        setCoverLetter(nextParas.join("\n\n"));
+                        setSaved(false);
+                      }}
+                      jobContext={jobDescription}
+                      keywords={jobDescription.split(/[\s,/.]+/).filter((t) => t.length > 5).slice(0, 8)}
+                      onCopyAll={copyCoverLetter}
+                      copyAllLabel="Copy Full Cover Letter"
+                    />
                   </div>
 
                   <BeforeAfter

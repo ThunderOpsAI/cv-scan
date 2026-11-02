@@ -1,6 +1,7 @@
 
 "use client";
 import { CoverLetterEvidenceDisplay } from "./CoverLetterEvidenceDisplay";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
@@ -66,6 +67,27 @@ export default function JobPackDetailPage() {
 
   const handleExport = (format: "pdf" | "docx") => {
     window.open(`/api/job-packs/${params.id}/export/${format}?reviewed=1`, "_blank");
+  };
+
+  const syncJobPackUpdates = async (updates: Partial<Pick<JobPack, "resume_version" | "cover_letter">>) => {
+    if (!jobPack) return;
+    const optimistic = { ...jobPack, ...updates };
+    setJobPack(optimistic);
+    try {
+      await fetch(`/api/job-packs/${params.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          job_title: optimistic.job_title,
+          company: optimistic.company,
+          job_description: optimistic.job_description,
+          resume_version: optimistic.resume_version,
+          cover_letter: optimistic.cover_letter,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to sync inline edit to job pack:", err);
+    }
   };
 
   const handleDelete = async () => {
@@ -316,20 +338,74 @@ export default function JobPackDetailPage() {
                     {loadingDiff ? "Loading..." : "View Diff"}
                   </button>
                 </div>
-                <div className="bg-white/40 rounded-lg p-6">
-                  {/* Evidence tag rendering for resume bullets (Phase 4.1) */}
-                  {/* TODO: Replace with actual evidence extraction for resume bullets if available */}
-                  <pre className="text-[#607086] whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                    {jobPack.resume_version || "No tailored resume available"}
-                  </pre>
-                  {/* If evidence/gap signals are available for resume, render them here */}
-                </div>
+                {jobPack.resume_version ? (
+                  <ScribeInlineEditor
+                    mode="bullets"
+                    title="Scribe Resume Bullet & Section Co-Writer"
+                    subtitle="Click any resume line or bullet to open the Scribe AI toolbar (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization)."
+                    items={jobPack.resume_version
+                      .split("\n")
+                      .map((line) => line.trim())
+                      .filter(Boolean)
+                      .map((line, idx) => {
+                        const clean = line.replace(/^[\s•\-*]+/, "");
+                        const isHeading =
+                          line.length < 48 &&
+                          (line === line.toUpperCase() || line.endsWith(":")) &&
+                          !line.startsWith("•") &&
+                          !line.startsWith("-");
+                        return {
+                          id: `jp-resume-${idx}`,
+                          text: clean,
+                          isHeading,
+                        };
+                      })}
+                    onUpdateItem={(id, newText) => {
+                      const idx = Number(id.replace("jp-resume-", ""));
+                      const lines = (jobPack.resume_version || "")
+                        .split("\n")
+                        .map((l) => l.trim())
+                        .filter(Boolean);
+                      const updatedLines = lines.map((line, i) => {
+                        if (i !== idx) return line;
+                        const hadBullet = /^[\s]*[•\-*]/.test(line);
+                        return hadBullet ? `• ${newText}` : newText;
+                      });
+                      void syncJobPackUpdates({ resume_version: updatedLines.join("\n") });
+                    }}
+                    jobContext={jobPack.job_description}
+                    keywords={[
+                      ...(atsScan?.keyword_matches.found || []),
+                      ...(atsScan?.keyword_matches.missing || []),
+                    ]}
+                    onCopyAll={() => {
+                      void navigator.clipboard.writeText(jobPack.resume_version || "");
+                    }}
+                    copyAllLabel="Copy Full Tailored Resume"
+                  />
+                ) : (
+                  <div className="bg-white/40 rounded-lg p-6">
+                    <pre className="text-[#607086] whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                      No tailored resume available
+                    </pre>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Cover Letter Tab */}
             {activeTab === "cover-letter" && (
-              <CoverLetterEvidenceDisplay coverLetter={jobPack.cover_letter} />
+              <CoverLetterEvidenceDisplay
+                coverLetter={jobPack.cover_letter}
+                jobContext={jobPack.job_description}
+                keywords={[
+                  ...(atsScan?.keyword_matches.found || []),
+                  ...(atsScan?.keyword_matches.missing || []),
+                ]}
+                onUpdateCoverLetter={(updatedCoverLetter) => {
+                  void syncJobPackUpdates({ cover_letter: updatedCoverLetter });
+                }}
+              />
             )}
 
             {/* ATS Analysis Tab */}

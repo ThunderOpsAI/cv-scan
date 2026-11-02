@@ -1,5 +1,7 @@
+import type { ImgHTMLAttributes } from "react";
+
 // Next.js Image fallback for dynamic import
-export default function FallbackImage(props: any) {
-  // fallback to <img> if next/image import fails
-  return <img {...props} />;
+export default function FallbackImage(props: ImgHTMLAttributes<HTMLImageElement>) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img {...props} alt={props.alt || ""} />;
 }

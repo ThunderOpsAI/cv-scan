@@ -16,7 +16,7 @@ export async function GET(req: Request) {
     // Check if token exists and is valid
     const { data: verificationToken, error: fetchError } = await supabase
       .from("verification_tokens")
-      .select("*")
+      .select("identifier, token, expires")
       .eq("identifier", email)
       .eq("token", token)
       .maybeSingle();

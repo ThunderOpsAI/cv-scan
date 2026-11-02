@@ -1,38 +1,76 @@
-import { useMemo } from "react";
-import { extractCoverLetterEvidence } from "@/lib/generation/cover-letter-evidence";
+"use client";
 
-export function CoverLetterEvidenceDisplay({ coverLetter }: { coverLetter?: string | null }) {
-  // For demo, we use empty facts array; in production, pass approved facts for full validation
-  const evidence = useMemo(() =>
-    extractCoverLetterEvidence(coverLetter || "", [])
-  , [coverLetter]);
+import { useMemo } from "react";
+import { extractCoverLetterEvidence, stripFactTagsForExport } from "@/lib/generation/cover-letter-evidence";
+import { ScribeInlineEditor } from "@/components/ui/ScribeInlineEditor";
+
+export function CoverLetterEvidenceDisplay({
+  coverLetter,
+  jobContext,
+  keywords = [],
+  onUpdateCoverLetter,
+}: {
+  coverLetter?: string | null;
+  jobContext?: string;
+  keywords?: string[];
+  onUpdateCoverLetter?: (updatedCoverLetter: string) => void;
+}) {
+  const evidence = useMemo(
+    () => extractCoverLetterEvidence(coverLetter || "", []),
+    [coverLetter]
+  );
 
   if (!coverLetter) {
     return (
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">Cover Letter</h2>
-        <div className="bg-white/5 rounded-lg p-6">
-          <span className="text-gray-400">No cover letter available</span>
+        <h2 className="text-xl font-bold text-[#1A237E] mb-4">Cover Letter</h2>
+        <div className="bg-white/40 rounded-lg p-6">
+          <span className="text-[#607086]">No cover letter available</span>
         </div>
       </div>
     );
   }
 
+  const paragraphs = coverLetter
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
   return (
-    <div>
-      <h2 className="text-xl font-bold text-white mb-4">Cover Letter</h2>
-      <div className="bg-white/5 rounded-lg p-6 space-y-4">
-        {evidence.paragraphs.map((para, idx) => (
-          <div key={idx} className="mb-2">
-            <p className="text-gray-300 whitespace-pre-wrap font-sans text-sm leading-relaxed">{para.text}</p>
-            {para.fact_ids.length > 0 && (
-              <div className="text-xs text-blue-300 mt-1">
-                Evidence: {para.fact_ids.join(", ")}
-              </div>
-            )}
-          </div>
-        ))}
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-bold text-[#1A237E]">Cover Letter</h2>
       </div>
+
+      <ScribeInlineEditor
+        mode="paragraphs"
+        title="Scribe Cover Letter Co-Writer"
+        subtitle="Click any paragraph to open the Scribe AI toolbar (Tighten, Add Metrics, Match Keywords, or AU/UK ↔ US Localization)."
+        items={paragraphs.map((text, idx) => {
+          const paraEv = evidence.paragraphs[idx];
+          return {
+            id: `cl-para-${idx}`,
+            text,
+            evidenceTag:
+              paraEv && paraEv.fact_ids.length > 0
+                ? `Evidence: ${paraEv.fact_ids.join(", ")}`
+                : undefined,
+          };
+        })}
+        onUpdateItem={(id, newText) => {
+          const idx = Number(id.replace("cl-para-", ""));
+          const nextParagraphs = paragraphs.map((p, i) => (i === idx ? newText : p));
+          const updatedFull = nextParagraphs.join("\n\n");
+          onUpdateCoverLetter?.(updatedFull);
+        }}
+        jobContext={jobContext}
+        keywords={keywords}
+        onCopyAll={() => {
+          void navigator.clipboard.writeText(stripFactTagsForExport(coverLetter));
+        }}
+        copyAllLabel="Copy All (Clean Export)"
+      />
     </div>
   );
 }
+

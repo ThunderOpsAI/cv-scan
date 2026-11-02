@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Education } from "@/types/profile";
 
 export default function EducationPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [education, setEducation] = useState<Education[]>([]);
   const [loading, setLoading] = useState(true);

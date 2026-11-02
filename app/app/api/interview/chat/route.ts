@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       .from('users')
       .select('credits')
       .eq('id', session.user.id)
-      .single() as { data: { credits: number } | null; error: any };
+      .single();
 
     if (userError || !user) {
       console.error('Failed to load user credits for interview chat:', userError);
@@ -115,7 +115,7 @@ Based on the above, write your next response as the Interviewer. Remember to giv
     const result = await gemini.generateContent(systemPrompt);
     const aiResponse = plainAiText(result.response.text());
 
-    const { data: deductResult, error: deductError } = await deductCredits(supabase as any, {
+    const { data: deductResult, error: deductError } = await deductCredits(supabase, {
       p_user_id: session.user.id,
       p_amount: CREDIT_COST,
       p_description: `Mock interview reply: ${role} at ${company}`,
@@ -152,14 +152,14 @@ Based on the above, write your next response as the Interviewer. Remember to giv
       response: aiResponse,
       creditsRemaining: deductResult[0].new_credits,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Interview Chat error:', error);
     await logCriticalError({
       workflow: 'interview_prep_run',
       error,
     });
     return NextResponse.json(
-      { error: error.message || 'Failed to generate response' },
+      { error: (error instanceof Error ? error.message : 'Failed to generate response') },
       { status: 500 }
     );
   }

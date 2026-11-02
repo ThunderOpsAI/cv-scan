@@ -20,8 +20,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
         }
 
-        const { data: updatedGoal, error } = await (supabase
-            .from('smart_goals') as any)
+        const { data: updatedGoal, error } = await supabase
+            .from('smart_goals')
             .update({
                 goal: body.goal,
                 specific: body.specific,
@@ -42,10 +42,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         return NextResponse.json({ goal: updatedGoal });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Update goal error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to update goal' },
+            { error: (error instanceof Error ? error.message : 'Failed to update goal') },
             { status: 500 }
         );
     }
@@ -79,10 +79,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Delete goal error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to delete goal' },
+            { error: (error instanceof Error ? error.message : 'Failed to delete goal') },
             { status: 500 }
         );
     }

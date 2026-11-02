@@ -8,8 +8,7 @@ CVScan now follows the standard project layout for this workspace.
 cv-scan/
 ├── app/                  # runnable Next.js codebase
 ├── docs/                 # product, system, and reference docs
-├── contracts/            # JSON schemas for agent-readable project metadata
-├── agents/               # project-specific agent/tooling config
+├── contracts/            # JSON schemas for project metadata
 ├── data/                 # local test data and artifacts
 ├── scripts/              # automation and pipeline scripts
 ├── tasks.json            # active project work

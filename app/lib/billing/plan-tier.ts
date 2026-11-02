@@ -49,12 +49,12 @@ export function stripePriceIdForTier(tier: Exclude<PlanTier, "free">): string | 
  * Server-side plan read (prefer over session alone for gated APIs).
  */
 export async function getPlanTierForUser(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient,
   userId: string
 ): Promise<PlanTier> {
-  const { data, error } = await (supabase.from("users").select as any)("plan_tier")
+  const { data, error } = await supabase.from("users").select("plan_tier")
     .eq("id", userId)
     .maybeSingle();
   if (error || !data) return "free";
-  return normalizePlanTier((data as { plan_tier?: string }).plan_tier);
+  return normalizePlanTier(data.plan_tier);
 }

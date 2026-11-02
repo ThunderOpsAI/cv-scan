@@ -105,7 +105,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-semibold text-[#1A237E]">9. Contact Us</h2>
               <p className="mt-2 text-[#424242]">
-                If you have questions or comments about this Privacy Policy, please contact us via the support portal in your dashboard or email privacy@{APP_NAME.toLowerCase().replace(' ', '')}.com.
+                If you have questions or comments about this Privacy Policy, please contact us via the support portal in your dashboard or email privacy@aicvscan.com.
               </p>
             </div>
             

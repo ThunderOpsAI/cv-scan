@@ -99,7 +99,7 @@ export default function ApplicationDetailPage() {
     }
   };
 
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -651,8 +651,8 @@ function EmailModal({
       }
 
       onGenerated();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }

@@ -19,9 +19,9 @@ export async function GET(
     const supabase = createClient();
 
     // Get application with stages
-    const { data: application, error } = await (supabase
+    const { data: application, error } = await supabase
       .from('applications')
-      .select as any)('*')
+      .select('*')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -34,16 +34,16 @@ export async function GET(
     }
 
     // Get stages
-    const { data: stages } = await (supabase
+    const { data: stages } = await supabase
       .from('application_stages')
-      .select as any)('*')
+      .select('*')
       .eq('application_id', application.id)
       .order('sort_order', { ascending: true });
 
     // Get generated emails
-    const { data: emails } = await (supabase
+    const { data: emails } = await supabase
       .from('generated_emails')
-      .select as any)('*')
+      .select('*')
       .eq('application_id', application.id)
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
@@ -53,7 +53,7 @@ export async function GET(
       stages: stages || [],
       emails: emails || [],
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching application:', error);
     return NextResponse.json(
       { error: 'Failed to fetch application' },
@@ -78,9 +78,9 @@ export async function PUT(
     const supabase = createClient();
 
     // Check ownership
-    const { data: existing } = await (supabase
+    const { data: existing } = await supabase
       .from('applications')
-      .select as any)('id')
+      .select('id')
       .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
@@ -95,9 +95,9 @@ export async function PUT(
     let jobPackId = body.job_pack_id;
 
     if (jobPackId) {
-      const { data: ownedJobPack, error: jobPackError } = await (supabase
+      const { data: ownedJobPack, error: jobPackError } = await supabase
         .from('job_packs')
-        .select as any)('id')
+        .select('id')
         .eq('id', jobPackId)
         .eq('user_id', session.user.id)
         .maybeSingle();
@@ -135,9 +135,9 @@ export async function PUT(
       cultural_score: body.cultural_score,
     };
 
-    const { data: application, error } = await (supabase
+    const { data: application, error } = await supabase
       .from('applications')
-      .update as any)({
+      .update({
         ...updateData,
         updated_at: new Date().toISOString(),
       })
@@ -155,7 +155,7 @@ export async function PUT(
     }
 
     return NextResponse.json({ application });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating application:', error);
     return NextResponse.json(
       { error: 'Failed to update application' },
@@ -178,9 +178,9 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createClient();
 
-    const { error } = await (supabase
+    const { error } = await supabase
       .from('applications')
-      .delete as any)()
+      .delete()
       .eq('id', id)
       .eq('user_id', session.user.id);
 
@@ -193,7 +193,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting application:', error);
     return NextResponse.json(
       { error: 'Failed to delete application' },
