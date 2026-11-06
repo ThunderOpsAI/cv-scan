@@ -20,66 +20,6 @@ interface InlineRewriteRequest {
   mode?: unknown;
 }
 
-const UK_AU_TO_US_MAP: Array<[RegExp, string]> = [
-  [/\boptimised\b/gi, "optimized"],
-  [/\boptimising\b/gi, "optimizing"],
-  [/\boptimisation\b/gi, "optimization"],
-  [/\borganised\b/gi, "organized"],
-  [/\borganising\b/gi, "organizing"],
-  [/\borganisation\b/gi, "organization"],
-  [/\borganisations\b/gi, "organizations"],
-  [/\banalysed\b/gi, "analyzed"],
-  [/\banalysing\b/gi, "analyzing"],
-  [/\bprioritised\b/gi, "prioritized"],
-  [/\bprioritising\b/gi, "prioritizing"],
-  [/\bstandardised\b/gi, "standardized"],
-  [/\bmobilised\b/gi, "mobilized"],
-  [/\bmodernised\b/gi, "modernized"],
-  [/\brealised\b/gi, "realized"],
-  [/\brecognised\b/gi, "recognized"],
-  [/\bspecialised\b/gi, "specialized"],
-  [/\butilised\b/gi, "utilized"],
-  [/\bprogramme\b/gi, "program"],
-  [/\bprogrammes\b/gi, "programs"],
-  [/\bbehaviour\b/gi, "behavior"],
-  [/\bcolour\b/gi, "color"],
-  [/\bfavour\b/gi, "favor"],
-  [/\blabour\b/gi, "labor"],
-  [/\bcentre\b/gi, "center"],
-  [/\bcurriculum vitae\b/gi, "resume"],
-  [/\bCV\b/g, "Resume"],
-  [/\bcustomised\b/gi, "customized"],
-];
-
-const US_TO_UK_AU_MAP: Array<[RegExp, string]> = [
-  [/\boptimized\b/gi, "optimised"],
-  [/\boptimizing\b/gi, "optimising"],
-  [/\boptimization\b/gi, "optimisation"],
-  [/\borganized\b/gi, "organised"],
-  [/\borganizing\b/gi, "organising"],
-  [/\borganization\b/gi, "organisation"],
-  [/\borganizations\b/gi, "organisations"],
-  [/\banalyzed\b/gi, "analysed"],
-  [/\banalyzing\b/gi, "analysing"],
-  [/\bprioritized\b/gi, "prioritised"],
-  [/\bprioritizing\b/gi, "prioritising"],
-  [/\bstandardized\b/gi, "standardised"],
-  [/\bmobilized\b/gi, "mobilised"],
-  [/\bmodernized\b/gi, "modernised"],
-  [/\brealized\b/gi, "realised"],
-  [/\brecognized\b/gi, "recognised"],
-  [/\bspecialized\b/gi, "specialised"],
-  [/\butilized\b/gi, "utilised"],
-  [/\bbehavior\b/gi, "behaviour"],
-  [/\bcolor\b/gi, "colour"],
-  [/\bfavor\b/gi, "favour"],
-  [/\blabor\b/gi, "labour"],
-  [/\bcenter\b/gi, "centre"],
-  [/\bresume\b/gi, "CV"],
-  [/\bResume\b/g, "CV"],
-  [/\bcustomized\b/gi, "customised"],
-];
-
 function extractFactTags(text: string): string[] {
   const matches = text.match(FACT_TAG_RE);
   return matches ? Array.from(new Set(matches)) : [];
@@ -96,71 +36,6 @@ function restoreFactTagsIfMissing(originalText: string, rewrittenText: string): 
     }
   }
   return result.trim();
-}
-
-function deterministicFallbackRewrite(
-  text: string,
-  action: InlineRewriteAction,
-  keywords: string[]
-): string {
-  const tags = extractFactTags(text);
-  const cleanBody = text.replace(FACT_TAG_RE, "").trim();
-  const suffix = tags.length > 0 ? ` ${tags.join(" ")}` : "";
-
-  if (action === "localize_us") {
-    let converted = cleanBody;
-    for (const [pattern, replacement] of UK_AU_TO_US_MAP) {
-      converted = converted.replace(pattern, replacement);
-    }
-    if (converted === cleanBody) {
-      converted = converted.replace(/\bLed\b/, "Spearheaded").replace(/\.$/, "") + " (US Resume format).";
-    }
-    return `${converted}${suffix}`.trim();
-  }
-
-  if (action === "localize_au_uk") {
-    let converted = cleanBody;
-    for (const [pattern, replacement] of US_TO_UK_AU_MAP) {
-      converted = converted.replace(pattern, replacement);
-    }
-    if (converted === cleanBody) {
-      converted = converted.replace(/\bSpearheaded\b/i, "Delivered").replace(/\.$/, "") + " (AU/UK CV standard).";
-    }
-    return `${converted}${suffix}`.trim();
-  }
-
-  if (action === "tighten") {
-    const tightened = cleanBody
-      .replace(/^(Responsible for|Helped with|Worked on|Assisted in|Involved in)\s+/i, "Delivered ")
-      .replace(/\bin order to\b/gi, "to")
-      .replace(/\ba wide variety of\b/gi, "diverse")
-      .replace(/\bSuccessfully\s+/gi, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    const finalBody =
-      tightened !== cleanBody
-        ? tightened
-        : `Accelerated ${cleanBody.charAt(0).toLowerCase()}${cleanBody.slice(1)}`;
-    return `${finalBody}${suffix}`.trim();
-  }
-
-  if (action === "metrics") {
-    const hasNumber = /\d+%|\d+\+|\$\d+|\d+\s*(hours|days|weeks|months|clients|users|teams)/i.test(cleanBody);
-    const base = cleanBody.replace(/\.$/, "");
-    const enhanced = hasNumber
-      ? `${base}, driving measurable efficiency gains across key delivery KPIs.`
-      : `${base}, achieving a [X]% improvement in operational velocity across [N]+ key deliverables.`;
-    return `${enhanced}${suffix}`.trim();
-  }
-
-  // keywords
-  const topKeywords = keywords.slice(0, 2).filter(Boolean);
-  const kwPhrase =
-    topKeywords.length > 0
-      ? ` leveraging ${topKeywords.join(" and ")}`
-      : " aligned with core role competencies and stakeholder delivery";
-  const base = cleanBody.replace(/\.$/, "");
-  return `${base}${kwPhrase}.${suffix}`.trim();
 }
 
 export async function POST(req: NextRequest) {
@@ -233,11 +108,17 @@ Strict rules:
       rewritten = plainAiText(raw).replace(/^[\s•\-*]+/, "").trim();
       rewritten = restoreFactTagsIfMissing(text, rewritten);
     } catch {
-      rewritten = deterministicFallbackRewrite(text, action, keywords);
+      return NextResponse.json(
+        { error: "AI rewrite is unavailable right now. Please try again." },
+        { status: 502 }
+      );
     }
 
     if (!rewritten || rewritten === text) {
-      rewritten = deterministicFallbackRewrite(text, action, keywords);
+      return NextResponse.json(
+        { error: "The AI could not produce a different rewrite. Please try again." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({

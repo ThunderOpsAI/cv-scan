@@ -6,9 +6,15 @@ docs/.DS_Store
 .env.local
 .env
 .env.*
+app/.env*
+!.env.example
+!app/.env.example
+.env.secret*
+*OWNERS_EYES_ONLY*
 
 # Next.js
 .next/
+**/.next/
 out/
 app/.next/
 app/out/
@@ -19,19 +25,33 @@ app/node_modules/
 
 # Build caches
 *.tsbuildinfo
+**/*.tsbuildinfo
 
 # Playwright
 app/test-results/
+app/playwright-report/
 **/playwright-report/
 
 # Personal / local
 Important Info DO NOT COMMIT for my eyes only/
 docs/cvscan-test-profiles/
+docs/OWNER_INSTRUCTIONS.md
+docs/OWNER_ACTIONS_REQUIRED.md
+docs/REVIEWER_ACCESS.md
+docs/PLAY_CONSOLE_SETUP.md
+docs/PLAY_STORE_METADATA.md
+docs/PLAY_STORE_RELEASE_RUNBOOK.md
+docs/TEST_EVIDENCE.md
+docs/V_REPORT.md
+docs/PRE_SUBMISSION_CHECKLIST.md
+data/*
+!data/.gitkeep
 .scratch/
 agents/
 .claude/
 .cursor/
 .emergent/
+.code-review-graph/
 # Added by git setup script
 .env.*.local
 *.log

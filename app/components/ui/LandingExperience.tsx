@@ -111,6 +111,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
                 <h2 className="mt-1 text-base sm:text-lg font-semibold tracking-[-0.03em] text-[#1A237E] text-center sm:text-left">
                   Clearer evidence, stronger story
                 </h2>
+                <p className="mt-1 text-[10px] text-[#757575] text-center sm:text-left">Illustrative example only.</p>
               </div>
               <div className="flex rounded-full bg-black/[0.05] p-1 w-full sm:w-auto">
                 <button
@@ -150,7 +151,7 @@ export function LandingExperience({ accountHref, signedIn }: LandingExperiencePr
                     transition={{ duration: 0.2 }}
                     className="text-[13px] sm:text-sm leading-relaxed text-[#1A237E] font-semibold"
                   >
-                    "Resolved 40+ weekly customer escalations, cut response time by 38%, and built reporting workflows that gave leadership same-day visibility into SLA risk."
+                    "Resolved customer escalations, shortened response times, and built reporting workflows that gave leadership same-day visibility into SLA risk."
                   </motion.p>
                 )}
               </AnimatePresence>

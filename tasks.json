@@ -12,10 +12,10 @@
     {
       "id": "verification-001",
       "title": "Verify app runs cleanly from nested /app directory",
-      "status": "todo",
+      "status": "done",
       "priority": "high",
-      "owner": "unassigned",
-      "notes": "Run install, dev, build, and tests from /app after the restructure."
+      "owner": "maintainer",
+      "notes": "Installed dependencies and passed lint, production build, and all 8 Playwright tests from /app."
     }
   ]
 }
